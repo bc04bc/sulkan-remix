@@ -75,24 +75,35 @@ void main() {
     // vertex cannot see the sun, so skip the cascade filter and use the fully
     // shadowed result the map reports for enclosed surfaces.
 #if SHADOW_QUALITY > 0
-    float shadow = mix(1.0,ShadowParams.z,ShadowParams.x);
+    float shadow = mix(1.0, ShadowParams.z, ShadowParams.x);
     float sunVisibility = 0.0;
-#else
-    float shadow = 1.0;
-    float sunVisibility = 1.0;
-#endif
-    // 树叶(5u)和草/植物(cutoutSurface)只有在天空光充足(lightLevel.y > 0.62，即暴露在树冠外层)时才采样阴影！
-    // 树冠内部阴暗处的树叶直接跳过 Shadow Map 采样，省下森林里 60% 的树叶阴影开销！
-    bool needsShadow = (lightLevel.y > 1.0/30.0 + 1e-4) && (
-        (cutoutSurface || materialId == 5u) ? (lightLevel.y > 0.62) : (sunFacing > 0.0)
-    );
+    float distSq = dot(relativePosition, relativePosition);
+    bool isFoliage = cutoutSurface || materialId == 5u;
+    bool needsShadow = false;
+    if (lightLevel.y > 1.0/30.0 + 1e-4) {
+        if (isFoliage) {
+            // 距离大于 24 格 (24*24 = 576.0) 或 处于树冠背阴内部 (lightLevel.y <= 0.75) 的树叶，跳过昂贵的阴影贴图采样
+            needsShadow = (distSq < 576.0) && (lightLevel.y > 0.75) && (sunFacing > -0.1);
+        } else {
+            needsShadow = (sunFacing > 0.0);
+        }
+    }
     if (needsShadow) {
         // 把 materialId == 5u 也作为 grass 参数传进去，让树叶走快速单次采样通道！
         shadow = sulkanTerrainShadows(relativePosition, shadowNormal, grass || materialId == 5u, sunVisibility);
+    } else if (isFoliage) {
+        // 树冠解析平滑阴影补偿（Canopy Shading）：利用体素天光平滑过渡，消除中远景树叶的摩尔纹与采样负载
+        float canopyShade = clamp((lightLevel.y - 0.55) / 0.40, 0.0, 1.0);
+        sunVisibility = canopyShade * canopyShade * step(0.0, sunDot);
+        shadow = mix(1.0, mix(ShadowParams.z, 1.0, sunVisibility), ShadowParams.x);
     } else {
         shadow = mix(1.0, ShadowParams.z, ShadowParams.x);
         sunVisibility = 0.0;
     }
+#else
+    float shadow = 1.0;
+    float sunVisibility = 1.0;
+#endif
     // 1. 真正的物理兰伯特直射光（背光面绝不吃直射太阳光，只吃软边缘过渡！）
     float directFacing = cutoutSurface ? sunFacing : smoothstep(-0.05, 0.95, sunDot) * sunFacing;
     vec3 direct = portLightPalette() * directFacing * shadow * microOccl * (1.0 - WorldTimeWeatherDimension.y * 0.65);
