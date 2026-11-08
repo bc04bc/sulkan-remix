@@ -1,0 +1,837 @@
+Compiled from "PackFiles.java"
+public final class com.sulkan.shaders.graph.PackFiles {
+  private static final int MAX_FILE;
+
+  private static final long MAX_PACK;
+
+  private final java.util.Map<java.lang.String, byte[]> files;
+
+  private com.sulkan.shaders.graph.PackFiles(java.util.Map<java.lang.String, byte[]>);
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+       4: aload_0
+       5: aload_1
+       6: invokestatic  #7                  // InterfaceMethod java/util/Map.copyOf:(Ljava/util/Map;)Ljava/util/Map;
+       9: putfield      #13                 // Field files:Ljava/util/Map;
+      12: return
+
+  public static com.sulkan.shaders.graph.PackFiles read(java.nio.file.Path) throws java.io.IOException;
+    Code:
+       0: new           #19                 // class java/util/LinkedHashMap
+       3: dup
+       4: invokespecial #21                 // Method java/util/LinkedHashMap."<init>":()V
+       7: astore_1
+       8: lconst_0
+       9: lstore_2
+      10: aload_0
+      11: iconst_0
+      12: anewarray     #22                 // class java/nio/file/LinkOption
+      15: invokestatic  #24                 // Method java/nio/file/Files.isDirectory:(Ljava/nio/file/Path;[Ljava/nio/file/LinkOption;)Z
+      18: ifeq          260
+      21: aload_0
+      22: iconst_0
+      23: anewarray     #22                 // class java/nio/file/LinkOption
+      26: invokeinterface #30,  2           // InterfaceMethod java/nio/file/Path.toRealPath:([Ljava/nio/file/LinkOption;)Ljava/nio/file/Path;
+      31: astore        4
+      33: aload         4
+      35: iconst_0
+      36: anewarray     #36                 // class java/nio/file/FileVisitOption
+      39: invokestatic  #38                 // Method java/nio/file/Files.walk:(Ljava/nio/file/Path;[Ljava/nio/file/FileVisitOption;)Ljava/util/stream/Stream;
+      42: astore        5
+      44: aload         5
+      46: invokedynamic #42,  0             // InvokeDynamic #0:test:()Ljava/util/function/Predicate;
+      51: invokeinterface #46,  2           // InterfaceMethod java/util/stream/Stream.filter:(Ljava/util/function/Predicate;)Ljava/util/stream/Stream;
+      56: invokeinterface #52,  1           // InterfaceMethod java/util/stream/Stream.toList:()Ljava/util/List;
+      61: invokeinterface #56,  1           // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+      66: astore        6
+      68: aload         6
+      70: invokeinterface #62,  1           // InterfaceMethod java/util/Iterator.hasNext:()Z
+      75: ifeq          213
+      78: aload         6
+      80: invokeinterface #68,  1           // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      85: checkcast     #31                 // class java/nio/file/Path
+      88: astore        7
+      90: aload         7
+      92: iconst_0
+      93: anewarray     #22                 // class java/nio/file/LinkOption
+      96: invokeinterface #30,  2           // InterfaceMethod java/nio/file/Path.toRealPath:([Ljava/nio/file/LinkOption;)Ljava/nio/file/Path;
+     101: aload         4
+     103: invokeinterface #72,  2           // InterfaceMethod java/nio/file/Path.startsWith:(Ljava/nio/file/Path;)Z
+     108: ifne          121
+     111: new           #76                 // class java/io/IOException
+     114: dup
+     115: ldc           #78                 // String Pack symlink escapes its folder
+     117: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     120: athrow
+     121: aload         7
+     123: iconst_0
+     124: anewarray     #83                 // class java/nio/file/OpenOption
+     127: invokestatic  #85                 // Method java/nio/file/Files.newInputStream:(Ljava/nio/file/Path;[Ljava/nio/file/OpenOption;)Ljava/io/InputStream;
+     130: astore        8
+     132: aload         8
+     134: ldc           #89                 // int 8388609
+     136: invokevirtual #90                 // Method java/io/InputStream.readNBytes:(I)[B
+     139: astore        9
+     141: aload_1
+     142: aload         4
+     144: aload         7
+     146: invokeinterface #96,  2           // InterfaceMethod java/nio/file/Path.relativize:(Ljava/nio/file/Path;)Ljava/nio/file/Path;
+     151: invokeinterface #100,  1          // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+     156: bipush        92
+     158: bipush        47
+     160: invokevirtual #104                // Method java/lang/String.replace:(CC)Ljava/lang/String;
+     163: aload         9
+     165: lload_2
+     166: invokestatic  #110                // Method add:(Ljava/util/Map;Ljava/lang/String;[BJ)J
+     169: lstore_2
+     170: aload         8
+     172: ifnull        210
+     175: aload         8
+     177: invokevirtual #114                // Method java/io/InputStream.close:()V
+     180: goto          210
+     183: astore        9
+     185: aload         8
+     187: ifnull        207
+     190: aload         8
+     192: invokevirtual #114                // Method java/io/InputStream.close:()V
+     195: goto          207
+     198: astore        10
+     200: aload         9
+     202: aload         10
+     204: invokevirtual #119                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     207: aload         9
+     209: athrow
+     210: goto          68
+     213: aload         5
+     215: ifnull        257
+     218: aload         5
+     220: invokeinterface #123,  1          // InterfaceMethod java/util/stream/Stream.close:()V
+     225: goto          257
+     228: astore        6
+     230: aload         5
+     232: ifnull        254
+     235: aload         5
+     237: invokeinterface #123,  1          // InterfaceMethod java/util/stream/Stream.close:()V
+     242: goto          254
+     245: astore        7
+     247: aload         6
+     249: aload         7
+     251: invokevirtual #119                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     254: aload         6
+     256: athrow
+     257: goto          412
+     260: new           #124                // class java/util/zip/ZipFile
+     263: dup
+     264: aload_0
+     265: invokeinterface #126,  1          // InterfaceMethod java/nio/file/Path.toFile:()Ljava/io/File;
+     270: invokespecial #130                // Method java/util/zip/ZipFile."<init>":(Ljava/io/File;)V
+     273: astore        4
+     275: aload         4
+     277: invokevirtual #133                // Method java/util/zip/ZipFile.entries:()Ljava/util/Enumeration;
+     280: astore        5
+     282: aload         5
+     284: invokeinterface #137,  1          // InterfaceMethod java/util/Enumeration.hasMoreElements:()Z
+     289: ifeq          382
+     292: aload         5
+     294: invokeinterface #142,  1          // InterfaceMethod java/util/Enumeration.nextElement:()Ljava/lang/Object;
+     299: checkcast     #145                // class java/util/zip/ZipEntry
+     302: astore        6
+     304: aload         6
+     306: invokevirtual #147                // Method java/util/zip/ZipEntry.isDirectory:()Z
+     309: ifne          379
+     312: aload         4
+     314: aload         6
+     316: invokevirtual #149                // Method java/util/zip/ZipFile.getInputStream:(Ljava/util/zip/ZipEntry;)Ljava/io/InputStream;
+     319: astore        7
+     321: aload_1
+     322: aload         6
+     324: invokevirtual #153                // Method java/util/zip/ZipEntry.getName:()Ljava/lang/String;
+     327: aload         7
+     329: ldc           #89                 // int 8388609
+     331: invokevirtual #90                 // Method java/io/InputStream.readNBytes:(I)[B
+     334: lload_2
+     335: invokestatic  #110                // Method add:(Ljava/util/Map;Ljava/lang/String;[BJ)J
+     338: lstore_2
+     339: aload         7
+     341: ifnull        379
+     344: aload         7
+     346: invokevirtual #114                // Method java/io/InputStream.close:()V
+     349: goto          379
+     352: astore        8
+     354: aload         7
+     356: ifnull        376
+     359: aload         7
+     361: invokevirtual #114                // Method java/io/InputStream.close:()V
+     364: goto          376
+     367: astore        9
+     369: aload         8
+     371: aload         9
+     373: invokevirtual #119                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     376: aload         8
+     378: athrow
+     379: goto          282
+     382: aload         4
+     384: invokevirtual #156                // Method java/util/zip/ZipFile.close:()V
+     387: goto          412
+     390: astore        5
+     392: aload         4
+     394: invokevirtual #156                // Method java/util/zip/ZipFile.close:()V
+     397: goto          409
+     400: astore        6
+     402: aload         5
+     404: aload         6
+     406: invokevirtual #119                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     409: aload         5
+     411: athrow
+     412: aload_1
+     413: invokestatic  #157                // Method rooted:(Ljava/util/Map;)Lcom/sulkan/shaders/graph/PackFiles;
+     416: areturn
+    Exception table:
+       from    to  target type
+         132   170   183   Class java/lang/Throwable
+         190   195   198   Class java/lang/Throwable
+          44   213   228   Class java/lang/Throwable
+         235   242   245   Class java/lang/Throwable
+         321   339   352   Class java/lang/Throwable
+         359   364   367   Class java/lang/Throwable
+         275   382   390   Class java/lang/Throwable
+         392   397   400   Class java/lang/Throwable
+
+  public static com.sulkan.shaders.graph.PackFiles bundled() throws java.io.IOException;
+    Code:
+       0: ldc           #14                 // class com/sulkan/shaders/graph/PackFiles
+       2: ldc           #161                // String /sulkan-bundled/Sulkan-Realistic.zip
+       4: invokevirtual #163                // Method java/lang/Class.getResourceAsStream:(Ljava/lang/String;)Ljava/io/InputStream;
+       7: astore_0
+       8: aload_0
+       9: ifnonnull     22
+      12: new           #76                 // class java/io/IOException
+      15: dup
+      16: ldc           #169                // String Sulkan Realistic is missing from this installation. Reinstall the Sulkan JAR.
+      18: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+      21: athrow
+      22: new           #19                 // class java/util/LinkedHashMap
+      25: dup
+      26: invokespecial #21                 // Method java/util/LinkedHashMap."<init>":()V
+      29: astore_1
+      30: lconst_0
+      31: lstore_2
+      32: new           #171                // class java/util/zip/ZipInputStream
+      35: dup
+      36: aload_0
+      37: invokespecial #173                // Method java/util/zip/ZipInputStream."<init>":(Ljava/io/InputStream;)V
+      40: astore        5
+      42: aload         5
+      44: invokevirtual #176                // Method java/util/zip/ZipInputStream.getNextEntry:()Ljava/util/zip/ZipEntry;
+      47: dup
+      48: astore        4
+      50: ifnull        82
+      53: aload         4
+      55: invokevirtual #147                // Method java/util/zip/ZipEntry.isDirectory:()Z
+      58: ifne          42
+      61: aload_1
+      62: aload         4
+      64: invokevirtual #153                // Method java/util/zip/ZipEntry.getName:()Ljava/lang/String;
+      67: aload         5
+      69: ldc           #89                 // int 8388609
+      71: invokevirtual #180                // Method java/util/zip/ZipInputStream.readNBytes:(I)[B
+      74: lload_2
+      75: invokestatic  #110                // Method add:(Ljava/util/Map;Ljava/lang/String;[BJ)J
+      78: lstore_2
+      79: goto          42
+      82: aload         5
+      84: invokevirtual #181                // Method java/util/zip/ZipInputStream.close:()V
+      87: goto          112
+      90: astore        6
+      92: aload         5
+      94: invokevirtual #181                // Method java/util/zip/ZipInputStream.close:()V
+      97: goto          109
+     100: astore        7
+     102: aload         6
+     104: aload         7
+     106: invokevirtual #119                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     109: aload         6
+     111: athrow
+     112: aload_1
+     113: invokestatic  #157                // Method rooted:(Ljava/util/Map;)Lcom/sulkan/shaders/graph/PackFiles;
+     116: areturn
+    Exception table:
+       from    to  target type
+          42    82    90   Class java/lang/Throwable
+          92    97   100   Class java/lang/Throwable
+
+  private static com.sulkan.shaders.graph.PackFiles rooted(java.util.Map<java.lang.String, byte[]>) throws java.io.IOException;
+    Code:
+       0: aload_0
+       1: invokeinterface #182,  1          // InterfaceMethod java/util/Map.keySet:()Ljava/util/Set;
+       6: invokeinterface #186,  1          // InterfaceMethod java/util/Set.stream:()Ljava/util/stream/Stream;
+      11: invokedynamic #192,  0            // InvokeDynamic #1:test:()Ljava/util/function/Predicate;
+      16: invokeinterface #46,  2           // InterfaceMethod java/util/stream/Stream.filter:(Ljava/util/function/Predicate;)Ljava/util/stream/Stream;
+      21: invokeinterface #52,  1           // InterfaceMethod java/util/stream/Stream.toList:()Ljava/util/List;
+      26: astore_1
+      27: aload_1
+      28: invokeinterface #193,  1          // InterfaceMethod java/util/List.size:()I
+      33: iconst_1
+      34: if_icmpeq     47
+      37: new           #76                 // class java/io/IOException
+      40: dup
+      41: ldc           #197                // String Native pack needs exactly one sulkan.json
+      43: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+      46: athrow
+      47: aload_1
+      48: invokeinterface #199,  1          // InterfaceMethod java/util/List.getFirst:()Ljava/lang/Object;
+      53: checkcast     #105                // class java/lang/String
+      56: iconst_0
+      57: aload_1
+      58: invokeinterface #199,  1          // InterfaceMethod java/util/List.getFirst:()Ljava/lang/Object;
+      63: checkcast     #105                // class java/lang/String
+      66: invokevirtual #202                // Method java/lang/String.length:()I
+      69: ldc           #205                // String sulkan.json
+      71: invokevirtual #202                // Method java/lang/String.length:()I
+      74: isub
+      75: invokevirtual #207                // Method java/lang/String.substring:(II)Ljava/lang/String;
+      78: astore_2
+      79: new           #19                 // class java/util/LinkedHashMap
+      82: dup
+      83: invokespecial #21                 // Method java/util/LinkedHashMap."<init>":()V
+      86: astore_3
+      87: aload_0
+      88: aload_2
+      89: aload_3
+      90: invokedynamic #211,  0            // InvokeDynamic #2:accept:(Ljava/lang/String;Ljava/util/Map;)Ljava/util/function/BiConsumer;
+      95: invokeinterface #215,  2          // InterfaceMethod java/util/Map.forEach:(Ljava/util/function/BiConsumer;)V
+     100: new           #14                 // class com/sulkan/shaders/graph/PackFiles
+     103: dup
+     104: aload_3
+     105: invokespecial #219                // Method "<init>":(Ljava/util/Map;)V
+     108: areturn
+
+  private static long add(java.util.Map<java.lang.String, byte[]>, java.lang.String, byte[], long) throws java.io.IOException;
+    Code:
+       0: aload_1
+       1: invokestatic  #222                // Method safe:(Ljava/lang/String;)Z
+       4: ifne          21
+       7: new           #76                 // class java/io/IOException
+      10: dup
+      11: aload_1
+      12: invokedynamic #226,  0            // InvokeDynamic #3:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      17: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+      20: athrow
+      21: aload_2
+      22: arraylength
+      23: ldc           #230                // int 8388608
+      25: if_icmpgt     52
+      28: lload_3
+      29: aload_2
+      30: arraylength
+      31: i2l
+      32: ladd
+      33: ldc2_w        #231                // long 134217728l
+      36: lcmp
+      37: ifgt          52
+      40: aload_0
+      41: invokeinterface #233,  1          // InterfaceMethod java/util/Map.size:()I
+      46: sipush        16384
+      49: if_icmplt     62
+      52: new           #76                 // class java/io/IOException
+      55: dup
+      56: ldc           #234                // String Pack exceeds loader size limits
+      58: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+      61: athrow
+      62: aload_0
+      63: aload_1
+      64: aload_2
+      65: invokeinterface #236,  3          // InterfaceMethod java/util/Map.putIfAbsent:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      70: ifnull        87
+      73: new           #76                 // class java/io/IOException
+      76: dup
+      77: aload_1
+      78: invokedynamic #240,  0            // InvokeDynamic #4:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      83: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+      86: athrow
+      87: lload_3
+      88: aload_2
+      89: arraylength
+      90: i2l
+      91: ladd
+      92: lreturn
+
+  public static boolean safe(java.lang.String);
+    Code:
+       0: aload_0
+       1: ifnull        65
+       4: aload_0
+       5: invokevirtual #241                // Method java/lang/String.isBlank:()Z
+       8: ifne          65
+      11: aload_0
+      12: ldc           #244                // String /
+      14: invokevirtual #246                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+      17: ifne          65
+      20: aload_0
+      21: ldc           #248                // String \\
+      23: invokevirtual #250                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+      26: ifne          65
+      29: aload_0
+      30: ldc           #254                // String :
+      32: invokevirtual #250                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+      35: ifne          65
+      38: aload_0
+      39: ldc           #244                // String /
+      41: iconst_m1
+      42: invokevirtual #256                // Method java/lang/String.split:(Ljava/lang/String;I)[Ljava/lang/String;
+      45: invokestatic  #260                // Method java/util/Arrays.stream:([Ljava/lang/Object;)Ljava/util/stream/Stream;
+      48: invokedynamic #265,  0            // InvokeDynamic #5:test:()Ljava/util/function/Predicate;
+      53: invokeinterface #266,  2          // InterfaceMethod java/util/stream/Stream.noneMatch:(Ljava/util/function/Predicate;)Z
+      58: ifeq          65
+      61: iconst_1
+      62: goto          66
+      65: iconst_0
+      66: ireturn
+
+  public java.lang.String text(java.lang.String) throws java.io.IOException;
+    Code:
+       0: ldc_w         #270                // String sulkan/frame.glsl
+       3: aload_1
+       4: invokevirtual #272                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+       7: ifeq          14
+      10: invokestatic  #276                // Method com/sulkan/shaders/graph/GraphFrame.declaration:()Ljava/lang/String;
+      13: areturn
+      14: ldc_w         #281                // String sulkan/shadows.glsl
+      17: aload_1
+      18: invokevirtual #272                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      21: ifne          34
+      24: ldc_w         #283                // String sulkan/shadow-filter.glsl
+      27: aload_1
+      28: invokevirtual #272                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      31: ifeq          131
+      34: aload_1
+      35: ldc_w         #281                // String sulkan/shadows.glsl
+      38: invokevirtual #272                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      41: ifeq          50
+      44: ldc_w         #285                // String /assets/sulkan/shaders/include/native_shadows.glsl
+      47: goto          53
+      50: ldc_w         #287                // String /assets/sulkan/shaders/include/directional_shadow.glsl
+      53: astore_2
+      54: ldc           #14                 // class com/sulkan/shaders/graph/PackFiles
+      56: aload_2
+      57: invokevirtual #163                // Method java/lang/Class.getResourceAsStream:(Ljava/lang/String;)Ljava/io/InputStream;
+      60: astore_3
+      61: aload_3
+      62: ifnonnull     79
+      65: new           #76                 // class java/io/IOException
+      68: dup
+      69: aload_2
+      70: invokedynamic #289,  0            // InvokeDynamic #6:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      75: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+      78: athrow
+      79: new           #105                // class java/lang/String
+      82: dup
+      83: aload_3
+      84: invokevirtual #290                // Method java/io/InputStream.readAllBytes:()[B
+      87: getstatic     #294                // Field java/nio/charset/StandardCharsets.UTF_8:Ljava/nio/charset/Charset;
+      90: invokespecial #300                // Method java/lang/String."<init>":([BLjava/nio/charset/Charset;)V
+      93: astore        4
+      95: aload_3
+      96: ifnull        103
+      99: aload_3
+     100: invokevirtual #114                // Method java/io/InputStream.close:()V
+     103: aload         4
+     105: areturn
+     106: astore        4
+     108: aload_3
+     109: ifnull        128
+     112: aload_3
+     113: invokevirtual #114                // Method java/io/InputStream.close:()V
+     116: goto          128
+     119: astore        5
+     121: aload         4
+     123: aload         5
+     125: invokevirtual #119                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     128: aload         4
+     130: athrow
+     131: aload_1
+     132: invokestatic  #222                // Method safe:(Ljava/lang/String;)Z
+     135: ifeq          175
+     138: aload_0
+     139: getfield      #13                 // Field files:Ljava/util/Map;
+     142: aload_1
+     143: invokeinterface #303,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+     148: ifeq          175
+     151: new           #105                // class java/lang/String
+     154: dup
+     155: aload_0
+     156: getfield      #13                 // Field files:Ljava/util/Map;
+     159: aload_1
+     160: invokeinterface #306,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     165: checkcast     #310                // class "[B"
+     168: getstatic     #294                // Field java/nio/charset/StandardCharsets.UTF_8:Ljava/nio/charset/Charset;
+     171: invokespecial #300                // Method java/lang/String."<init>":([BLjava/nio/charset/Charset;)V
+     174: areturn
+     175: new           #76                 // class java/io/IOException
+     178: dup
+     179: aload_1
+     180: invokedynamic #312,  0            // InvokeDynamic #7:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     185: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     188: athrow
+    Exception table:
+       from    to  target type
+          61    95   106   Class java/lang/Throwable
+         112   116   119   Class java/lang/Throwable
+
+  public byte[] binary(java.lang.String) throws java.io.IOException;
+    Code:
+       0: aload_1
+       1: invokestatic  #222                // Method safe:(Ljava/lang/String;)Z
+       4: ifeq          40
+       7: aload_0
+       8: getfield      #13                 // Field files:Ljava/util/Map;
+      11: aload_1
+      12: invokeinterface #303,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+      17: ifeq          40
+      20: aload_0
+      21: getfield      #13                 // Field files:Ljava/util/Map;
+      24: aload_1
+      25: invokeinterface #306,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      30: checkcast     #310                // class "[B"
+      33: invokevirtual #313                // Method "[B".clone:()Ljava/lang/Object;
+      36: checkcast     #310                // class "[B"
+      39: areturn
+      40: new           #76                 // class java/io/IOException
+      43: dup
+      44: aload_1
+      45: invokedynamic #312,  0            // InvokeDynamic #7:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      50: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+      53: athrow
+
+  public java.lang.String shader(java.lang.String, java.util.Map<java.lang.String, java.lang.Double>) throws java.io.IOException;
+    Code:
+       0: aload_0
+       1: aload_1
+       2: new           #316                // class java/util/ArrayDeque
+       5: dup
+       6: invokespecial #318                // Method java/util/ArrayDeque."<init>":()V
+       9: new           #319                // class java/util/HashMap
+      12: dup
+      13: invokespecial #321                // Method java/util/HashMap."<init>":()V
+      16: invokevirtual #322                // Method expand:(Ljava/lang/String;Ljava/util/Deque;Ljava/util/Map;)Ljava/lang/String;
+      19: astore_3
+      20: aload_3
+      21: bipush        10
+      23: invokevirtual #326                // Method java/lang/String.indexOf:(I)I
+      26: istore        4
+      28: aload_3
+      29: ldc_w         #330                // String #version
+      32: invokevirtual #246                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+      35: ifeq          99
+      38: iload         4
+      40: iflt          99
+      43: new           #332                // class java/lang/StringBuilder
+      46: dup
+      47: invokespecial #334                // Method java/lang/StringBuilder."<init>":()V
+      50: astore        5
+      52: aload_2
+      53: aload         5
+      55: invokedynamic #335,  0            // InvokeDynamic #8:accept:(Ljava/lang/StringBuilder;)Ljava/util/function/BiConsumer;
+      60: invokeinterface #215,  2          // InterfaceMethod java/util/Map.forEach:(Ljava/util/function/BiConsumer;)V
+      65: aload_3
+      66: iconst_0
+      67: iload         4
+      69: iconst_1
+      70: iadd
+      71: invokevirtual #207                // Method java/lang/String.substring:(II)Ljava/lang/String;
+      74: invokestatic  #338                // Method com/sulkan/shaders/runtime/GpuCapabilities.current:()Lcom/sulkan/shaders/runtime/GpuCapabilities;
+      77: invokevirtual #344                // Method com/sulkan/shaders/runtime/GpuCapabilities.shaderHeader:()Ljava/lang/String;
+      80: aload         5
+      82: invokestatic  #347                // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+      85: aload_3
+      86: iload         4
+      88: iconst_1
+      89: iadd
+      90: invokevirtual #351                // Method java/lang/String.substring:(I)Ljava/lang/String;
+      93: invokedynamic #354,  0            // InvokeDynamic #9:makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+      98: areturn
+      99: new           #76                 // class java/io/IOException
+     102: dup
+     103: aload_1
+     104: invokedynamic #357,  0            // InvokeDynamic #10:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     109: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     112: athrow
+
+  private java.lang.String expand(java.lang.String, java.util.Deque<java.lang.String>, java.util.Map<java.lang.String, java.lang.Integer>) throws java.io.IOException;
+    Code:
+       0: aload_2
+       1: aload_1
+       2: invokeinterface #358,  2          // InterfaceMethod java/util/Deque.contains:(Ljava/lang/Object;)Z
+       7: ifne          296
+      10: aload_2
+      11: invokeinterface #362,  1          // InterfaceMethod java/util/Deque.size:()I
+      16: bipush        32
+      18: if_icmpge     296
+      21: aload_2
+      22: aload_1
+      23: invokeinterface #363,  2          // InterfaceMethod java/util/Deque.addLast:(Ljava/lang/Object;)V
+      28: aload_3
+      29: aload_1
+      30: aload_3
+      31: invokedynamic #367,  0            // InvokeDynamic #11:apply:(Ljava/util/Map;)Ljava/util/function/Function;
+      36: invokeinterface #371,  3          // InterfaceMethod java/util/Map.computeIfAbsent:(Ljava/lang/Object;Ljava/util/function/Function;)Ljava/lang/Object;
+      41: checkcast     #375                // class java/lang/Integer
+      44: invokevirtual #377                // Method java/lang/Integer.intValue:()I
+      47: istore        4
+      49: new           #332                // class java/lang/StringBuilder
+      52: dup
+      53: invokespecial #334                // Method java/lang/StringBuilder."<init>":()V
+      56: astore        5
+      58: aload_0
+      59: aload_1
+      60: invokevirtual #380                // Method text:(Ljava/lang/String;)Ljava/lang/String;
+      63: ldc_w         #383                // String \n
+      66: iconst_m1
+      67: invokevirtual #256                // Method java/lang/String.split:(Ljava/lang/String;I)[Ljava/lang/String;
+      70: astore        6
+      72: iconst_0
+      73: istore        7
+      75: iload         7
+      77: aload         6
+      79: arraylength
+      80: if_icmpge     283
+      83: aload         6
+      85: iload         7
+      87: aaload
+      88: invokevirtual #385                // Method java/lang/String.trim:()Ljava/lang/String;
+      91: astore        8
+      93: aload         8
+      95: ldc_w         #388                // String #include
+      98: invokevirtual #246                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+     101: ifeq          237
+     104: ldc_w         #390                // String #include\\s+\"([^\"]+)\"\\s*(?://.*)?
+     107: invokestatic  #392                // Method java/util/regex/Pattern.compile:(Ljava/lang/String;)Ljava/util/regex/Pattern;
+     110: aload         8
+     112: invokevirtual #398                // Method java/util/regex/Pattern.matcher:(Ljava/lang/CharSequence;)Ljava/util/regex/Matcher;
+     115: astore        9
+     117: aload         9
+     119: invokevirtual #402                // Method java/util/regex/Matcher.matches:()Z
+     122: ifne          143
+     125: new           #76                 // class java/io/IOException
+     128: dup
+     129: aload_1
+     130: iload         7
+     132: iconst_1
+     133: iadd
+     134: invokedynamic #407,  0            // InvokeDynamic #12:makeConcatWithConstants:(Ljava/lang/String;I)Ljava/lang/String;
+     139: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     142: athrow
+     143: aload         9
+     145: iconst_1
+     146: invokevirtual #410                // Method java/util/regex/Matcher.group:(I)Ljava/lang/String;
+     149: astore        10
+     151: aload_3
+     152: aload         10
+     154: aload_3
+     155: invokedynamic #413,  0            // InvokeDynamic #13:apply:(Ljava/util/Map;)Ljava/util/function/Function;
+     160: invokeinterface #371,  3          // InterfaceMethod java/util/Map.computeIfAbsent:(Ljava/lang/Object;Ljava/util/function/Function;)Ljava/lang/Object;
+     165: checkcast     #375                // class java/lang/Integer
+     168: invokevirtual #377                // Method java/lang/Integer.intValue:()I
+     171: istore        11
+     173: aload         5
+     175: ldc_w         #414                // String #line 1
+     178: invokevirtual #416                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     181: iload         11
+     183: invokevirtual #420                // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;
+     186: bipush        10
+     188: invokevirtual #423                // Method java/lang/StringBuilder.append:(C)Ljava/lang/StringBuilder;
+     191: aload_0
+     192: aload         10
+     194: aload_2
+     195: aload_3
+     196: invokevirtual #322                // Method expand:(Ljava/lang/String;Ljava/util/Deque;Ljava/util/Map;)Ljava/lang/String;
+     199: invokevirtual #416                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     202: pop
+     203: aload         5
+     205: ldc_w         #426                // String #line
+     208: invokevirtual #416                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     211: iload         7
+     213: iconst_2
+     214: iadd
+     215: invokevirtual #420                // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;
+     218: bipush        32
+     220: invokevirtual #423                // Method java/lang/StringBuilder.append:(C)Ljava/lang/StringBuilder;
+     223: iload         4
+     225: invokevirtual #420                // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;
+     228: bipush        10
+     230: invokevirtual #423                // Method java/lang/StringBuilder.append:(C)Ljava/lang/StringBuilder;
+     233: pop
+     234: goto          253
+     237: aload         5
+     239: aload         6
+     241: iload         7
+     243: aaload
+     244: invokevirtual #416                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     247: bipush        10
+     249: invokevirtual #423                // Method java/lang/StringBuilder.append:(C)Ljava/lang/StringBuilder;
+     252: pop
+     253: aload         5
+     255: invokevirtual #428                // Method java/lang/StringBuilder.length:()I
+     258: ldc           #230                // int 8388608
+     260: if_icmple     277
+     263: new           #76                 // class java/io/IOException
+     266: dup
+     267: aload_1
+     268: invokedynamic #429,  0            // InvokeDynamic #14:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     273: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     276: athrow
+     277: iinc          7, 1
+     280: goto          75
+     283: aload_2
+     284: invokeinterface #430,  1          // InterfaceMethod java/util/Deque.removeLast:()Ljava/lang/Object;
+     289: pop
+     290: aload         5
+     292: invokevirtual #433                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+     295: areturn
+     296: new           #76                 // class java/io/IOException
+     299: dup
+     300: aload_2
+     301: invokestatic  #347                // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+     304: aload_1
+     305: invokedynamic #434,  0            // InvokeDynamic #15:makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+     310: invokespecial #80                 // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     313: athrow
+
+  private static java.lang.Integer lambda$expand$1(java.util.Map, java.lang.String);
+    Code:
+       0: aload_0
+       1: invokeinterface #233,  1          // InterfaceMethod java/util/Map.size:()I
+       6: invokestatic  #437                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       9: areturn
+
+  private static java.lang.Integer lambda$expand$0(java.util.Map, java.lang.String);
+    Code:
+       0: aload_0
+       1: invokeinterface #233,  1          // InterfaceMethod java/util/Map.size:()I
+       6: invokestatic  #437                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+       9: areturn
+
+  private static void lambda$shader$0(java.lang.StringBuilder, java.lang.String, java.lang.Double);
+    Code:
+       0: aload_1
+       1: ldc_w         #440                // String [A-Z][A-Z0-9_]*
+       4: invokevirtual #442                // Method java/lang/String.matches:(Ljava/lang/String;)Z
+       7: ifeq          126
+      10: aload_2
+      11: invokevirtual #444                // Method java/lang/Double.doubleValue:()D
+      14: invokestatic  #450                // Method java/lang/Double.isFinite:(D)Z
+      17: ifeq          126
+      20: aload_2
+      21: invokevirtual #444                // Method java/lang/Double.doubleValue:()D
+      24: aload_2
+      25: invokevirtual #444                // Method java/lang/Double.doubleValue:()D
+      28: invokestatic  #454                // Method java/lang/Math.rint:(D)D
+      31: dcmpl
+      32: ifne          59
+      35: aload_2
+      36: invokevirtual #444                // Method java/lang/Double.doubleValue:()D
+      39: invokestatic  #460                // Method java/lang/Math.abs:(D)D
+      42: ldc2_w        #463                // double 2.147483647E9d
+      45: dcmpg
+      46: ifgt          59
+      49: aload_2
+      50: invokevirtual #465                // Method java/lang/Double.longValue:()J
+      53: invokestatic  #469                // Method java/lang/Long.toString:(J)Ljava/lang/String;
+      56: goto          63
+      59: aload_2
+      60: invokevirtual #474                // Method java/lang/Double.toString:()Ljava/lang/String;
+      63: astore_3
+      64: aload_0
+      65: ldc_w         #475                // String #define _SULKAN_ENABLED_
+      68: invokevirtual #416                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      71: aload_1
+      72: invokevirtual #416                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      75: aload_2
+      76: invokevirtual #444                // Method java/lang/Double.doubleValue:()D
+      79: dconst_0
+      80: dcmpl
+      81: ifle          90
+      84: ldc_w         #477                // String  1\n
+      87: goto          93
+      90: ldc_w         #479                // String  0\n
+      93: invokevirtual #416                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      96: pop
+      97: aload_0
+      98: ldc_w         #481                // String #define
+     101: invokevirtual #416                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     104: aload_1
+     105: invokevirtual #416                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     108: bipush        32
+     110: invokevirtual #423                // Method java/lang/StringBuilder.append:(C)Ljava/lang/StringBuilder;
+     113: aload_3
+     114: invokevirtual #416                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+     117: bipush        10
+     119: invokevirtual #423                // Method java/lang/StringBuilder.append:(C)Ljava/lang/StringBuilder;
+     122: pop
+     123: goto          140
+     126: new           #483                // class java/lang/IllegalArgumentException
+     129: dup
+     130: aload_1
+     131: invokedynamic #485,  0            // InvokeDynamic #16:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     136: invokespecial #486                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     139: athrow
+     140: return
+
+  private static boolean lambda$safe$0(java.lang.String);
+    Code:
+       0: aload_0
+       1: invokevirtual #487                // Method java/lang/String.isEmpty:()Z
+       4: ifne          27
+       7: aload_0
+       8: ldc_w         #490                // String .
+      11: invokevirtual #272                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      14: ifne          27
+      17: aload_0
+      18: ldc_w         #492                // String ..
+      21: invokevirtual #272                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      24: ifeq          31
+      27: iconst_1
+      28: goto          32
+      31: iconst_0
+      32: ireturn
+
+  private static void lambda$rooted$1(java.lang.String, java.util.Map, java.lang.String, byte[]);
+    Code:
+       0: aload_2
+       1: aload_0
+       2: invokevirtual #246                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+       5: ifeq          24
+       8: aload_1
+       9: aload_2
+      10: aload_0
+      11: invokevirtual #202                // Method java/lang/String.length:()I
+      14: invokevirtual #351                // Method java/lang/String.substring:(I)Ljava/lang/String;
+      17: aload_3
+      18: invokeinterface #494,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      23: pop
+      24: return
+
+  private static boolean lambda$rooted$0(java.lang.String);
+    Code:
+       0: aload_0
+       1: ldc           #205                // String sulkan.json
+       3: invokevirtual #272                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+       6: ifne          19
+       9: aload_0
+      10: ldc_w         #497                // String /sulkan.json
+      13: invokevirtual #499                // Method java/lang/String.endsWith:(Ljava/lang/String;)Z
+      16: ifeq          23
+      19: iconst_1
+      20: goto          24
+      23: iconst_0
+      24: ireturn
+
+  private static boolean lambda$read$0(java.nio.file.Path);
+    Code:
+       0: aload_0
+       1: iconst_0
+       2: anewarray     #22                 // class java/nio/file/LinkOption
+       5: invokestatic  #502                // Method java/nio/file/Files.isRegularFile:(Ljava/nio/file/Path;[Ljava/nio/file/LinkOption;)Z
+       8: ireturn
+}

@@ -1,0 +1,1114 @@
+Compiled from "NativePackRuntime.java"
+public final class com.sulkan.shaders.graph.NativePackRuntime {
+  private static com.sulkan.shaders.graph.GraphRenderer active;
+
+  private static java.lang.String activeId;
+
+  private static java.lang.String failure;
+
+  private static boolean sceneScope;
+
+  private static java.lang.Exception sceneFailure;
+
+  private static net.minecraft.client.renderer.state.level.CameraRenderState camera;
+
+  private static org.joml.Matrix4fc view;
+
+  private static org.joml.Matrix4fc worldProjection;
+
+  private static boolean geometryRebuildPending;
+
+  public static void captureHandProjection(org.joml.Matrix4fc);
+    Code:
+       0: getstatic     #1                  // Field sceneScope:Z
+       3: ifeq          19
+       6: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       9: ifnull        19
+      12: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      15: aload_0
+      16: invokevirtual #11                 // Method com/sulkan/shaders/graph/GraphRenderer.handProjection:(Lorg/joml/Matrix4fc;)V
+      19: return
+
+  public static void captureWorldProjection(org.joml.Matrix4fc);
+    Code:
+       0: new           #17                 // class org/joml/Matrix4f
+       3: dup
+       4: aload_0
+       5: invokespecial #19                 // Method org/joml/Matrix4f."<init>":(Lorg/joml/Matrix4fc;)V
+       8: putstatic     #22                 // Field worldProjection:Lorg/joml/Matrix4fc;
+      11: return
+
+  private com.sulkan.shaders.graph.NativePackRuntime();
+    Code:
+       0: aload_0
+       1: invokespecial #26                 // Method java/lang/Object."<init>":()V
+       4: return
+
+  public static boolean isNative(java.nio.file.Path);
+    Code:
+       0: aload_0
+       1: iconst_0
+       2: anewarray     #31                 // class java/nio/file/LinkOption
+       5: invokestatic  #33                 // Method java/nio/file/Files.isDirectory:(Ljava/nio/file/Path;[Ljava/nio/file/LinkOption;)Z
+       8: ifeq          67
+      11: aload_0
+      12: iconst_2
+      13: iconst_0
+      14: anewarray     #39                 // class java/nio/file/FileVisitOption
+      17: invokestatic  #41                 // Method java/nio/file/Files.walk:(Ljava/nio/file/Path;I[Ljava/nio/file/FileVisitOption;)Ljava/util/stream/Stream;
+      20: astore_1
+      21: aload_1
+      22: invokedynamic #45,  0             // InvokeDynamic #0:test:()Ljava/util/function/Predicate;
+      27: invokeinterface #49,  2           // InterfaceMethod java/util/stream/Stream.anyMatch:(Ljava/util/function/Predicate;)Z
+      32: istore_2
+      33: aload_1
+      34: ifnull        43
+      37: aload_1
+      38: invokeinterface #55,  1           // InterfaceMethod java/util/stream/Stream.close:()V
+      43: iload_2
+      44: ireturn
+      45: astore_2
+      46: aload_1
+      47: ifnull        65
+      50: aload_1
+      51: invokeinterface #55,  1           // InterfaceMethod java/util/stream/Stream.close:()V
+      56: goto          65
+      59: astore_3
+      60: aload_2
+      61: aload_3
+      62: invokevirtual #60                 // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+      65: aload_2
+      66: athrow
+      67: new           #64                 // class java/util/zip/ZipFile
+      70: dup
+      71: aload_0
+      72: invokeinterface #66,  1           // InterfaceMethod java/nio/file/Path.toFile:()Ljava/io/File;
+      77: invokespecial #72                 // Method java/util/zip/ZipFile."<init>":(Ljava/io/File;)V
+      80: astore_1
+      81: aload_1
+      82: invokevirtual #75                 // Method java/util/zip/ZipFile.stream:()Ljava/util/stream/Stream;
+      85: invokedynamic #79,  0             // InvokeDynamic #1:test:()Ljava/util/function/Predicate;
+      90: invokeinterface #49,  2           // InterfaceMethod java/util/stream/Stream.anyMatch:(Ljava/util/function/Predicate;)Z
+      95: istore_2
+      96: aload_1
+      97: invokevirtual #80                 // Method java/util/zip/ZipFile.close:()V
+     100: iload_2
+     101: ireturn
+     102: astore_2
+     103: aload_1
+     104: invokevirtual #80                 // Method java/util/zip/ZipFile.close:()V
+     107: goto          116
+     110: astore_3
+     111: aload_2
+     112: aload_3
+     113: invokevirtual #60                 // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     116: aload_2
+     117: athrow
+     118: astore_1
+     119: iconst_0
+     120: ireturn
+    Exception table:
+       from    to  target type
+          21    33    45   Class java/lang/Throwable
+          50    56    59   Class java/lang/Throwable
+          81    96   102   Class java/lang/Throwable
+         103   107   110   Class java/lang/Throwable
+           0    43   118   Class java/io/IOException
+          45   100   118   Class java/io/IOException
+         102   118   118   Class java/io/IOException
+
+  public static boolean selected(com.sulkan.shaders.config.ShaderConfig);
+    Code:
+       0: ldc           #83                 // String __builtin__
+       2: aload_0
+       3: invokevirtual #85                 // Method com/sulkan/shaders/config/ShaderConfig.selectedPackId:()Ljava/lang/String;
+       6: invokevirtual #91                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+       9: ifne          71
+      12: aload_0
+      13: invokevirtual #85                 // Method com/sulkan/shaders/config/ShaderConfig.selectedPackId:()Ljava/lang/String;
+      16: ifnull        75
+      19: aload_0
+      20: invokevirtual #85                 // Method com/sulkan/shaders/config/ShaderConfig.selectedPackId:()Ljava/lang/String;
+      23: invokestatic  #97                 // Method com/sulkan/shaders/graph/PackFiles.safe:(Ljava/lang/String;)Z
+      26: ifeq          75
+      29: aload_0
+      30: invokevirtual #85                 // Method com/sulkan/shaders/config/ShaderConfig.selectedPackId:()Ljava/lang/String;
+      33: ldc           #103                // String /
+      35: invokevirtual #105                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+      38: ifne          75
+      41: ldc           #83                 // String __builtin__
+      43: aload_0
+      44: invokevirtual #85                 // Method com/sulkan/shaders/config/ShaderConfig.selectedPackId:()Ljava/lang/String;
+      47: invokevirtual #91                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      50: ifne          75
+      53: invokestatic  #109                // Method com/sulkan/shaders/pack/ShaderPackScanner.shaderPackDirectory:()Ljava/nio/file/Path;
+      56: aload_0
+      57: invokevirtual #85                 // Method com/sulkan/shaders/config/ShaderConfig.selectedPackId:()Ljava/lang/String;
+      60: invokeinterface #115,  2          // InterfaceMethod java/nio/file/Path.resolve:(Ljava/lang/String;)Ljava/nio/file/Path;
+      65: invokestatic  #119                // Method isNative:(Ljava/nio/file/Path;)Z
+      68: ifeq          75
+      71: iconst_1
+      72: goto          76
+      75: iconst_0
+      76: ireturn
+
+  private static com.sulkan.shaders.graph.PackFiles packFiles(java.lang.String) throws java.io.IOException;
+    Code:
+       0: ldc           #83                 // String __builtin__
+       2: aload_0
+       3: invokevirtual #91                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+       6: ifeq          15
+       9: invokestatic  #123                // Method com/sulkan/shaders/graph/PackFiles.bundled:()Lcom/sulkan/shaders/graph/PackFiles;
+      12: goto          27
+      15: invokestatic  #109                // Method com/sulkan/shaders/pack/ShaderPackScanner.shaderPackDirectory:()Ljava/nio/file/Path;
+      18: aload_0
+      19: invokeinterface #115,  2          // InterfaceMethod java/nio/file/Path.resolve:(Ljava/lang/String;)Ljava/nio/file/Path;
+      24: invokestatic  #127                // Method com/sulkan/shaders/graph/PackFiles.read:(Ljava/nio/file/Path;)Lcom/sulkan/shaders/graph/PackFiles;
+      27: areturn
+
+  public static com.sulkan.shaders.graph.GraphRenderer prepare(com.sulkan.shaders.config.ShaderConfig) throws java.io.IOException;
+    Code:
+       0: aload_0
+       1: invokevirtual #131                // Method com/sulkan/shaders/config/ShaderConfig.enabled:()Z
+       4: ifeq          13
+       7: invokestatic  #135                // Method com/sulkan/shaders/runtime/BackendStatus.vulkanActive:()Z
+      10: ifne          15
+      13: aconst_null
+      14: areturn
+      15: aload_0
+      16: invokestatic  #140                // Method selected:(Lcom/sulkan/shaders/config/ShaderConfig;)Z
+      19: ifne          32
+      22: new           #81                 // class java/io/IOException
+      25: dup
+      26: ldc           #144                // String This pack is not a native Sulkan shader pack. Select Sulkan Realistic or a pack with sulkan.json.
+      28: invokespecial #146                // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+      31: athrow
+      32: aload_0
+      33: invokevirtual #85                 // Method com/sulkan/shaders/config/ShaderConfig.selectedPackId:()Ljava/lang/String;
+      36: invokestatic  #149                // Method packFiles:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/PackFiles;
+      39: astore_1
+      40: aload_1
+      41: ldc           #153                // String sulkan.json
+      43: invokevirtual #155                // Method com/sulkan/shaders/graph/PackFiles.text:(Ljava/lang/String;)Ljava/lang/String;
+      46: invokestatic  #159                // Method com/sulkan/shaders/graph/PackGraph.parse:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/PackGraph;
+      49: aload_0
+      50: invokevirtual #85                 // Method com/sulkan/shaders/config/ShaderConfig.selectedPackId:()Ljava/lang/String;
+      53: invokestatic  #165                // Method loadOptions:(Lcom/sulkan/shaders/graph/PackGraph;Ljava/lang/String;)Lcom/sulkan/shaders/graph/PackGraph;
+      56: astore_2
+      57: new           #12                 // class com/sulkan/shaders/graph/GraphRenderer
+      60: dup
+      61: aload_2
+      62: aload_1
+      63: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+      66: getfield      #175                // Field net/minecraft/client/Minecraft.gameRenderer:Lnet/minecraft/client/renderer/GameRenderer;
+      69: invokevirtual #179                // Method net/minecraft/client/renderer/GameRenderer.mainRenderTarget:()Lcom/mojang/blaze3d/pipeline/RenderTarget;
+      72: invokespecial #185                // Method com/sulkan/shaders/graph/GraphRenderer."<init>":(Lcom/sulkan/shaders/graph/PackGraph;Lcom/sulkan/shaders/graph/PackFiles;Lcom/mojang/blaze3d/pipeline/RenderTarget;)V
+      75: areturn
+
+  public static com.sulkan.shaders.graph.PackGraph settings(java.lang.String) throws java.io.IOException;
+    Code:
+       0: aload_0
+       1: invokestatic  #149                // Method packFiles:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/PackFiles;
+       4: astore_1
+       5: aload_1
+       6: ldc           #153                // String sulkan.json
+       8: invokevirtual #155                // Method com/sulkan/shaders/graph/PackFiles.text:(Ljava/lang/String;)Ljava/lang/String;
+      11: invokestatic  #159                // Method com/sulkan/shaders/graph/PackGraph.parse:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/PackGraph;
+      14: aload_0
+      15: invokestatic  #165                // Method loadOptions:(Lcom/sulkan/shaders/graph/PackGraph;Ljava/lang/String;)Lcom/sulkan/shaders/graph/PackGraph;
+      18: areturn
+
+  private static java.nio.file.Path optionFile(java.lang.String);
+    Code:
+       0: invokestatic  #188                // Method java/util/HexFormat.of:()Ljava/util/HexFormat;
+       3: ldc           #194                // String SHA-256
+       5: invokestatic  #196                // Method java/security/MessageDigest.getInstance:(Ljava/lang/String;)Ljava/security/MessageDigest;
+       8: aload_0
+       9: getstatic     #201                // Field java/nio/charset/StandardCharsets.UTF_8:Ljava/nio/charset/Charset;
+      12: invokevirtual #207                // Method java/lang/String.getBytes:(Ljava/nio/charset/Charset;)[B
+      15: invokevirtual #211                // Method java/security/MessageDigest.digest:([B)[B
+      18: invokevirtual #215                // Method java/util/HexFormat.formatHex:([B)Ljava/lang/String;
+      21: astore_1
+      22: invokestatic  #219                // InterfaceMethod net/fabricmc/loader/api/FabricLoader.getInstance:()Lnet/fabricmc/loader/api/FabricLoader;
+      25: invokeinterface #224,  1          // InterfaceMethod net/fabricmc/loader/api/FabricLoader.getConfigDir:()Ljava/nio/file/Path;
+      30: ldc           #227                // String sulkan-packs
+      32: invokeinterface #115,  2          // InterfaceMethod java/nio/file/Path.resolve:(Ljava/lang/String;)Ljava/nio/file/Path;
+      37: aload_1
+      38: invokedynamic #229,  0            // InvokeDynamic #2:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      43: invokeinterface #115,  2          // InterfaceMethod java/nio/file/Path.resolve:(Ljava/lang/String;)Ljava/nio/file/Path;
+      48: areturn
+      49: astore_1
+      50: new           #234                // class java/lang/AssertionError
+      53: dup
+      54: aload_1
+      55: invokespecial #236                // Method java/lang/AssertionError."<init>":(Ljava/lang/Object;)V
+      58: athrow
+    Exception table:
+       from    to  target type
+           0    48    49   Class java/security/NoSuchAlgorithmException
+
+  private static com.sulkan.shaders.graph.PackGraph loadOptions(com.sulkan.shaders.graph.PackGraph, java.lang.String) throws java.io.IOException;
+    Code:
+       0: aload_1
+       1: invokestatic  #239                // Method optionFile:(Ljava/lang/String;)Ljava/nio/file/Path;
+       4: astore_2
+       5: aload_2
+       6: iconst_0
+       7: anewarray     #31                 // class java/nio/file/LinkOption
+      10: invokestatic  #242                // Method java/nio/file/Files.isRegularFile:(Ljava/nio/file/Path;[Ljava/nio/file/LinkOption;)Z
+      13: ifne          18
+      16: aload_0
+      17: areturn
+      18: aload_2
+      19: invokestatic  #245                // Method java/nio/file/Files.readString:(Ljava/nio/file/Path;)Ljava/lang/String;
+      22: invokestatic  #249                // Method com/google/gson/JsonParser.parseString:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+      25: invokevirtual #255                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+      28: astore_3
+      29: new           #261                // class java/util/TreeMap
+      32: dup
+      33: invokespecial #263                // Method java/util/TreeMap."<init>":()V
+      36: astore        4
+      38: aload_3
+      39: invokevirtual #264                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+      42: aload_0
+      43: aload         4
+      45: invokedynamic #270,  0            // InvokeDynamic #3:accept:(Lcom/sulkan/shaders/graph/PackGraph;Ljava/util/Map;)Ljava/util/function/Consumer;
+      50: invokeinterface #274,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+      55: aload_0
+      56: aload         4
+      58: invokevirtual #280                // Method com/sulkan/shaders/graph/PackGraph.withOptions:(Ljava/util/Map;)Lcom/sulkan/shaders/graph/PackGraph;
+      61: areturn
+      62: astore_3
+      63: new           #81                 // class java/io/IOException
+      66: dup
+      67: aload_2
+      68: invokestatic  #286                // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+      71: invokedynamic #290,  0            // InvokeDynamic #4:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      76: aload_3
+      77: invokespecial #291                // Method java/io/IOException."<init>":(Ljava/lang/String;Ljava/lang/Throwable;)V
+      80: athrow
+    Exception table:
+       from    to  target type
+          18    61    62   Class java/lang/RuntimeException
+
+  public static void applyOptions(java.lang.String, java.util.Map<java.lang.String, java.lang.Double>) throws java.io.IOException;
+    Code:
+       0: aload_0
+       1: invokestatic  #149                // Method packFiles:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/PackFiles;
+       4: astore_2
+       5: aload_2
+       6: ldc           #153                // String sulkan.json
+       8: invokevirtual #155                // Method com/sulkan/shaders/graph/PackFiles.text:(Ljava/lang/String;)Ljava/lang/String;
+      11: invokestatic  #159                // Method com/sulkan/shaders/graph/PackGraph.parse:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/PackGraph;
+      14: aload_1
+      15: invokevirtual #280                // Method com/sulkan/shaders/graph/PackGraph.withOptions:(Ljava/util/Map;)Lcom/sulkan/shaders/graph/PackGraph;
+      18: astore_3
+      19: invokestatic  #294                // Method com/sulkan/shaders/runtime/ShaderRuntime.config:()Lcom/sulkan/shaders/config/ShaderConfig;
+      22: astore        4
+      24: aload         4
+      26: invokevirtual #131                // Method com/sulkan/shaders/config/ShaderConfig.enabled:()Z
+      29: ifeq          71
+      32: invokestatic  #135                // Method com/sulkan/shaders/runtime/BackendStatus.vulkanActive:()Z
+      35: ifeq          71
+      38: aload_0
+      39: aload         4
+      41: invokevirtual #85                 // Method com/sulkan/shaders/config/ShaderConfig.selectedPackId:()Ljava/lang/String;
+      44: invokevirtual #91                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      47: ifeq          71
+      50: new           #12                 // class com/sulkan/shaders/graph/GraphRenderer
+      53: dup
+      54: aload_3
+      55: aload_2
+      56: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+      59: getfield      #175                // Field net/minecraft/client/Minecraft.gameRenderer:Lnet/minecraft/client/renderer/GameRenderer;
+      62: invokevirtual #179                // Method net/minecraft/client/renderer/GameRenderer.mainRenderTarget:()Lcom/mojang/blaze3d/pipeline/RenderTarget;
+      65: invokespecial #185                // Method com/sulkan/shaders/graph/GraphRenderer."<init>":(Lcom/sulkan/shaders/graph/PackGraph;Lcom/sulkan/shaders/graph/PackFiles;Lcom/mojang/blaze3d/pipeline/RenderTarget;)V
+      68: goto          72
+      71: aconst_null
+      72: astore        5
+      74: aload_0
+      75: invokestatic  #239                // Method optionFile:(Ljava/lang/String;)Ljava/nio/file/Path;
+      78: astore        6
+      80: aload         6
+      82: aload         6
+      84: invokeinterface #300,  1          // InterfaceMethod java/nio/file/Path.getFileName:()Ljava/nio/file/Path;
+      89: invokestatic  #286                // Method java/lang/String.valueOf:(Ljava/lang/Object;)Ljava/lang/String;
+      92: invokedynamic #303,  0            // InvokeDynamic #5:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      97: invokeinterface #304,  2          // InterfaceMethod java/nio/file/Path.resolveSibling:(Ljava/lang/String;)Ljava/nio/file/Path;
+     102: astore        7
+     104: aload         6
+     106: invokeinterface #307,  1          // InterfaceMethod java/nio/file/Path.getParent:()Ljava/nio/file/Path;
+     111: iconst_0
+     112: anewarray     #310                // class java/nio/file/attribute/FileAttribute
+     115: invokestatic  #312                // Method java/nio/file/Files.createDirectories:(Ljava/nio/file/Path;[Ljava/nio/file/attribute/FileAttribute;)Ljava/nio/file/Path;
+     118: pop
+     119: aload         7
+     121: new           #316                // class com/google/gson/GsonBuilder
+     124: dup
+     125: invokespecial #318                // Method com/google/gson/GsonBuilder."<init>":()V
+     128: invokevirtual #319                // Method com/google/gson/GsonBuilder.setPrettyPrinting:()Lcom/google/gson/GsonBuilder;
+     131: invokevirtual #323                // Method com/google/gson/GsonBuilder.create:()Lcom/google/gson/Gson;
+     134: aload_3
+     135: invokevirtual #327                // Method com/sulkan/shaders/graph/PackGraph.options:()Ljava/util/Map;
+     138: invokevirtual #331                // Method com/google/gson/Gson.toJson:(Ljava/lang/Object;)Ljava/lang/String;
+     141: iconst_0
+     142: anewarray     #336                // class java/nio/file/OpenOption
+     145: invokestatic  #338                // Method java/nio/file/Files.writeString:(Ljava/nio/file/Path;Ljava/lang/CharSequence;[Ljava/nio/file/OpenOption;)Ljava/nio/file/Path;
+     148: pop
+     149: aload         7
+     151: aload         6
+     153: iconst_2
+     154: anewarray     #342                // class java/nio/file/CopyOption
+     157: dup
+     158: iconst_0
+     159: getstatic     #344                // Field java/nio/file/StandardCopyOption.ATOMIC_MOVE:Ljava/nio/file/StandardCopyOption;
+     162: aastore
+     163: dup
+     164: iconst_1
+     165: getstatic     #350                // Field java/nio/file/StandardCopyOption.REPLACE_EXISTING:Ljava/nio/file/StandardCopyOption;
+     168: aastore
+     169: invokestatic  #353                // Method java/nio/file/Files.move:(Ljava/nio/file/Path;Ljava/nio/file/Path;[Ljava/nio/file/CopyOption;)Ljava/nio/file/Path;
+     172: pop
+     173: goto          196
+     176: astore        8
+     178: aload         7
+     180: aload         6
+     182: iconst_1
+     183: anewarray     #342                // class java/nio/file/CopyOption
+     186: dup
+     187: iconst_0
+     188: getstatic     #350                // Field java/nio/file/StandardCopyOption.REPLACE_EXISTING:Ljava/nio/file/StandardCopyOption;
+     191: aastore
+     192: invokestatic  #353                // Method java/nio/file/Files.move:(Ljava/nio/file/Path;Ljava/nio/file/Path;[Ljava/nio/file/CopyOption;)Ljava/nio/file/Path;
+     195: pop
+     196: goto          214
+     199: astore        8
+     201: aload         5
+     203: ifnull        211
+     206: aload         5
+     208: invokevirtual #359                // Method com/sulkan/shaders/graph/GraphRenderer.close:()V
+     211: aload         8
+     213: athrow
+     214: aload         5
+     216: ifnull        225
+     219: aload         5
+     221: aload_0
+     222: invokestatic  #360                // Method activate:(Lcom/sulkan/shaders/graph/GraphRenderer;Ljava/lang/String;)V
+     225: return
+    Exception table:
+       from    to  target type
+         149   173   176   Class java/nio/file/AtomicMoveNotSupportedException
+         104   196   199   Class java/io/IOException
+
+  public static void activate(com.sulkan.shaders.graph.GraphRenderer, java.lang.String);
+    Code:
+       0: aconst_null
+       1: putstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+       4: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       7: astore_2
+       8: aload_0
+       9: putstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      12: aload_0
+      13: ifnonnull     20
+      16: aconst_null
+      17: goto          21
+      20: aload_1
+      21: putstatic     #368                // Field activeId:Ljava/lang/String;
+      24: aconst_null
+      25: putstatic     #372                // Field failure:Ljava/lang/String;
+      28: aload_2
+      29: ifnull        42
+      32: aload_2
+      33: invokevirtual #375                // Method com/sulkan/shaders/graph/GraphRenderer.materials:()Lcom/sulkan/shaders/graph/MaterialTable;
+      36: invokevirtual #379                // Method com/sulkan/shaders/graph/MaterialTable.enabled:()Z
+      39: ifne          56
+      42: aload_0
+      43: ifnull        59
+      46: aload_0
+      47: invokevirtual #375                // Method com/sulkan/shaders/graph/GraphRenderer.materials:()Lcom/sulkan/shaders/graph/MaterialTable;
+      50: invokevirtual #379                // Method com/sulkan/shaders/graph/MaterialTable.enabled:()Z
+      53: ifeq          59
+      56: invokestatic  #382                // Method rebuildGeometry:()V
+      59: aload_2
+      60: ifnull        77
+      63: aload_2
+      64: dup
+      65: invokestatic  #385                // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+      68: pop
+      69: invokedynamic #391,  0            // InvokeDynamic #6:run:(Lcom/sulkan/shaders/graph/GraphRenderer;)Ljava/lang/Runnable;
+      74: invokestatic  #395                // Method com/mojang/blaze3d/systems/RenderSystem.queueFencedTask:(Ljava/lang/Runnable;)V
+      77: invokestatic  #401                // Method com/sulkan/shaders/runtime/PipelineCache.save:()V
+      80: return
+
+  public static boolean render(com.sulkan.shaders.config.ShaderConfig, net.minecraft.client.renderer.state.level.CameraRenderState, org.joml.Matrix4fc);
+    Code:
+       0: aload_0
+       1: invokevirtual #131                // Method com/sulkan/shaders/config/ShaderConfig.enabled:()Z
+       4: ifeq          65
+       7: invokestatic  #135                // Method com/sulkan/shaders/runtime/BackendStatus.vulkanActive:()Z
+      10: ifeq          65
+      13: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      16: ifnull        65
+      19: aload_0
+      20: invokevirtual #85                 // Method com/sulkan/shaders/config/ShaderConfig.selectedPackId:()Ljava/lang/String;
+      23: getstatic     #368                // Field activeId:Ljava/lang/String;
+      26: invokevirtual #91                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      29: ifeq          65
+      32: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      35: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+      38: getfield      #175                // Field net/minecraft/client/Minecraft.gameRenderer:Lnet/minecraft/client/renderer/GameRenderer;
+      41: invokevirtual #179                // Method net/minecraft/client/renderer/GameRenderer.mainRenderTarget:()Lcom/mojang/blaze3d/pipeline/RenderTarget;
+      44: aload_1
+      45: aload_2
+      46: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+      49: getfield      #406                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+      52: invokevirtual #410                // Method com/sulkan/shaders/graph/GraphRenderer.render:(Lcom/mojang/blaze3d/pipeline/RenderTarget;Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lorg/joml/Matrix4fc;Ljava/lang/Object;)V
+      55: goto          63
+      58: astore_3
+      59: aload_3
+      60: invokestatic  #416                // Method pause:(Ljava/lang/Exception;)V
+      63: iconst_1
+      64: ireturn
+      65: iconst_0
+      66: ireturn
+    Exception table:
+       from    to  target type
+          32    55    58   Class java/lang/Exception
+
+  public static boolean usesNativeTransparency();
+    Code:
+       0: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       3: ifnull        16
+       6: invokestatic  #420                // Method com/sulkan/shaders/runtime/ShaderRuntime.resourceReloading:()Z
+       9: ifne          16
+      12: iconst_1
+      13: goto          17
+      16: iconst_0
+      17: ireturn
+
+  public static void scope(boolean);
+    Code:
+       0: iload_0
+       1: putstatic     #1                  // Field sceneScope:Z
+       4: return
+
+  public static void beginScene(net.minecraft.client.renderer.state.level.CameraRenderState, org.joml.Matrix4fc, net.minecraft.client.renderer.state.level.LevelRenderState, float);
+    Code:
+       0: ldc_w         #423                // String sulkan.environmentSmoke
+       3: invokestatic  #425                // Method java/lang/Boolean.getBoolean:(Ljava/lang/String;)Z
+       6: ifeq          24
+       9: invokestatic  #219                // InterfaceMethod net/fabricmc/loader/api/FabricLoader.getInstance:()Lnet/fabricmc/loader/api/FabricLoader;
+      12: invokeinterface #430,  1          // InterfaceMethod net/fabricmc/loader/api/FabricLoader.isDevelopmentEnvironment:()Z
+      17: ifeq          24
+      20: aload_2
+      21: invokestatic  #433                // Method com/sulkan/shaders/graph/NativeEnvironmentSmoke.observe:(Lnet/minecraft/client/renderer/state/level/LevelRenderState;)V
+      24: getstatic     #439                // Field geometryRebuildPending:Z
+      27: ifne          130
+      30: aload_0
+      31: aload_1
+      32: invokestatic  #442                // Method com/sulkan/shaders/graph/GraphFrame.cameraReady:(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lorg/joml/Matrix4fc;)Z
+      35: ifeq          130
+      38: aload_0
+      39: putstatic     #448                // Field camera:Lnet/minecraft/client/renderer/state/level/CameraRenderState;
+      42: aload_1
+      43: ifnonnull     50
+      46: aconst_null
+      47: goto          58
+      50: new           #17                 // class org/joml/Matrix4f
+      53: dup
+      54: aload_1
+      55: invokespecial #19                 // Method org/joml/Matrix4f."<init>":(Lorg/joml/Matrix4fc;)V
+      58: putstatic     #452                // Field view:Lorg/joml/Matrix4fc;
+      61: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      64: ifnull        154
+      67: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      70: getstatic     #22                 // Field worldProjection:Lorg/joml/Matrix4fc;
+      73: invokevirtual #455                // Method com/sulkan/shaders/graph/GraphRenderer.projection:(Lorg/joml/Matrix4fc;)V
+      76: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      79: aload_2
+      80: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+      83: getfield      #406                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+      86: fload_3
+      87: invokevirtual #458                // Method com/sulkan/shaders/graph/GraphRenderer.environment:(Lnet/minecraft/client/renderer/state/level/LevelRenderState;Lnet/minecraft/client/multiplayer/ClientLevel;F)V
+      90: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      93: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+      96: getfield      #175                // Field net/minecraft/client/Minecraft.gameRenderer:Lnet/minecraft/client/renderer/GameRenderer;
+      99: invokevirtual #179                // Method net/minecraft/client/renderer/GameRenderer.mainRenderTarget:()Lcom/mojang/blaze3d/pipeline/RenderTarget;
+     102: getstatic     #448                // Field camera:Lnet/minecraft/client/renderer/state/level/CameraRenderState;
+     105: getstatic     #452                // Field view:Lorg/joml/Matrix4fc;
+     108: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+     111: getfield      #406                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+     114: invokevirtual #462                // Method com/sulkan/shaders/graph/GraphRenderer.beginScene:(Lcom/mojang/blaze3d/pipeline/RenderTarget;Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lorg/joml/Matrix4fc;Ljava/lang/Object;)V
+     117: goto          154
+     120: astore        4
+     122: aload         4
+     124: invokestatic  #416                // Method pause:(Ljava/lang/Exception;)V
+     127: goto          154
+     130: iconst_0
+     131: putstatic     #1                  // Field sceneScope:Z
+     134: aconst_null
+     135: putstatic     #448                // Field camera:Lnet/minecraft/client/renderer/state/level/CameraRenderState;
+     138: aconst_null
+     139: putstatic     #452                // Field view:Lorg/joml/Matrix4fc;
+     142: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+     145: ifnull        154
+     148: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+     151: invokevirtual #465                // Method com/sulkan/shaders/graph/GraphRenderer.invalidateHistory:()V
+     154: return
+    Exception table:
+       from    to  target type
+          67   117   120   Class java/lang/Exception
+
+  public static void finishScene();
+    Code:
+       0: getstatic     #1                  // Field sceneScope:Z
+       3: ifeq          16
+       6: getstatic     #448                // Field camera:Lnet/minecraft/client/renderer/state/level/CameraRenderState;
+       9: ifnull        16
+      12: iconst_1
+      13: goto          17
+      16: iconst_0
+      17: istore_0
+      18: iconst_0
+      19: putstatic     #1                  // Field sceneScope:Z
+      22: getstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      25: ifnull        43
+      28: getstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      31: astore_1
+      32: aconst_null
+      33: putstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      36: aload_1
+      37: invokestatic  #416                // Method pause:(Ljava/lang/Exception;)V
+      40: goto          66
+      43: iload_0
+      44: ifeq          66
+      47: invokestatic  #420                // Method com/sulkan/shaders/runtime/ShaderRuntime.resourceReloading:()Z
+      50: ifne          66
+      53: invokestatic  #294                // Method com/sulkan/shaders/runtime/ShaderRuntime.config:()Lcom/sulkan/shaders/config/ShaderConfig;
+      56: getstatic     #448                // Field camera:Lnet/minecraft/client/renderer/state/level/CameraRenderState;
+      59: getstatic     #452                // Field view:Lorg/joml/Matrix4fc;
+      62: invokestatic  #468                // Method render:(Lcom/sulkan/shaders/config/ShaderConfig;Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lorg/joml/Matrix4fc;)Z
+      65: pop
+      66: aconst_null
+      67: putstatic     #448                // Field camera:Lnet/minecraft/client/renderer/state/level/CameraRenderState;
+      70: aconst_null
+      71: putstatic     #452                // Field view:Lorg/joml/Matrix4fc;
+      74: return
+
+  public static com.mojang.renderpearl.api.commands.RenderPassDescriptor sceneAttachments(com.mojang.renderpearl.api.commands.RenderPassDescriptor);
+    Code:
+       0: invokestatic  #471                // Method com/sulkan/shaders/render/shadow/DirectionalShadowRenderer.isRenderingShadowMap:()Z
+       3: ifne          43
+       6: getstatic     #1                  // Field sceneScope:Z
+       9: ifeq          43
+      12: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      15: ifnull        43
+      18: invokestatic  #420                // Method com/sulkan/shaders/runtime/ShaderRuntime.resourceReloading:()Z
+      21: ifne          43
+      24: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      27: aload_0
+      28: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+      31: getfield      #175                // Field net/minecraft/client/Minecraft.gameRenderer:Lnet/minecraft/client/renderer/GameRenderer;
+      34: invokevirtual #179                // Method net/minecraft/client/renderer/GameRenderer.mainRenderTarget:()Lcom/mojang/blaze3d/pipeline/RenderTarget;
+      37: invokevirtual #476                // Method com/sulkan/shaders/graph/GraphRenderer.sceneAttachments:(Lcom/mojang/renderpearl/api/commands/RenderPassDescriptor;Lcom/mojang/blaze3d/pipeline/RenderTarget;)Lcom/mojang/renderpearl/api/commands/RenderPassDescriptor;
+      40: goto          44
+      43: aload_0
+      44: areturn
+
+  public static com.mojang.renderpearl.api.pipeline.RenderPipeline scenePipeline(com.mojang.renderpearl.api.pipeline.RenderPipeline, java.util.List<com.mojang.renderpearl.api.commands.RenderPassDescriptor$Attachment<java.util.Optional<org.joml.Vector4fc>>>);
+    Code:
+       0: invokestatic  #471                // Method com/sulkan/shaders/render/shadow/DirectionalShadowRenderer.isRenderingShadowMap:()Z
+       3: ifne          108
+       6: getstatic     #1                  // Field sceneScope:Z
+       9: ifeq          108
+      12: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      15: ifnull        108
+      18: invokestatic  #420                // Method com/sulkan/shaders/runtime/ShaderRuntime.resourceReloading:()Z
+      21: ifne          108
+      24: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      27: aload_1
+      28: invokevirtual #480                // Method com/sulkan/shaders/graph/GraphRenderer.hasSceneAttachments:(Ljava/util/List;)Z
+      31: istore_2
+      32: getstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      35: ifnull        47
+      38: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      41: aload_0
+      42: iload_2
+      43: invokevirtual #484                // Method com/sulkan/shaders/graph/GraphRenderer.sceneFallback:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Z)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;
+      46: areturn
+      47: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      50: aload_0
+      51: iload_2
+      52: invokevirtual #488                // Method com/sulkan/shaders/graph/GraphRenderer.scenePipeline:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Z)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;
+      55: astore_3
+      56: aload_3
+      57: invokestatic  #491                // Method com/sulkan/shaders/graph/ScenePrograms.isReplacement:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)Z
+      60: ifeq          92
+      63: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      66: invokevirtual #497                // Method com/sulkan/shaders/graph/GraphRenderer.shadowQuality:()I
+      69: ifle          92
+      72: invokestatic  #501                // Method com/sulkan/shaders/render/shadow/DirectionalShadowRenderer.get:()Lcom/sulkan/shaders/render/shadow/DirectionalShadowRenderer;
+      75: invokevirtual #505                // Method com/sulkan/shaders/render/shadow/DirectionalShadowRenderer.resourcesReady:()Z
+      78: ifne          92
+      81: new           #508                // class java/lang/IllegalStateException
+      84: dup
+      85: ldc_w         #510                // String Shadow producer did not run before native terrain
+      88: invokespecial #512                // Method java/lang/IllegalStateException."<init>":(Ljava/lang/String;)V
+      91: athrow
+      92: aload_3
+      93: areturn
+      94: astore_3
+      95: aload_3
+      96: putstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      99: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+     102: aload_0
+     103: iload_2
+     104: invokevirtual #484                // Method com/sulkan/shaders/graph/GraphRenderer.sceneFallback:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Z)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;
+     107: areturn
+     108: aload_0
+     109: areturn
+    Exception table:
+       from    to  target type
+          47    93    94   Class java/lang/Exception
+
+  private static void pause(java.lang.Exception);
+    Code:
+       0: aload_0
+       1: invokevirtual #513                // Method java/lang/Exception.getMessage:()Ljava/lang/String;
+       4: invokedynamic #516,  0            // InvokeDynamic #7:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+       9: putstatic     #372                // Field failure:Ljava/lang/String;
+      12: invokestatic  #517                // Method com/mojang/logging/LogUtils.getLogger:()Lorg/slf4j/Logger;
+      15: getstatic     #372                // Field failure:Ljava/lang/String;
+      18: aload_0
+      19: invokeinterface #523,  3          // InterfaceMethod org/slf4j/Logger.error:(Ljava/lang/String;Ljava/lang/Throwable;)V
+      24: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      27: astore_1
+      28: aconst_null
+      29: putstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      32: aconst_null
+      33: putstatic     #368                // Field activeId:Ljava/lang/String;
+      36: aload_1
+      37: ifnull        53
+      40: aload_1
+      41: invokevirtual #375                // Method com/sulkan/shaders/graph/GraphRenderer.materials:()Lcom/sulkan/shaders/graph/MaterialTable;
+      44: invokevirtual #379                // Method com/sulkan/shaders/graph/MaterialTable.enabled:()Z
+      47: ifeq          53
+      50: invokestatic  #382                // Method rebuildGeometry:()V
+      53: aload_1
+      54: ifnull        71
+      57: aload_1
+      58: dup
+      59: invokestatic  #385                // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+      62: pop
+      63: invokedynamic #391,  0            // InvokeDynamic #6:run:(Lcom/sulkan/shaders/graph/GraphRenderer;)Ljava/lang/Runnable;
+      68: invokestatic  #395                // Method com/mojang/blaze3d/systems/RenderSystem.queueFencedTask:(Ljava/lang/Runnable;)V
+      71: return
+
+  public static void bindSceneUniforms(com.mojang.renderpearl.api.commands.RenderPass, com.mojang.renderpearl.api.pipeline.RenderPipeline);
+    Code:
+       0: getstatic     #1                  // Field sceneScope:Z
+       3: ifeq          20
+       6: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       9: ifnull        20
+      12: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      15: aload_0
+      16: aload_1
+      17: invokevirtual #528                // Method com/sulkan/shaders/graph/GraphRenderer.bindSceneUniforms:(Lcom/mojang/renderpearl/api/commands/RenderPass;Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)V
+      20: return
+
+  public static com.mojang.renderpearl.api.textures.GpuTextureView weatherView();
+    Code:
+       0: getstatic     #1                  // Field sceneScope:Z
+       3: ifeq          39
+       6: getstatic     #448                // Field camera:Lnet/minecraft/client/renderer/state/level/CameraRenderState;
+       9: ifnull        39
+      12: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      15: ifnull        39
+      18: getstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      21: ifnonnull     39
+      24: invokestatic  #420                // Method com/sulkan/shaders/runtime/ShaderRuntime.resourceReloading:()Z
+      27: ifne          39
+      30: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      33: invokevirtual #532                // Method com/sulkan/shaders/graph/GraphRenderer.weatherView:()Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+      36: goto          40
+      39: aconst_null
+      40: areturn
+
+  public static void captureTerrain();
+    Code:
+       0: getstatic     #1                  // Field sceneScope:Z
+       3: ifeq          46
+       6: getstatic     #448                // Field camera:Lnet/minecraft/client/renderer/state/level/CameraRenderState;
+       9: ifnull        46
+      12: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      15: ifnull        46
+      18: getstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      21: ifnonnull     46
+      24: invokestatic  #420                // Method com/sulkan/shaders/runtime/ShaderRuntime.resourceReloading:()Z
+      27: ifne          46
+      30: invokedynamic #536,  0            // InvokeDynamic #8:run:()Ljava/lang/Runnable;
+      35: invokestatic  #539                // Method com/sulkan/shaders/graph/SceneRenderPass.outside:(Ljava/lang/Runnable;)V
+      38: goto          46
+      41: astore_0
+      42: aload_0
+      43: putstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      46: return
+    Exception table:
+       from    to  target type
+          30    38    41   Class java/lang/Exception
+
+  public static void captureTranslucentDepth();
+    Code:
+       0: getstatic     #1                  // Field sceneScope:Z
+       3: ifeq          61
+       6: getstatic     #448                // Field camera:Lnet/minecraft/client/renderer/state/level/CameraRenderState;
+       9: ifnull        61
+      12: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      15: ifnull        61
+      18: getstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      21: ifnonnull     61
+      24: invokestatic  #420                // Method com/sulkan/shaders/runtime/ShaderRuntime.resourceReloading:()Z
+      27: ifne          61
+      30: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+      33: getfield      #175                // Field net/minecraft/client/Minecraft.gameRenderer:Lnet/minecraft/client/renderer/GameRenderer;
+      36: invokevirtual #179                // Method net/minecraft/client/renderer/GameRenderer.mainRenderTarget:()Lcom/mojang/blaze3d/pipeline/RenderTarget;
+      39: astore_0
+      40: aload_0
+      41: ifnull        61
+      44: aload_0
+      45: invokedynamic #544,  0            // InvokeDynamic #9:run:(Lcom/mojang/blaze3d/pipeline/RenderTarget;)Ljava/lang/Runnable;
+      50: invokestatic  #539                // Method com/sulkan/shaders/graph/SceneRenderPass.outside:(Ljava/lang/Runnable;)V
+      53: goto          61
+      56: astore_1
+      57: aload_1
+      58: putstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      61: return
+    Exception table:
+       from    to  target type
+          44    53    56   Class java/lang/Exception
+
+  public static long terrainCaptures();
+    Code:
+       0: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       3: ifnonnull     10
+       6: lconst_0
+       7: goto          16
+      10: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      13: invokevirtual #547                // Method com/sulkan/shaders/graph/GraphRenderer.terrainCaptures:()J
+      16: lreturn
+
+  public static void captureWorldDepth();
+    Code:
+       0: getstatic     #1                  // Field sceneScope:Z
+       3: ifeq          53
+       6: getstatic     #448                // Field camera:Lnet/minecraft/client/renderer/state/level/CameraRenderState;
+       9: ifnull        53
+      12: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      15: ifnull        53
+      18: getstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      21: ifnonnull     53
+      24: invokestatic  #420                // Method com/sulkan/shaders/runtime/ShaderRuntime.resourceReloading:()Z
+      27: ifne          53
+      30: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      33: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+      36: getfield      #175                // Field net/minecraft/client/Minecraft.gameRenderer:Lnet/minecraft/client/renderer/GameRenderer;
+      39: invokevirtual #179                // Method net/minecraft/client/renderer/GameRenderer.mainRenderTarget:()Lcom/mojang/blaze3d/pipeline/RenderTarget;
+      42: invokevirtual #551                // Method com/sulkan/shaders/graph/GraphRenderer.captureWorldDepth:(Lcom/mojang/blaze3d/pipeline/RenderTarget;)V
+      45: goto          53
+      48: astore_0
+      49: aload_0
+      50: putstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      53: return
+    Exception table:
+       from    to  target type
+          30    45    48   Class java/lang/Exception
+
+  public static void failScene(java.lang.Exception);
+    Code:
+       0: aload_0
+       1: putstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+       4: return
+
+  public static java.lang.String failure();
+    Code:
+       0: getstatic     #372                // Field failure:Ljava/lang/String;
+       3: areturn
+
+  public static long renderedFrames();
+    Code:
+       0: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       3: ifnonnull     10
+       6: lconst_0
+       7: goto          16
+      10: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      13: invokevirtual #555                // Method com/sulkan/shaders/graph/GraphRenderer.renderedFrames:()J
+      16: lreturn
+
+  public static long sceneReplacementCount();
+    Code:
+       0: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       3: ifnonnull     10
+       6: lconst_0
+       7: goto          16
+      10: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      13: invokevirtual #558                // Method com/sulkan/shaders/graph/GraphRenderer.sceneReplacementCount:()J
+      16: lreturn
+
+  public static boolean replacesEnvironment(boolean);
+    Code:
+       0: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+       3: astore_1
+       4: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       7: ifnull        80
+      10: invokestatic  #561                // Method shadowFrameReady:()Z
+      13: ifeq          80
+      16: invokestatic  #420                // Method com/sulkan/shaders/runtime/ShaderRuntime.resourceReloading:()Z
+      19: ifne          80
+      22: aload_1
+      23: getfield      #406                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+      26: ifnull        80
+      29: aload_1
+      30: getfield      #406                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+      33: invokevirtual #564                // Method net/minecraft/client/multiplayer/ClientLevel.dimension:()Lnet/minecraft/resources/ResourceKey;
+      36: getstatic     #570                // Field net/minecraft/world/level/Level.OVERWORLD:Lnet/minecraft/resources/ResourceKey;
+      39: invokevirtual #576                // Method java/lang/Object.equals:(Ljava/lang/Object;)Z
+      42: ifeq          80
+      45: iload_0
+      46: ifeq          64
+      49: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      52: invokevirtual #577                // Method com/sulkan/shaders/graph/GraphRenderer.environment:()Lcom/sulkan/shaders/graph/PackGraph$Environment;
+      55: invokevirtual #580                // Method com/sulkan/shaders/graph/PackGraph$Environment.clouds:()Z
+      58: ifeq          80
+      61: goto          76
+      64: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      67: invokevirtual #577                // Method com/sulkan/shaders/graph/GraphRenderer.environment:()Lcom/sulkan/shaders/graph/PackGraph$Environment;
+      70: invokevirtual #585                // Method com/sulkan/shaders/graph/PackGraph$Environment.sky:()Z
+      73: ifeq          80
+      76: iconst_1
+      77: goto          81
+      80: iconst_0
+      81: ireturn
+
+  public static int shadowQuality();
+    Code:
+       0: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       3: ifnonnull     10
+       6: iconst_0
+       7: goto          16
+      10: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      13: invokevirtual #497                // Method com/sulkan/shaders/graph/GraphRenderer.shadowQuality:()I
+      16: ireturn
+
+  public static int shadowDistance();
+    Code:
+       0: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       3: ifnonnull     12
+       6: sipush        128
+       9: goto          18
+      12: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      15: invokevirtual #588                // Method com/sulkan/shaders/graph/GraphRenderer.shadowDistance:()I
+      18: ireturn
+
+  public static boolean animatedShadowCasters();
+    Code:
+       0: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       3: ifnull        19
+       6: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       9: invokevirtual #591                // Method com/sulkan/shaders/graph/GraphRenderer.animatedShadowCasters:()Z
+      12: ifeq          19
+      15: iconst_1
+      16: goto          20
+      19: iconst_0
+      20: ireturn
+
+  public static boolean shadowFrameReady();
+    Code:
+       0: getstatic     #1                  // Field sceneScope:Z
+       3: ifeq          28
+       6: getstatic     #448                // Field camera:Lnet/minecraft/client/renderer/state/level/CameraRenderState;
+       9: ifnull        28
+      12: getstatic     #439                // Field geometryRebuildPending:Z
+      15: ifne          28
+      18: getstatic     #364                // Field sceneFailure:Ljava/lang/Exception;
+      21: ifnonnull     28
+      24: iconst_1
+      25: goto          29
+      28: iconst_0
+      29: ireturn
+
+  public static com.sulkan.shaders.graph.MaterialTable materials();
+    Code:
+       0: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       3: ifnonnull     10
+       6: aconst_null
+       7: goto          16
+      10: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      13: invokevirtual #375                // Method com/sulkan/shaders/graph/GraphRenderer.materials:()Lcom/sulkan/shaders/graph/MaterialTable;
+      16: areturn
+
+  private static void rebuildGeometry();
+    Code:
+       0: invokestatic  #594                // Method requestGeometryRebuild:()V
+       3: return
+
+  public static void requestGeometryRebuild();
+    Code:
+       0: iconst_1
+       1: putstatic     #439                // Field geometryRebuildPending:Z
+       4: return
+
+  public static void flushGeometryRebuild();
+    Code:
+       0: getstatic     #439                // Field geometryRebuildPending:Z
+       3: ifeq          66
+       6: invokestatic  #420                // Method com/sulkan/shaders/runtime/ShaderRuntime.resourceReloading:()Z
+       9: ifne          66
+      12: iconst_0
+      13: putstatic     #439                // Field geometryRebuildPending:Z
+      16: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+      19: astore_0
+      20: aload_0
+      21: getfield      #406                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+      24: ifnull        66
+      27: invokestatic  #597                // Method com/mojang/blaze3d/systems/RenderSystem.getDevice:()Lcom/mojang/renderpearl/api/device/GpuDevice;
+      30: invokeinterface #601,  1          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.createCommandEncoder:()Lcom/mojang/renderpearl/api/commands/CommandEncoder;
+      35: invokeinterface #607,  1          // InterfaceMethod com/mojang/renderpearl/api/commands/CommandEncoder.submit:()V
+      40: aload_0
+      41: getfield      #612                // Field net/minecraft/client/Minecraft.levelRenderer:Lnet/minecraft/client/renderer/LevelRenderer;
+      44: aload_0
+      45: getfield      #406                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+      48: aload_0
+      49: getfield      #616                // Field net/minecraft/client/Minecraft.options:Lnet/minecraft/client/Options;
+      52: aload_0
+      53: getfield      #175                // Field net/minecraft/client/Minecraft.gameRenderer:Lnet/minecraft/client/renderer/GameRenderer;
+      56: invokevirtual #619                // Method net/minecraft/client/renderer/GameRenderer.mainCamera:()Lnet/minecraft/client/Camera;
+      59: aload_0
+      60: invokevirtual #623                // Method net/minecraft/client/Minecraft.getBlockColors:()Lnet/minecraft/client/color/block/BlockColors;
+      63: invokevirtual #627                // Method net/minecraft/client/renderer/LevelRenderer.invalidateCompiledGeometry:(Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/Options;Lnet/minecraft/client/Camera;Lnet/minecraft/client/color/block/BlockColors;)V
+      66: return
+
+  public static void close();
+    Code:
+       0: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       3: ifnull        16
+       6: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       9: invokevirtual #359                // Method com/sulkan/shaders/graph/GraphRenderer.close:()V
+      12: aconst_null
+      13: putstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+      16: aconst_null
+      17: putstatic     #368                // Field activeId:Ljava/lang/String;
+      20: return
+
+  private static void lambda$captureTranslucentDepth$0(com.mojang.blaze3d.pipeline.RenderTarget);
+    Code:
+       0: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       3: aload_0
+       4: invokevirtual #551                // Method com/sulkan/shaders/graph/GraphRenderer.captureWorldDepth:(Lcom/mojang/blaze3d/pipeline/RenderTarget;)V
+       7: return
+
+  private static void lambda$captureTerrain$0();
+    Code:
+       0: getstatic     #7                  // Field active:Lcom/sulkan/shaders/graph/GraphRenderer;
+       3: invokestatic  #169                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+       6: getfield      #175                // Field net/minecraft/client/Minecraft.gameRenderer:Lnet/minecraft/client/renderer/GameRenderer;
+       9: invokevirtual #179                // Method net/minecraft/client/renderer/GameRenderer.mainRenderTarget:()Lcom/mojang/blaze3d/pipeline/RenderTarget;
+      12: invokevirtual #633                // Method com/sulkan/shaders/graph/GraphRenderer.captureTerrain:(Lcom/mojang/blaze3d/pipeline/RenderTarget;)V
+      15: return
+
+  private static void lambda$loadOptions$0(com.sulkan.shaders.graph.PackGraph, java.util.Map, java.util.Map$Entry);
+    Code:
+       0: aload_0
+       1: invokevirtual #636                // Method com/sulkan/shaders/graph/PackGraph.optionDefinitions:()Ljava/util/Map;
+       4: aload_2
+       5: invokeinterface #639,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      10: invokeinterface #645,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      15: checkcast     #649                // class com/sulkan/shaders/graph/PackGraph$Option
+      18: astore_3
+      19: aload_2
+      20: invokeinterface #651,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      25: checkcast     #256                // class com/google/gson/JsonElement
+      28: invokevirtual #654                // Method com/google/gson/JsonElement.getAsDouble:()D
+      31: dstore        4
+      33: aload_2
+      34: invokeinterface #639,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      39: checkcast     #92                 // class java/lang/String
+      42: ldc_w         #658                // String COLOR_GRADE
+      45: invokevirtual #91                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      48: ifeq          102
+      51: dload         4
+      53: ldc2_w        #660                // double 0.75d
+      56: dcmpl
+      57: ifne          102
+      60: aload_3
+      61: ifnull        102
+      64: aload_3
+      65: invokevirtual #662                // Method com/sulkan/shaders/graph/PackGraph$Option.values:()Ljava/util/List;
+      68: dconst_0
+      69: invokestatic  #666                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+      72: ldc2_w        #671                // double 0.25d
+      75: invokestatic  #666                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+      78: ldc2_w        #673                // double 0.5d
+      81: invokestatic  #666                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+      84: dconst_1
+      85: invokestatic  #666                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+      88: invokestatic  #675                // InterfaceMethod java/util/List.of:(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/List;
+      91: invokeinterface #680,  2          // InterfaceMethod java/util/List.equals:(Ljava/lang/Object;)Z
+      96: ifeq          102
+      99: dconst_1
+     100: dstore        4
+     102: aload_3
+     103: ifnull        144
+     106: aload_3
+     107: invokevirtual #662                // Method com/sulkan/shaders/graph/PackGraph$Option.values:()Ljava/util/List;
+     110: dload         4
+     112: invokestatic  #666                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+     115: invokeinterface #681,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+     120: ifeq          144
+     123: aload_1
+     124: aload_2
+     125: invokeinterface #639,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     130: checkcast     #92                 // class java/lang/String
+     133: dload         4
+     135: invokestatic  #666                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+     138: invokeinterface #683,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     143: pop
+     144: return
+
+  private static boolean lambda$isNative$1(java.util.zip.ZipEntry);
+    Code:
+       0: aload_0
+       1: invokevirtual #687                // Method java/util/zip/ZipEntry.isDirectory:()Z
+       4: ifne          36
+       7: aload_0
+       8: invokevirtual #691                // Method java/util/zip/ZipEntry.getName:()Ljava/lang/String;
+      11: ldc           #153                // String sulkan.json
+      13: invokevirtual #91                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      16: ifne          32
+      19: aload_0
+      20: invokevirtual #691                // Method java/util/zip/ZipEntry.getName:()Ljava/lang/String;
+      23: ldc_w         #694                // String [^/]+/sulkan\\.json
+      26: invokevirtual #696                // Method java/lang/String.matches:(Ljava/lang/String;)Z
+      29: ifeq          36
+      32: iconst_1
+      33: goto          37
+      36: iconst_0
+      37: ireturn
+
+  private static boolean lambda$isNative$0(java.nio.file.Path);
+    Code:
+       0: aload_0
+       1: invokeinterface #300,  1          // InterfaceMethod java/nio/file/Path.getFileName:()Ljava/nio/file/Path;
+       6: invokeinterface #699,  1          // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      11: ldc           #153                // String sulkan.json
+      13: invokevirtual #91                 // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      16: ifeq          34
+      19: aload_0
+      20: iconst_0
+      21: anewarray     #31                 // class java/nio/file/LinkOption
+      24: invokestatic  #242                // Method java/nio/file/Files.isRegularFile:(Ljava/nio/file/Path;[Ljava/nio/file/LinkOption;)Z
+      27: ifeq          34
+      30: iconst_1
+      31: goto          35
+      34: iconst_0
+      35: ireturn
+}

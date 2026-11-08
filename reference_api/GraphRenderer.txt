@@ -1,0 +1,2548 @@
+Compiled from "GraphRenderer.java"
+public final class com.sulkan.shaders.graph.GraphRenderer implements java.lang.AutoCloseable {
+  private static long generation;
+
+  private static final java.lang.String VERTEX;
+
+  private static final java.lang.String PRESENT;
+
+  private final com.sulkan.shaders.graph.PackGraph graph;
+
+  private final com.sulkan.shaders.graph.MaterialTable materials;
+
+  private final java.util.List<com.sulkan.shaders.graph.PackGraph$Pass> schedule;
+
+  private final java.util.Map<com.sulkan.shaders.graph.PackGraph$Pass, com.mojang.renderpearl.api.pipeline.RenderPipeline> pipelines;
+
+  private final java.util.Map<com.sulkan.shaders.graph.PackGraph$Pass, com.sulkan.shaders.graph.ComputeProgram> computePipelines;
+
+  private final java.util.List<com.mojang.renderpearl.api.pipeline.RenderPipeline> ownedPipelines;
+
+  private final java.util.Map<java.lang.String, com.sulkan.shaders.graph.GraphRenderer$Image[]> images;
+
+  private final com.sulkan.shaders.graph.GraphFrame frame;
+
+  private final com.mojang.renderpearl.api.textures.GpuSampler sampler;
+
+  private com.mojang.renderpearl.api.textures.GpuSampler linearSampler;
+
+  private final com.mojang.renderpearl.api.pipeline.RenderPipeline present;
+
+  private int width;
+
+  private int height;
+
+  private int parity;
+
+  private boolean closed;
+
+  private long renderedFrames;
+
+  private com.sulkan.shaders.graph.ScenePrograms scenePrograms;
+
+  private com.mojang.renderpearl.api.buffers.GpuBufferSlice windUniforms;
+
+  private final java.nio.ByteBuffer windBytes;
+
+  private static final long WIND_START;
+
+  private com.mojang.renderpearl.api.buffers.GpuBufferSlice sceneUniforms;
+
+  private final java.util.Map<java.lang.String, com.sulkan.shaders.graph.GraphRenderer$Image> customTextures;
+
+  private final java.util.Map<java.lang.String, com.mojang.renderpearl.api.textures.GpuSampler> textureSamplers;
+
+  private final java.util.Map<java.lang.String, java.lang.Integer> mipFilters;
+
+  private long textureBytes;
+
+  private com.sulkan.shaders.graph.GraphBuffers buffers;
+
+  private com.sulkan.shaders.graph.GraphSceneCapture sceneCapture;
+
+  private final java.util.Set<com.mojang.renderpearl.api.pipeline.RenderPipeline> shadowPostPipelines;
+
+  public com.sulkan.shaders.graph.MaterialTable materials();
+    Code:
+       0: aload_0
+       1: getfield      #1                  // Field materials:Lcom/sulkan/shaders/graph/MaterialTable;
+       4: areturn
+
+  public long renderedFrames();
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field renderedFrames:J
+       4: lreturn
+
+  public long sceneReplacementCount();
+    Code:
+       0: aload_0
+       1: getfield      #11                 // Field scenePrograms:Lcom/sulkan/shaders/graph/ScenePrograms;
+       4: invokevirtual #15                 // Method com/sulkan/shaders/graph/ScenePrograms.replacementCount:()J
+       7: lreturn
+
+  public void invalidateHistory();
+    Code:
+       0: aload_0
+       1: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+       4: invokevirtual #25                 // Method com/sulkan/shaders/graph/GraphFrame.reset:()V
+       7: return
+
+  public long terrainCaptures();
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+       4: invokevirtual #35                 // Method com/sulkan/shaders/graph/GraphSceneCapture.captures:()J
+       7: lreturn
+
+  public void captureTerrain(com.mojang.blaze3d.pipeline.RenderTarget);
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+       4: aload_1
+       5: invokevirtual #40                 // Method com/sulkan/shaders/graph/GraphSceneCapture.capture:(Lcom/mojang/blaze3d/pipeline/RenderTarget;)V
+       8: return
+
+  public void captureWorldDepth(com.mojang.blaze3d.pipeline.RenderTarget);
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+       4: aload_1
+       5: invokevirtual #44                 // Method com/sulkan/shaders/graph/GraphSceneCapture.captureWorldDepth:(Lcom/mojang/blaze3d/pipeline/RenderTarget;)V
+       8: return
+
+  public com.sulkan.shaders.graph.GraphRenderer(com.sulkan.shaders.graph.PackGraph, com.sulkan.shaders.graph.PackFiles, com.mojang.blaze3d.pipeline.RenderTarget) throws java.io.IOException;
+    Code:
+       0: aload_0
+       1: invokespecial #47                 // Method java/lang/Object."<init>":()V
+       4: aload_0
+       5: new           #52                 // class java/util/LinkedHashMap
+       8: dup
+       9: invokespecial #54                 // Method java/util/LinkedHashMap."<init>":()V
+      12: putfield      #55                 // Field pipelines:Ljava/util/Map;
+      15: aload_0
+      16: new           #52                 // class java/util/LinkedHashMap
+      19: dup
+      20: invokespecial #54                 // Method java/util/LinkedHashMap."<init>":()V
+      23: putfield      #59                 // Field computePipelines:Ljava/util/Map;
+      26: aload_0
+      27: new           #62                 // class java/util/ArrayList
+      30: dup
+      31: invokespecial #64                 // Method java/util/ArrayList."<init>":()V
+      34: putfield      #65                 // Field ownedPipelines:Ljava/util/List;
+      37: aload_0
+      38: new           #52                 // class java/util/LinkedHashMap
+      41: dup
+      42: invokespecial #54                 // Method java/util/LinkedHashMap."<init>":()V
+      45: putfield      #69                 // Field images:Ljava/util/Map;
+      48: aload_0
+      49: new           #26                 // class com/sulkan/shaders/graph/GraphFrame
+      52: dup
+      53: invokespecial #72                 // Method com/sulkan/shaders/graph/GraphFrame."<init>":()V
+      56: putfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+      59: aload_0
+      60: bipush        32
+      62: invokestatic  #73                 // Method java/nio/ByteBuffer.allocateDirect:(I)Ljava/nio/ByteBuffer;
+      65: invokestatic  #79                 // Method java/nio/ByteOrder.nativeOrder:()Ljava/nio/ByteOrder;
+      68: invokevirtual #85                 // Method java/nio/ByteBuffer.order:(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;
+      71: putfield      #89                 // Field windBytes:Ljava/nio/ByteBuffer;
+      74: aload_0
+      75: new           #52                 // class java/util/LinkedHashMap
+      78: dup
+      79: invokespecial #54                 // Method java/util/LinkedHashMap."<init>":()V
+      82: putfield      #93                 // Field customTextures:Ljava/util/Map;
+      85: aload_0
+      86: new           #52                 // class java/util/LinkedHashMap
+      89: dup
+      90: invokespecial #54                 // Method java/util/LinkedHashMap."<init>":()V
+      93: putfield      #96                 // Field textureSamplers:Ljava/util/Map;
+      96: aload_0
+      97: new           #99                 // class java/util/HashMap
+     100: dup
+     101: invokespecial #101                // Method java/util/HashMap."<init>":()V
+     104: putfield      #102                // Field mipFilters:Ljava/util/Map;
+     107: aload_0
+     108: new           #105                // class java/util/HashSet
+     111: dup
+     112: invokespecial #107                // Method java/util/HashSet."<init>":()V
+     115: putfield      #108                // Field shadowPostPipelines:Ljava/util/Set;
+     118: aload_0
+     119: aload_1
+     120: putfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+     123: aload_0
+     124: aload_1
+     125: invokevirtual #116                // Method com/sulkan/shaders/graph/PackGraph.schedule:()Ljava/util/List;
+     128: putfield      #122                // Field schedule:Ljava/util/List;
+     131: aload_0
+     132: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+     135: aload_1
+     136: invokevirtual #124                // Method com/sulkan/shaders/graph/PackGraph.options:()Ljava/util/Map;
+     139: ldc           #128                // String HELD_LIGHTING
+     141: dconst_0
+     142: invokestatic  #130                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+     145: invokeinterface #136,  3          // InterfaceMethod java/util/Map.getOrDefault:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     150: checkcast     #131                // class java/lang/Double
+     153: invokevirtual #142                // Method java/lang/Double.doubleValue:()D
+     156: dconst_0
+     157: dcmpl
+     158: ifle          165
+     161: iconst_1
+     162: goto          166
+     165: iconst_0
+     166: putfield      #146                // Field com/sulkan/shaders/graph/GraphFrame.heldLighting:Z
+     169: aload_0
+     170: aload_1
+     171: invokevirtual #150                // Method com/sulkan/shaders/graph/PackGraph.materials:()Ljava/util/Map;
+     174: invokestatic  #152                // Method com/sulkan/shaders/graph/MaterialTable.compile:(Ljava/util/Map;)Lcom/sulkan/shaders/graph/MaterialTable;
+     177: putfield      #1                  // Field materials:Lcom/sulkan/shaders/graph/MaterialTable;
+     180: aload_0
+     181: getfield      #1                  // Field materials:Lcom/sulkan/shaders/graph/MaterialTable;
+     184: aload_1
+     185: invokevirtual #124                // Method com/sulkan/shaders/graph/PackGraph.options:()Ljava/util/Map;
+     188: ldc           #158                // String VEGETATION_WIND
+     190: invokeinterface #160,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+     195: putfield      #164                // Field com/sulkan/shaders/graph/MaterialTable.vegetationWind:Z
+     198: invokestatic  #167                // Method com/mojang/blaze3d/systems/RenderSystem.getDevice:()Lcom/mojang/renderpearl/api/device/GpuDevice;
+     201: astore        4
+     203: aload_0
+     204: aload         4
+     206: getstatic     #173                // Field com/mojang/renderpearl/api/textures/AddressMode.CLAMP_TO_EDGE:Lcom/mojang/renderpearl/api/textures/AddressMode;
+     209: getstatic     #173                // Field com/mojang/renderpearl/api/textures/AddressMode.CLAMP_TO_EDGE:Lcom/mojang/renderpearl/api/textures/AddressMode;
+     212: getstatic     #179                // Field com/mojang/renderpearl/api/textures/FilterMode.NEAREST:Lcom/mojang/renderpearl/api/textures/FilterMode;
+     215: getstatic     #179                // Field com/mojang/renderpearl/api/textures/FilterMode.NEAREST:Lcom/mojang/renderpearl/api/textures/FilterMode;
+     218: iconst_1
+     219: invokestatic  #185                // Method java/util/OptionalDouble.empty:()Ljava/util/OptionalDouble;
+     222: invokeinterface #191,  7          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.createSampler:(Lcom/mojang/renderpearl/api/textures/AddressMode;Lcom/mojang/renderpearl/api/textures/AddressMode;Lcom/mojang/renderpearl/api/textures/FilterMode;Lcom/mojang/renderpearl/api/textures/FilterMode;ILjava/util/OptionalDouble;)Lcom/mojang/renderpearl/api/textures/GpuSampler;
+     227: putfield      #197                // Field sampler:Lcom/mojang/renderpearl/api/textures/GpuSampler;
+     230: aload_0
+     231: aload         4
+     233: getstatic     #173                // Field com/mojang/renderpearl/api/textures/AddressMode.CLAMP_TO_EDGE:Lcom/mojang/renderpearl/api/textures/AddressMode;
+     236: getstatic     #173                // Field com/mojang/renderpearl/api/textures/AddressMode.CLAMP_TO_EDGE:Lcom/mojang/renderpearl/api/textures/AddressMode;
+     239: getstatic     #201                // Field com/mojang/renderpearl/api/textures/FilterMode.LINEAR:Lcom/mojang/renderpearl/api/textures/FilterMode;
+     242: getstatic     #201                // Field com/mojang/renderpearl/api/textures/FilterMode.LINEAR:Lcom/mojang/renderpearl/api/textures/FilterMode;
+     245: iconst_1
+     246: invokestatic  #185                // Method java/util/OptionalDouble.empty:()Ljava/util/OptionalDouble;
+     249: invokeinterface #191,  7          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.createSampler:(Lcom/mojang/renderpearl/api/textures/AddressMode;Lcom/mojang/renderpearl/api/textures/AddressMode;Lcom/mojang/renderpearl/api/textures/FilterMode;Lcom/mojang/renderpearl/api/textures/FilterMode;ILjava/util/OptionalDouble;)Lcom/mojang/renderpearl/api/textures/GpuSampler;
+     254: putfield      #204                // Field linearSampler:Lcom/mojang/renderpearl/api/textures/GpuSampler;
+     257: aload_1
+     258: invokevirtual #207                // Method com/sulkan/shaders/graph/PackGraph.sceneTargets:()Ljava/util/List;
+     261: invokeinterface #210,  1          // InterfaceMethod java/util/List.size:()I
+     266: iconst_1
+     267: iadd
+     268: aload         4
+     270: invokeinterface #216,  1          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.getDeviceInfo:()Lcom/mojang/renderpearl/api/device/DeviceInfo;
+     275: invokevirtual #220                // Method com/mojang/renderpearl/api/device/DeviceInfo.limits:()Lcom/mojang/renderpearl/api/device/DeviceLimits;
+     278: invokevirtual #226                // Method com/mojang/renderpearl/api/device/DeviceLimits.maxColorAttachments:()I
+     281: if_icmple     294
+     284: new           #231                // class java/io/IOException
+     287: dup
+     288: ldc           #233                // String GPU cannot provide the pack\'s scene attachments
+     290: invokespecial #235                // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     293: athrow
+     294: aload_0
+     295: new           #36                 // class com/sulkan/shaders/graph/GraphSceneCapture
+     298: dup
+     299: aload_1
+     300: aload_3
+     301: invokespecial #238                // Method com/sulkan/shaders/graph/GraphSceneCapture."<init>":(Lcom/sulkan/shaders/graph/PackGraph;Lcom/mojang/blaze3d/pipeline/RenderTarget;)V
+     304: putfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+     307: aload_0
+     308: new           #16                 // class com/sulkan/shaders/graph/ScenePrograms
+     311: dup
+     312: aload_1
+     313: aload_2
+     314: invokespecial #241                // Method com/sulkan/shaders/graph/ScenePrograms."<init>":(Lcom/sulkan/shaders/graph/PackGraph;Lcom/sulkan/shaders/graph/PackFiles;)V
+     317: putfield      #11                 // Field scenePrograms:Lcom/sulkan/shaders/graph/ScenePrograms;
+     320: aload_0
+     321: getfield      #122                // Field schedule:Ljava/util/List;
+     324: invokeinterface #244,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     329: astore        5
+     331: aload         5
+     333: invokeinterface #248,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     338: ifeq          519
+     341: aload         5
+     343: invokeinterface #254,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     348: checkcast     #258                // class com/sulkan/shaders/graph/PackGraph$Pass
+     351: astore        6
+     353: aload         6
+     355: invokevirtual #260                // Method com/sulkan/shaders/graph/PackGraph$Pass.isCompute:()Z
+     358: ifeq          387
+     361: aload_0
+     362: getfield      #59                 // Field computePipelines:Ljava/util/Map;
+     365: aload         6
+     367: new           #263                // class com/sulkan/shaders/graph/ComputeProgram
+     370: dup
+     371: aload_1
+     372: aload         6
+     374: aload_2
+     375: invokespecial #265                // Method com/sulkan/shaders/graph/ComputeProgram."<init>":(Lcom/sulkan/shaders/graph/PackGraph;Lcom/sulkan/shaders/graph/PackGraph$Pass;Lcom/sulkan/shaders/graph/PackFiles;)V
+     378: invokeinterface #268,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     383: pop
+     384: goto          516
+     387: aload         6
+     389: invokevirtual #271                // Method com/sulkan/shaders/graph/PackGraph$Pass.writes:()Ljava/util/List;
+     392: invokeinterface #210,  1          // InterfaceMethod java/util/List.size:()I
+     397: aload         4
+     399: invokeinterface #216,  1          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.getDeviceInfo:()Lcom/mojang/renderpearl/api/device/DeviceInfo;
+     404: invokevirtual #220                // Method com/mojang/renderpearl/api/device/DeviceInfo.limits:()Lcom/mojang/renderpearl/api/device/DeviceLimits;
+     407: invokevirtual #226                // Method com/mojang/renderpearl/api/device/DeviceLimits.maxColorAttachments:()I
+     410: if_icmple     441
+     413: new           #231                // class java/io/IOException
+     416: dup
+     417: aload         6
+     419: invokevirtual #271                // Method com/sulkan/shaders/graph/PackGraph$Pass.writes:()Ljava/util/List;
+     422: invokeinterface #210,  1          // InterfaceMethod java/util/List.size:()I
+     427: aload         6
+     429: invokevirtual #274                // Method com/sulkan/shaders/graph/PackGraph$Pass.name:()Ljava/lang/String;
+     432: invokedynamic #278,  0            // InvokeDynamic #0:makeConcatWithConstants:(ILjava/lang/String;)Ljava/lang/String;
+     437: invokespecial #235                // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     440: athrow
+     441: aload         6
+     443: invokevirtual #271                // Method com/sulkan/shaders/graph/PackGraph$Pass.writes:()Ljava/util/List;
+     446: invokeinterface #282,  1          // InterfaceMethod java/util/List.stream:()Ljava/util/stream/Stream;
+     451: aload_1
+     452: invokedynamic #286,  0            // InvokeDynamic #1:apply:(Lcom/sulkan/shaders/graph/PackGraph;)Ljava/util/function/Function;
+     457: invokeinterface #290,  2          // InterfaceMethod java/util/stream/Stream.map:(Ljava/util/function/Function;)Ljava/util/stream/Stream;
+     462: invokeinterface #296,  1          // InterfaceMethod java/util/stream/Stream.toList:()Ljava/util/List;
+     467: astore        7
+     469: aload_0
+     470: getfield      #55                 // Field pipelines:Ljava/util/Map;
+     473: aload         6
+     475: aload_0
+     476: aload         6
+     478: invokevirtual #274                // Method com/sulkan/shaders/graph/PackGraph$Pass.name:()Ljava/lang/String;
+     481: aload_2
+     482: aload         6
+     484: invokevirtual #299                // Method com/sulkan/shaders/graph/PackGraph$Pass.fragment:()Ljava/lang/String;
+     487: aload_1
+     488: invokevirtual #124                // Method com/sulkan/shaders/graph/PackGraph.options:()Ljava/util/Map;
+     491: invokevirtual #302                // Method com/sulkan/shaders/graph/PackFiles.shader:(Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
+     494: aload         6
+     496: invokevirtual #308                // Method com/sulkan/shaders/graph/PackGraph$Pass.reads:()Ljava/util/Map;
+     499: invokeinterface #311,  1          // InterfaceMethod java/util/Map.keySet:()Ljava/util/Set;
+     504: aload         7
+     506: iconst_1
+     507: invokevirtual #315                // Method pipeline:(Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/List;Z)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;
+     510: invokeinterface #268,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     515: pop
+     516: goto          331
+     519: aload_0
+     520: aload_0
+     521: ldc_w         #319                // String present
+     524: ldc_w         #321                // String #version 450\nlayout(location=0) in vec2 texCoord;\nlayout(location=0) out vec4 color;\nuniform sampler2D Source;\nvoid main() { color = texture(Source, texCoord); }\n
+     527: ldc_w         #323                // String Source
+     530: invokestatic  #325                // InterfaceMethod java/util/Set.of:(Ljava/lang/Object;)Ljava/util/Set;
+     533: aload_3
+     534: invokevirtual #331                // Method com/mojang/blaze3d/pipeline/RenderTarget.getColorTexture:()Lcom/mojang/renderpearl/api/textures/GpuTexture;
+     537: invokeinterface #337,  1          // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTexture.getFormat:()Lcom/mojang/renderpearl/api/GpuFormat;
+     542: invokestatic  #343                // InterfaceMethod java/util/List.of:(Ljava/lang/Object;)Ljava/util/List;
+     545: iconst_0
+     546: invokevirtual #315                // Method pipeline:(Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/List;Z)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;
+     549: putfield      #346                // Field present:Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;
+     552: aload_0
+     553: aload_2
+     554: invokevirtual #349                // Method loadTextures:(Lcom/sulkan/shaders/graph/PackFiles;)V
+     557: aload_0
+     558: aload_3
+     559: getfield      #353                // Field com/mojang/blaze3d/pipeline/RenderTarget.width:I
+     562: aload_3
+     563: getfield      #357                // Field com/mojang/blaze3d/pipeline/RenderTarget.height:I
+     566: invokevirtual #360                // Method allocate:(II)V
+     569: aload_0
+     570: new           #364                // class com/sulkan/shaders/graph/GraphBuffers
+     573: dup
+     574: aload_1
+     575: invokespecial #366                // Method com/sulkan/shaders/graph/GraphBuffers."<init>":(Lcom/sulkan/shaders/graph/PackGraph;)V
+     578: putfield      #369                // Field buffers:Lcom/sulkan/shaders/graph/GraphBuffers;
+     581: goto          614
+     584: astore        5
+     586: aload_0
+     587: invokevirtual #375                // Method close:()V
+     590: new           #231                // class java/io/IOException
+     593: dup
+     594: aload_1
+     595: invokevirtual #378                // Method com/sulkan/shaders/graph/PackGraph.name:()Ljava/lang/String;
+     598: aload         5
+     600: invokevirtual #379                // Method java/lang/Exception.getMessage:()Ljava/lang/String;
+     603: invokedynamic #382,  0            // InvokeDynamic #2:makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+     608: aload         5
+     610: invokespecial #385                // Method java/io/IOException."<init>":(Ljava/lang/String;Ljava/lang/Throwable;)V
+     613: athrow
+     614: return
+    Exception table:
+       from    to  target type
+         230   581   584   Class java/lang/Exception
+
+  private com.mojang.renderpearl.api.pipeline.RenderPipeline pipeline(java.lang.String, java.lang.String, java.util.Set<java.lang.String>, java.util.List<com.mojang.renderpearl.api.GpuFormat>, boolean) throws java.io.IOException;
+    Code:
+       0: getstatic     #388                // Field generation:J
+       3: lconst_1
+       4: ladd
+       5: dup2
+       6: putstatic     #388                // Field generation:J
+       9: aload_1
+      10: invokedynamic #391,  0            // InvokeDynamic #3:makeConcatWithConstants:(JLjava/lang/String;)Ljava/lang/String;
+      15: astore        6
+      17: invokestatic  #394                // Method com/mojang/renderpearl/api/pipeline/BindGroupLayout.builder:()Lcom/mojang/renderpearl/api/pipeline/BindGroupLayout$Builder;
+      20: astore        7
+      22: aload_3
+      23: aload         7
+      25: invokedynamic #400,  0            // InvokeDynamic #4:accept:(Lcom/mojang/renderpearl/api/pipeline/BindGroupLayout$Builder;)Ljava/util/function/Consumer;
+      30: invokeinterface #404,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+      35: iload         5
+      37: ifeq          52
+      40: aload         7
+      42: ldc_w         #408                // String SulkanFrame
+      45: getstatic     #410                // Field com/mojang/renderpearl/api/pipeline/UniformType.UNIFORM_BUFFER:Lcom/mojang/renderpearl/api/pipeline/UniformType;
+      48: invokevirtual #416                // Method com/mojang/renderpearl/api/pipeline/BindGroupLayout$Builder.withUniform:(Ljava/lang/String;Lcom/mojang/renderpearl/api/pipeline/UniformType;)Lcom/mojang/renderpearl/api/pipeline/BindGroupLayout$Builder;
+      51: pop
+      52: iload         5
+      54: ifeq          81
+      57: aload_0
+      58: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+      61: invokevirtual #422                // Method com/sulkan/shaders/graph/PackGraph.shadowQuality:()I
+      64: ifle          81
+      67: aload_2
+      68: ldc_w         #425                // String uniform SulkanShadowData
+      71: invokevirtual #427                // Method java/lang/String.contains:(Ljava/lang/CharSequence;)Z
+      74: ifeq          81
+      77: iconst_1
+      78: goto          82
+      81: iconst_0
+      82: istore        8
+      84: iload         8
+      86: ifeq          94
+      89: aload         7
+      91: invokestatic  #433                // Method com/sulkan/shaders/render/shadow/ShadowService.layout:(Lcom/mojang/renderpearl/api/pipeline/BindGroupLayout$Builder;)V
+      94: aload_3
+      95: invokeinterface #439,  1          // InterfaceMethod java/util/Set.size:()I
+     100: iload         8
+     102: ifeq          110
+     105: bipush        6
+     107: goto          111
+     110: iconst_0
+     111: iadd
+     112: istore        9
+     114: invokestatic  #440                // Method com/sulkan/shaders/runtime/GpuCapabilities.current:()Lcom/sulkan/shaders/runtime/GpuCapabilities;
+     117: invokevirtual #446                // Method com/sulkan/shaders/runtime/GpuCapabilities.maxStageSamplers:()I
+     120: istore        10
+     122: iload         9
+     124: iload         10
+     126: if_icmple     147
+     129: new           #231                // class java/io/IOException
+     132: dup
+     133: aload_1
+     134: iload         9
+     136: iload         10
+     138: invokedynamic #449,  0            // InvokeDynamic #5:makeConcatWithConstants:(Ljava/lang/String;II)Ljava/lang/String;
+     143: invokespecial #235                // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     146: athrow
+     147: iconst_1
+     148: anewarray     #452                // class com/mojang/renderpearl/api/pipeline/RenderPipeline$Snippet
+     151: dup
+     152: iconst_0
+     153: getstatic     #454                // Field net/minecraft/client/renderer/RenderPipelines.POST_PROCESSING_SNIPPET:Lcom/mojang/renderpearl/api/pipeline/RenderPipeline$Snippet;
+     156: aastore
+     157: invokestatic  #460                // Method com/mojang/renderpearl/api/pipeline/RenderPipeline.builder:([Lcom/mojang/renderpearl/api/pipeline/RenderPipeline$Snippet;)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline$Builder;
+     160: ldc_w         #465                // String sulkan
+     163: aload         6
+     165: invokestatic  #467                // Method net/minecraft/resources/Identifier.fromNamespaceAndPath:(Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/resources/Identifier;
+     168: invokevirtual #473                // Method com/mojang/renderpearl/api/pipeline/RenderPipeline$Builder.withLocation:(Lnet/minecraft/resources/Identifier;)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline$Builder;
+     171: ldc_w         #465                // String sulkan
+     174: aload         6
+     176: invokedynamic #479,  0            // InvokeDynamic #6:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     181: invokestatic  #467                // Method net/minecraft/resources/Identifier.fromNamespaceAndPath:(Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/resources/Identifier;
+     184: invokevirtual #482                // Method com/mojang/renderpearl/api/pipeline/RenderPipeline$Builder.withVertexShader:(Lnet/minecraft/resources/Identifier;)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline$Builder;
+     187: ldc_w         #465                // String sulkan
+     190: aload         6
+     192: invokedynamic #485,  0            // InvokeDynamic #7:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     197: invokestatic  #467                // Method net/minecraft/resources/Identifier.fromNamespaceAndPath:(Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/resources/Identifier;
+     200: invokevirtual #486                // Method com/mojang/renderpearl/api/pipeline/RenderPipeline$Builder.withFragmentShader:(Lnet/minecraft/resources/Identifier;)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline$Builder;
+     203: aload         7
+     205: invokevirtual #489                // Method com/mojang/renderpearl/api/pipeline/BindGroupLayout$Builder.build:()Lcom/mojang/renderpearl/api/pipeline/BindGroupLayout;
+     208: invokevirtual #493                // Method com/mojang/renderpearl/api/pipeline/RenderPipeline$Builder.withBindGroupLayout:(Lcom/mojang/renderpearl/api/pipeline/BindGroupLayout;)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline$Builder;
+     211: astore        11
+     213: iconst_0
+     214: istore        12
+     216: iload         12
+     218: aload         4
+     220: invokeinterface #210,  1          // InterfaceMethod java/util/List.size:()I
+     225: if_icmpge     266
+     228: aload         11
+     230: iload         12
+     232: new           #497                // class com/mojang/renderpearl/api/pipeline/ColorTargetState
+     235: dup
+     236: invokestatic  #499                // Method java/util/Optional.empty:()Ljava/util/Optional;
+     239: aload         4
+     241: iload         12
+     243: invokeinterface #504,  2          // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+     248: checkcast     #508                // class com/mojang/renderpearl/api/GpuFormat
+     251: bipush        15
+     253: invokespecial #510                // Method com/mojang/renderpearl/api/pipeline/ColorTargetState."<init>":(Ljava/util/Optional;Lcom/mojang/renderpearl/api/GpuFormat;I)V
+     256: invokevirtual #513                // Method com/mojang/renderpearl/api/pipeline/RenderPipeline$Builder.withColorTargetState:(ILcom/mojang/renderpearl/api/pipeline/ColorTargetState;)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline$Builder;
+     259: pop
+     260: iinc          12, 1
+     263: goto          216
+     266: aload         11
+     268: invokevirtual #517                // Method com/mojang/renderpearl/api/pipeline/RenderPipeline$Builder.build:()Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;
+     271: astore        12
+     273: aload_0
+     274: getfield      #65                 // Field ownedPipelines:Ljava/util/List;
+     277: aload         12
+     279: invokeinterface #520,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     284: pop
+     285: iload         8
+     287: ifeq          302
+     290: aload_0
+     291: getfield      #108                // Field shadowPostPipelines:Ljava/util/Set;
+     294: aload         12
+     296: invokeinterface #523,  2          // InterfaceMethod java/util/Set.add:(Ljava/lang/Object;)Z
+     301: pop
+     302: aload         12
+     304: ldc_w         #524                // String #version 450\nlayout(location=0) out vec2 texCoord;\nvoid main() {\n\ttexCoord = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);\n\tgl_Position = vec4(texCoord * 2.0 - 1.0, 0.0, 1.0);\n}\n
+     307: aload_2
+     308: invokestatic  #526                // Method com/sulkan/shaders/graph/GraphShaderSources.put:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Ljava/lang/String;Ljava/lang/String;)V
+     311: aload         12
+     313: invokestatic  #531                // Method com/mojang/blaze3d/systems/RenderSystem.getCompiledPipelineNullable:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)Lcom/mojang/renderpearl/api/pipeline/CompiledRenderPipeline;
+     316: ifnonnull     333
+     319: new           #231                // class java/io/IOException
+     322: dup
+     323: aload_1
+     324: invokedynamic #535,  0            // InvokeDynamic #8:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     329: invokespecial #235                // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     332: athrow
+     333: aload         12
+     335: areturn
+
+  private void allocate(int, int);
+    Code:
+       0: iconst_1
+       1: iload_1
+       2: invokestatic  #536                // Method java/lang/Math.max:(II)I
+       5: istore_1
+       6: iconst_1
+       7: iload_2
+       8: invokestatic  #536                // Method java/lang/Math.max:(II)I
+      11: istore_2
+      12: aload_0
+      13: getfield      #542                // Field width:I
+      16: iload_1
+      17: if_icmpne     28
+      20: aload_0
+      21: getfield      #543                // Field height:I
+      24: iload_2
+      25: if_icmpeq     915
+      28: aload_0
+      29: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+      32: iload_1
+      33: iload_2
+      34: invokevirtual #544                // Method com/sulkan/shaders/graph/PackGraph.allocationBytes:(II)J
+      37: aload_0
+      38: getfield      #548                // Field textureBytes:J
+      41: ladd
+      42: aload_0
+      43: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+      46: iload_1
+      47: iload_2
+      48: invokevirtual #551                // Method com/sulkan/shaders/graph/GraphSceneCapture.bytes:(II)J
+      51: ladd
+      52: aload_0
+      53: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+      56: invokevirtual #422                // Method com/sulkan/shaders/graph/PackGraph.shadowQuality:()I
+      59: invokestatic  #554                // Method com/sulkan/shaders/render/shadow/ShadowService.memoryBytes:(I)J
+      62: ladd
+      63: aload_0
+      64: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+      67: invokevirtual #558                // Method com/sulkan/shaders/graph/PackGraph.budgetBytes:()J
+      70: lcmp
+      71: ifle          85
+      74: new           #561                // class java/lang/IllegalArgumentException
+      77: dup
+      78: ldc_w         #563                // String Textures and render targets exceed pack memory budget
+      81: invokespecial #565                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      84: athrow
+      85: new           #52                 // class java/util/LinkedHashMap
+      88: dup
+      89: invokespecial #54                 // Method java/util/LinkedHashMap."<init>":()V
+      92: astore_3
+      93: aload_0
+      94: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+      97: invokestatic  #566                // Method com/sulkan/shaders/graph/GraphAllocations.plan:(Lcom/sulkan/shaders/graph/PackGraph;)Lcom/sulkan/shaders/graph/GraphAllocations;
+     100: astore        4
+     102: new           #105                // class java/util/HashSet
+     105: dup
+     106: invokespecial #107                // Method java/util/HashSet."<init>":()V
+     109: astore        5
+     111: aload_0
+     112: getfield      #122                // Field schedule:Ljava/util/List;
+     115: invokeinterface #244,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     120: astore        6
+     122: aload         6
+     124: invokeinterface #248,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     129: ifeq          215
+     132: aload         6
+     134: invokeinterface #254,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     139: checkcast     #258                // class com/sulkan/shaders/graph/PackGraph$Pass
+     142: astore        7
+     144: aload         7
+     146: invokevirtual #260                // Method com/sulkan/shaders/graph/PackGraph$Pass.isCompute:()Z
+     149: ifeq          212
+     152: aload         7
+     154: invokevirtual #271                // Method com/sulkan/shaders/graph/PackGraph$Pass.writes:()Ljava/util/List;
+     157: invokeinterface #244,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     162: astore        8
+     164: aload         8
+     166: invokeinterface #248,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     171: ifeq          212
+     174: aload         8
+     176: invokeinterface #254,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     181: checkcast     #428                // class java/lang/String
+     184: astore        9
+     186: aload         5
+     188: aload         4
+     190: invokevirtual #572                // Method com/sulkan/shaders/graph/GraphAllocations.resourceSlots:()Ljava/util/Map;
+     193: aload         9
+     195: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     200: checkcast     #578                // class java/lang/Integer
+     203: invokeinterface #523,  2          // InterfaceMethod java/util/Set.add:(Ljava/lang/Object;)Z
+     208: pop
+     209: goto          164
+     212: goto          122
+     215: new           #99                 // class java/util/HashMap
+     218: dup
+     219: invokespecial #101                // Method java/util/HashMap."<init>":()V
+     222: astore        6
+     224: invokestatic  #167                // Method com/mojang/blaze3d/systems/RenderSystem.getDevice:()Lcom/mojang/renderpearl/api/device/GpuDevice;
+     227: astore        7
+     229: aload         4
+     231: invokevirtual #572                // Method com/sulkan/shaders/graph/GraphAllocations.resourceSlots:()Ljava/util/Map;
+     234: invokeinterface #311,  1          // InterfaceMethod java/util/Map.keySet:()Ljava/util/Set;
+     239: invokeinterface #580,  1          // InterfaceMethod java/util/Set.iterator:()Ljava/util/Iterator;
+     244: astore        8
+     246: aload         8
+     248: invokeinterface #248,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     253: ifeq          808
+     256: aload         8
+     258: invokeinterface #254,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     263: checkcast     #428                // class java/lang/String
+     266: astore        9
+     268: aload_0
+     269: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+     272: invokevirtual #581                // Method com/sulkan/shaders/graph/PackGraph.resources:()Ljava/util/Map;
+     275: aload         9
+     277: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     282: checkcast     #584                // class com/sulkan/shaders/graph/PackGraph$Resource
+     285: astore        10
+     287: aload         10
+     289: invokevirtual #586                // Method com/sulkan/shaders/graph/PackGraph$Resource.mipmaps:()Z
+     292: ifeq          318
+     295: aload_0
+     296: getfield      #102                // Field mipFilters:Ljava/util/Map;
+     299: aload         9
+     301: aload         10
+     303: invokevirtual #589                // Method com/sulkan/shaders/graph/PackGraph$Resource.format:()Lcom/mojang/renderpearl/api/GpuFormat;
+     306: invokestatic  #592                // Method com/sulkan/shaders/graph/GraphMipmaps.filter:(Lcom/mojang/renderpearl/api/GpuFormat;)I
+     309: invokestatic  #598                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     312: invokeinterface #268,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     317: pop
+     318: aload         4
+     320: invokevirtual #572                // Method com/sulkan/shaders/graph/GraphAllocations.resourceSlots:()Ljava/util/Map;
+     323: aload         9
+     325: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     330: checkcast     #578                // class java/lang/Integer
+     333: invokevirtual #601                // Method java/lang/Integer.intValue:()I
+     336: istore        11
+     338: aload         6
+     340: iload         11
+     342: invokestatic  #598                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     345: invokeinterface #160,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+     350: ifne          781
+     353: aload         10
+     355: iload_1
+     356: invokevirtual #604                // Method com/sulkan/shaders/graph/PackGraph$Resource.width:(I)I
+     359: istore        12
+     361: aload         10
+     363: iload_2
+     364: invokevirtual #607                // Method com/sulkan/shaders/graph/PackGraph$Resource.height:(I)I
+     367: istore        13
+     369: aload         7
+     371: invokeinterface #216,  1          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.getDeviceInfo:()Lcom/mojang/renderpearl/api/device/DeviceInfo;
+     376: invokevirtual #220                // Method com/mojang/renderpearl/api/device/DeviceInfo.limits:()Lcom/mojang/renderpearl/api/device/DeviceLimits;
+     379: aload         10
+     381: invokevirtual #589                // Method com/sulkan/shaders/graph/PackGraph$Resource.format:()Lcom/mojang/renderpearl/api/GpuFormat;
+     384: invokevirtual #609                // Method com/mojang/renderpearl/api/device/DeviceLimits.maxTextureSizeForFormat:(Lcom/mojang/renderpearl/api/GpuFormat;)I
+     387: istore        14
+     389: iload         12
+     391: iload         14
+     393: if_icmpgt     403
+     396: iload         13
+     398: iload         14
+     400: if_icmple     422
+     403: new           #561                // class java/lang/IllegalArgumentException
+     406: dup
+     407: aload         9
+     409: iload         12
+     411: iload         13
+     413: invokedynamic #612,  0            // InvokeDynamic #9:makeConcatWithConstants:(Ljava/lang/String;II)Ljava/lang/String;
+     418: invokespecial #565                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     421: athrow
+     422: aload         10
+     424: iload_1
+     425: iload_2
+     426: invokevirtual #613                // Method com/sulkan/shaders/graph/PackGraph$Resource.bytes:(II)J
+     429: lstore        15
+     431: lload         15
+     433: aload         7
+     435: invokeinterface #216,  1          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.getDeviceInfo:()Lcom/mojang/renderpearl/api/device/DeviceInfo;
+     440: invokevirtual #220                // Method com/mojang/renderpearl/api/device/DeviceInfo.limits:()Lcom/mojang/renderpearl/api/device/DeviceLimits;
+     443: invokevirtual #614                // Method com/mojang/renderpearl/api/device/DeviceLimits.maxMemoryAllocationSize:()J
+     446: lcmp
+     447: ifle          465
+     450: new           #561                // class java/lang/IllegalArgumentException
+     453: dup
+     454: aload         9
+     456: invokedynamic #617,  0            // InvokeDynamic #10:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     461: invokespecial #565                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     464: athrow
+     465: aload         10
+     467: invokevirtual #618                // Method com/sulkan/shaders/graph/PackGraph$Resource.history:()Z
+     470: ifeq          477
+     473: iconst_2
+     474: goto          478
+     477: iconst_1
+     478: anewarray     #621                // class com/sulkan/shaders/graph/GraphRenderer$Image
+     481: astore        17
+     483: aload_3
+     484: aload         9
+     486: aload         17
+     488: invokeinterface #268,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     493: pop
+     494: aload         6
+     496: iload         11
+     498: invokestatic  #598                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     501: aload         17
+     503: invokeinterface #268,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     508: pop
+     509: iconst_0
+     510: istore        18
+     512: iload         18
+     514: aload         17
+     516: arraylength
+     517: if_icmpge     778
+     520: new           #623                // class com/sulkan/shaders/graph/StorageImageScope
+     523: dup
+     524: aload         5
+     526: iload         11
+     528: invokestatic  #598                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     531: invokeinterface #625,  2          // InterfaceMethod java/util/Set.contains:(Ljava/lang/Object;)Z
+     536: aload         10
+     538: invokevirtual #627                // Method com/sulkan/shaders/graph/PackGraph$Resource.depth:()I
+     541: invokespecial #630                // Method com/sulkan/shaders/graph/StorageImageScope."<init>":(ZI)V
+     544: astore        19
+     546: aload         7
+     548: checkcast     #633                // class com/sulkan/shaders/mixin/GraphDeviceAccessor
+     551: invokeinterface #635,  1          // InterfaceMethod com/sulkan/shaders/mixin/GraphDeviceAccessor.sulkan$backend:()Lcom/mojang/renderpearl/backend/api/GpuDeviceBackend;
+     556: aload         9
+     558: invokedynamic #639,  0            // InvokeDynamic #11:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     563: aload         10
+     565: invokevirtual #627                // Method com/sulkan/shaders/graph/PackGraph$Resource.depth:()I
+     568: iconst_1
+     569: if_icmpne     577
+     572: bipush        8
+     574: goto          578
+     577: iconst_0
+     578: iconst_4
+     579: ior
+     580: aload         10
+     582: invokevirtual #618                // Method com/sulkan/shaders/graph/PackGraph$Resource.history:()Z
+     585: ifne          617
+     588: aload_0
+     589: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+     592: invokevirtual #207                // Method com/sulkan/shaders/graph/PackGraph.sceneTargets:()Ljava/util/List;
+     595: aload         9
+     597: invokeinterface #640,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+     602: ifne          617
+     605: aload         10
+     607: invokevirtual #586                // Method com/sulkan/shaders/graph/PackGraph$Resource.mipmaps:()Z
+     610: ifne          617
+     613: iconst_0
+     614: goto          618
+     617: iconst_1
+     618: ior
+     619: aload         10
+     621: invokevirtual #586                // Method com/sulkan/shaders/graph/PackGraph$Resource.mipmaps:()Z
+     624: ifeq          631
+     627: iconst_2
+     628: goto          632
+     631: iconst_0
+     632: ior
+     633: aload         10
+     635: invokevirtual #589                // Method com/sulkan/shaders/graph/PackGraph$Resource.format:()Lcom/mojang/renderpearl/api/GpuFormat;
+     638: iload         12
+     640: iload         13
+     642: aload         10
+     644: invokevirtual #627                // Method com/sulkan/shaders/graph/PackGraph$Resource.depth:()I
+     647: aload         10
+     649: iload_1
+     650: iload_2
+     651: invokevirtual #641                // Method com/sulkan/shaders/graph/PackGraph$Resource.mipLevels:(II)I
+     654: invokeinterface #644,  8          // InterfaceMethod com/mojang/renderpearl/backend/api/GpuDeviceBackend.createTexture:(Ljava/lang/String;ILcom/mojang/renderpearl/api/GpuFormat;IIII)Lcom/mojang/renderpearl/api/textures/GpuTexture;
+     659: astore        20
+     661: aload         7
+     663: aload         20
+     665: invokeinterface #650,  2          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.createTextureView:(Lcom/mojang/renderpearl/api/textures/GpuTexture;)Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     670: astore        21
+     672: aload         17
+     674: iload         18
+     676: new           #621                // class com/sulkan/shaders/graph/GraphRenderer$Image
+     679: dup
+     680: aload         20
+     682: aload         21
+     684: aload         10
+     686: invokevirtual #586                // Method com/sulkan/shaders/graph/PackGraph$Resource.mipmaps:()Z
+     689: ifeq          706
+     692: aload         7
+     694: aload         20
+     696: iconst_0
+     697: iconst_1
+     698: invokeinterface #654,  4          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.createTextureView:(Lcom/mojang/renderpearl/api/textures/GpuTexture;II)Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     703: goto          708
+     706: aload         21
+     708: invokespecial #657                // Method com/sulkan/shaders/graph/GraphRenderer$Image."<init>":(Lcom/mojang/renderpearl/api/textures/GpuTexture;Lcom/mojang/renderpearl/api/textures/GpuTextureView;Lcom/mojang/renderpearl/api/textures/GpuTextureView;)V
+     711: aastore
+     712: goto          727
+     715: astore        22
+     717: aload         21
+     719: invokeinterface #660,  1          // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTextureView.close:()V
+     724: aload         22
+     726: athrow
+     727: goto          742
+     730: astore        21
+     732: aload         20
+     734: invokeinterface #663,  1          // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTexture.close:()V
+     739: aload         21
+     741: athrow
+     742: aload         19
+     744: invokevirtual #664                // Method com/sulkan/shaders/graph/StorageImageScope.close:()V
+     747: goto          772
+     750: astore        20
+     752: aload         19
+     754: invokevirtual #664                // Method com/sulkan/shaders/graph/StorageImageScope.close:()V
+     757: goto          769
+     760: astore        21
+     762: aload         20
+     764: aload         21
+     766: invokevirtual #667                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     769: aload         20
+     771: athrow
+     772: iinc          18, 1
+     775: goto          512
+     778: goto          805
+     781: aload_3
+     782: aload         9
+     784: aload         6
+     786: iload         11
+     788: invokestatic  #598                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     791: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     796: checkcast     #671                // class "[Lcom/sulkan/shaders/graph/GraphRenderer$Image;"
+     799: invokeinterface #268,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     804: pop
+     805: goto          246
+     808: goto          820
+     811: astore        7
+     813: aload_3
+     814: invokestatic  #673                // Method destroy:(Ljava/util/Map;)V
+     817: aload         7
+     819: athrow
+     820: aload_0
+     821: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+     824: iload_1
+     825: iload_2
+     826: invokevirtual #677                // Method com/sulkan/shaders/graph/GraphSceneCapture.resize:(II)V
+     829: goto          841
+     832: astore        7
+     834: aload_3
+     835: invokestatic  #673                // Method destroy:(Ljava/util/Map;)V
+     838: aload         7
+     840: athrow
+     841: new           #52                 // class java/util/LinkedHashMap
+     844: dup
+     845: aload_0
+     846: getfield      #69                 // Field images:Ljava/util/Map;
+     849: invokespecial #680                // Method java/util/LinkedHashMap."<init>":(Ljava/util/Map;)V
+     852: astore        7
+     854: aload_0
+     855: getfield      #69                 // Field images:Ljava/util/Map;
+     858: invokeinterface #682,  1          // InterfaceMethod java/util/Map.clear:()V
+     863: aload_0
+     864: getfield      #69                 // Field images:Ljava/util/Map;
+     867: aload_3
+     868: invokeinterface #685,  2          // InterfaceMethod java/util/Map.putAll:(Ljava/util/Map;)V
+     873: aload         7
+     875: invokeinterface #688,  1          // InterfaceMethod java/util/Map.isEmpty:()Z
+     880: ifne          893
+     883: aload         7
+     885: invokedynamic #691,  0            // InvokeDynamic #12:run:(Ljava/util/Map;)Ljava/lang/Runnable;
+     890: invokestatic  #695                // Method com/mojang/blaze3d/systems/RenderSystem.queueFencedTask:(Ljava/lang/Runnable;)V
+     893: aload_0
+     894: iload_1
+     895: putfield      #542                // Field width:I
+     898: aload_0
+     899: iload_2
+     900: putfield      #543                // Field height:I
+     903: aload_0
+     904: iconst_0
+     905: putfield      #699                // Field parity:I
+     908: aload_0
+     909: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+     912: invokevirtual #25                 // Method com/sulkan/shaders/graph/GraphFrame.reset:()V
+     915: return
+    Exception table:
+       from    to  target type
+         672   712   715   Class java/lang/Exception
+         661   727   730   Class java/lang/Exception
+         546   742   750   Class java/lang/Throwable
+         752   757   760   Class java/lang/Throwable
+         224   808   811   Class java/lang/Exception
+         820   829   832   Class java/lang/Exception
+
+  public void render(com.mojang.blaze3d.pipeline.RenderTarget, net.minecraft.client.renderer.state.level.CameraRenderState, org.joml.Matrix4fc, java.lang.Object);
+    Code:
+       0: aload_0
+       1: getfield      #702                // Field closed:Z
+       4: ifeq          18
+       7: new           #705                // class java/lang/IllegalStateException
+      10: dup
+      11: ldc_w         #707                // String Graph is closed
+      14: invokespecial #709                // Method java/lang/IllegalStateException."<init>":(Ljava/lang/String;)V
+      17: athrow
+      18: aload_0
+      19: aload_1
+      20: getfield      #353                // Field com/mojang/blaze3d/pipeline/RenderTarget.width:I
+      23: aload_1
+      24: getfield      #357                // Field com/mojang/blaze3d/pipeline/RenderTarget.height:I
+      27: invokevirtual #360                // Method allocate:(II)V
+      30: aload_0
+      31: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+      34: aload_1
+      35: invokevirtual #44                 // Method com/sulkan/shaders/graph/GraphSceneCapture.captureWorldDepth:(Lcom/mojang/blaze3d/pipeline/RenderTarget;)V
+      38: aload_0
+      39: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+      42: invokevirtual #710                // Method com/sulkan/shaders/graph/GraphSceneCapture.clearMissedCapture:()V
+      45: invokestatic  #167                // Method com/mojang/blaze3d/systems/RenderSystem.getDevice:()Lcom/mojang/renderpearl/api/device/GpuDevice;
+      48: invokeinterface #713,  1          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.createCommandEncoder:()Lcom/mojang/renderpearl/api/commands/CommandEncoder;
+      53: astore        5
+      55: aload_0
+      56: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+      59: aload_2
+      60: aload         4
+      62: aload_3
+      63: invokevirtual #717                // Method com/sulkan/shaders/graph/GraphFrame.discontinuity:(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Ljava/lang/Object;Lorg/joml/Matrix4fc;)Z
+      66: istore        6
+      68: aload_0
+      69: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+      72: aload_2
+      73: aload         4
+      75: invokevirtual #721                // Method com/sulkan/shaders/graph/GraphFrame.globalDiscontinuity:(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Ljava/lang/Object;)Z
+      78: istore        7
+      80: aload_0
+      81: getfield      #369                // Field buffers:Lcom/sulkan/shaders/graph/GraphBuffers;
+      84: aload_0
+      85: getfield      #699                // Field parity:I
+      88: iload         6
+      90: invokevirtual #725                // Method com/sulkan/shaders/graph/GraphBuffers.beginFrame:(IZ)V
+      93: iload         6
+      95: ifeq          272
+      98: aload_0
+      99: getfield      #69                 // Field images:Ljava/util/Map;
+     102: invokeinterface #729,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+     107: invokeinterface #733,  1          // InterfaceMethod java/util/Collection.iterator:()Ljava/util/Iterator;
+     112: astore        8
+     114: aload         8
+     116: invokeinterface #248,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     121: ifeq          272
+     124: aload         8
+     126: invokeinterface #254,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     131: checkcast     #671                // class "[Lcom/sulkan/shaders/graph/GraphRenderer$Image;"
+     134: astore        9
+     136: aload         9
+     138: arraylength
+     139: iconst_2
+     140: if_icmpne     269
+     143: aload         9
+     145: astore        10
+     147: aload         10
+     149: arraylength
+     150: istore        11
+     152: iconst_0
+     153: istore        12
+     155: iload         12
+     157: iload         11
+     159: if_icmpge     269
+     162: aload         10
+     164: iload         12
+     166: aaload
+     167: astore        13
+     169: iload         7
+     171: ifne          218
+     174: aload         13
+     176: getfield      #736                // Field com/sulkan/shaders/graph/GraphRenderer$Image.texture:Lcom/mojang/renderpearl/api/textures/GpuTexture;
+     179: iconst_0
+     180: invokeinterface #740,  2          // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTexture.getWidth:(I)I
+     185: iconst_1
+     186: if_icmpne     218
+     189: aload         13
+     191: getfield      #736                // Field com/sulkan/shaders/graph/GraphRenderer$Image.texture:Lcom/mojang/renderpearl/api/textures/GpuTexture;
+     194: iconst_0
+     195: invokeinterface #743,  2          // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTexture.getHeight:(I)I
+     200: iconst_1
+     201: if_icmpne     218
+     204: aload         13
+     206: getfield      #736                // Field com/sulkan/shaders/graph/GraphRenderer$Image.texture:Lcom/mojang/renderpearl/api/textures/GpuTexture;
+     209: invokeinterface #746,  1          // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTexture.getDepthOrLayers:()I
+     214: iconst_1
+     215: if_icmpeq     263
+     218: aload         13
+     220: getfield      #736                // Field com/sulkan/shaders/graph/GraphRenderer$Image.texture:Lcom/mojang/renderpearl/api/textures/GpuTexture;
+     223: invokeinterface #746,  1          // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTexture.getDepthOrLayers:()I
+     228: iconst_1
+     229: if_icmple     243
+     232: aload         13
+     234: getfield      #736                // Field com/sulkan/shaders/graph/GraphRenderer$Image.texture:Lcom/mojang/renderpearl/api/textures/GpuTexture;
+     237: invokestatic  #749                // Method com/sulkan/shaders/graph/ComputeProgram.clearVolume:(Lcom/mojang/renderpearl/api/textures/GpuTexture;)V
+     240: goto          263
+     243: aload         5
+     245: aload         13
+     247: getfield      #736                // Field com/sulkan/shaders/graph/GraphRenderer$Image.texture:Lcom/mojang/renderpearl/api/textures/GpuTexture;
+     250: new           #753                // class org/joml/Vector4f
+     253: dup
+     254: fconst_0
+     255: invokespecial #755                // Method org/joml/Vector4f."<init>":(F)V
+     258: invokeinterface #758,  3          // InterfaceMethod com/mojang/renderpearl/api/commands/CommandEncoder.clearColorTexture:(Lcom/mojang/renderpearl/api/textures/GpuTexture;Lorg/joml/Vector4fc;)V
+     263: iinc          12, 1
+     266: goto          155
+     269: goto          114
+     272: aload_0
+     273: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+     276: aload         5
+     278: aload_2
+     279: aload_3
+     280: aload_0
+     281: getfield      #542                // Field width:I
+     284: aload_0
+     285: getfield      #543                // Field height:I
+     288: iload         6
+     290: invokevirtual #764                // Method com/sulkan/shaders/graph/GraphFrame.upload:(Lcom/mojang/renderpearl/api/commands/CommandEncoder;Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lorg/joml/Matrix4fc;IIZ)Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+     293: astore        8
+     295: aload_0
+     296: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+     299: aload_0
+     300: getfield      #122                // Field schedule:Ljava/util/List;
+     303: invokeinterface #768,  1          // InterfaceMethod java/util/List.getLast:()Ljava/lang/Object;
+     308: checkcast     #258                // class com/sulkan/shaders/graph/PackGraph$Pass
+     311: aload_1
+     312: invokevirtual #331                // Method com/mojang/blaze3d/pipeline/RenderTarget.getColorTexture:()Lcom/mojang/renderpearl/api/textures/GpuTexture;
+     315: invokeinterface #337,  1          // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTexture.getFormat:()Lcom/mojang/renderpearl/api/GpuFormat;
+     320: aload_0
+     321: getfield      #542                // Field width:I
+     324: aload_0
+     325: getfield      #543                // Field height:I
+     328: invokestatic  #771                // Method canPresentDirectly:(Lcom/sulkan/shaders/graph/PackGraph;Lcom/sulkan/shaders/graph/PackGraph$Pass;Lcom/mojang/renderpearl/api/GpuFormat;II)Z
+     331: istore        9
+     333: aload_0
+     334: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+     337: invokevirtual #207                // Method com/sulkan/shaders/graph/PackGraph.sceneTargets:()Ljava/util/List;
+     340: aload_0
+     341: invokedynamic #775,  0            // InvokeDynamic #13:accept:(Lcom/sulkan/shaders/graph/GraphRenderer;)Ljava/util/function/Consumer;
+     346: invokeinterface #778,  2          // InterfaceMethod java/util/List.forEach:(Ljava/util/function/Consumer;)V
+     351: aload_0
+     352: getfield      #122                // Field schedule:Ljava/util/List;
+     355: invokeinterface #244,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     360: astore        10
+     362: aload         10
+     364: invokeinterface #248,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     369: ifeq          797
+     372: aload         10
+     374: invokeinterface #254,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     379: checkcast     #258                // class com/sulkan/shaders/graph/PackGraph$Pass
+     382: astore        11
+     384: aload         11
+     386: invokevirtual #260                // Method com/sulkan/shaders/graph/PackGraph$Pass.isCompute:()Z
+     389: ifeq          449
+     392: aload_0
+     393: getfield      #59                 // Field computePipelines:Ljava/util/Map;
+     396: aload         11
+     398: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     403: checkcast     #263                // class com/sulkan/shaders/graph/ComputeProgram
+     406: aload         8
+     408: aload_0
+     409: aload         11
+     411: aload_1
+     412: invokedynamic #779,  0            // InvokeDynamic #14:apply:(Lcom/sulkan/shaders/graph/GraphRenderer;Lcom/sulkan/shaders/graph/PackGraph$Pass;Lcom/mojang/blaze3d/pipeline/RenderTarget;)Ljava/util/function/Function;
+     417: aload_0
+     418: invokedynamic #782,  0            // InvokeDynamic #15:apply:(Lcom/sulkan/shaders/graph/GraphRenderer;)Ljava/util/function/Function;
+     423: aload_0
+     424: getfield      #369                // Field buffers:Lcom/sulkan/shaders/graph/GraphBuffers;
+     427: invokevirtual #785                // Method com/sulkan/shaders/graph/ComputeProgram.dispatch:(Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;Ljava/util/function/Function;Ljava/util/function/Function;Lcom/sulkan/shaders/graph/GraphBuffers;)V
+     430: aload         11
+     432: invokevirtual #271                // Method com/sulkan/shaders/graph/PackGraph$Pass.writes:()Ljava/util/List;
+     435: aload_0
+     436: invokedynamic #775,  0            // InvokeDynamic #13:accept:(Lcom/sulkan/shaders/graph/GraphRenderer;)Ljava/util/function/Consumer;
+     441: invokeinterface #778,  2          // InterfaceMethod java/util/List.forEach:(Ljava/util/function/Consumer;)V
+     446: goto          794
+     449: aload_0
+     450: aload         11
+     452: invokedynamic #789,  0            // InvokeDynamic #16:get:(Lcom/sulkan/shaders/graph/GraphRenderer;Lcom/sulkan/shaders/graph/PackGraph$Pass;)Ljava/util/function/Supplier;
+     457: invokestatic  #792                // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor.builder:(Ljava/util/function/Supplier;)Lcom/mojang/renderpearl/api/commands/RenderPassDescriptor$Builder;
+     460: astore        12
+     462: aload_0
+     463: aload         11
+     465: invokevirtual #271                // Method com/sulkan/shaders/graph/PackGraph$Pass.writes:()Ljava/util/List;
+     468: invokeinterface #797,  1          // InterfaceMethod java/util/List.getFirst:()Ljava/lang/Object;
+     473: checkcast     #428                // class java/lang/String
+     476: invokevirtual #800                // Method image:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/GraphRenderer$Image;
+     479: getfield      #736                // Field com/sulkan/shaders/graph/GraphRenderer$Image.texture:Lcom/mojang/renderpearl/api/textures/GpuTexture;
+     482: astore        13
+     484: aload         12
+     486: new           #804                // class com/mojang/renderpearl/api/commands/RenderPass$RenderArea
+     489: dup
+     490: iconst_0
+     491: iconst_0
+     492: aload         13
+     494: iconst_0
+     495: invokeinterface #740,  2          // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTexture.getWidth:(I)I
+     500: aload         13
+     502: iconst_0
+     503: invokeinterface #743,  2          // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTexture.getHeight:(I)I
+     508: invokespecial #806                // Method com/mojang/renderpearl/api/commands/RenderPass$RenderArea."<init>":(IIII)V
+     511: invokevirtual #809                // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor$Builder.withRenderArea:(Lcom/mojang/renderpearl/api/commands/RenderPass$RenderArea;)Lcom/mojang/renderpearl/api/commands/RenderPassDescriptor$Builder;
+     514: pop
+     515: iload         9
+     517: ifeq          541
+     520: aload         11
+     522: aload_0
+     523: getfield      #122                // Field schedule:Ljava/util/List;
+     526: invokeinterface #768,  1          // InterfaceMethod java/util/List.getLast:()Ljava/lang/Object;
+     531: invokevirtual #815                // Method com/sulkan/shaders/graph/PackGraph$Pass.equals:(Ljava/lang/Object;)Z
+     534: ifeq          541
+     537: iconst_1
+     538: goto          542
+     541: iconst_0
+     542: istore        14
+     544: aload         11
+     546: invokevirtual #271                // Method com/sulkan/shaders/graph/PackGraph$Pass.writes:()Ljava/util/List;
+     549: invokeinterface #244,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     554: astore        15
+     556: aload         15
+     558: invokeinterface #248,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     563: ifeq          619
+     566: aload         15
+     568: invokeinterface #254,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     573: checkcast     #428                // class java/lang/String
+     576: astore        16
+     578: aload         12
+     580: iload         14
+     582: ifeq          592
+     585: aload_1
+     586: invokevirtual #818                // Method com/mojang/blaze3d/pipeline/RenderTarget.getColorTextureView:()Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     589: goto          601
+     592: aload_0
+     593: aload         16
+     595: invokevirtual #800                // Method image:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/GraphRenderer$Image;
+     598: getfield      #822                // Field com/sulkan/shaders/graph/GraphRenderer$Image.attachment:Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     601: new           #753                // class org/joml/Vector4f
+     604: dup
+     605: fconst_0
+     606: invokespecial #755                // Method org/joml/Vector4f."<init>":(F)V
+     609: invokestatic  #826                // Method java/util/Optional.of:(Ljava/lang/Object;)Ljava/util/Optional;
+     612: invokevirtual #829                // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor$Builder.withColorAttachment:(Lcom/mojang/renderpearl/api/textures/GpuTextureView;Ljava/util/Optional;)Lcom/mojang/renderpearl/api/commands/RenderPassDescriptor$Builder;
+     615: pop
+     616: goto          556
+     619: aload         5
+     621: aload         12
+     623: invokevirtual #833                // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor$Builder.build:()Lcom/mojang/renderpearl/api/commands/RenderPassDescriptor;
+     626: invokeinterface #836,  2          // InterfaceMethod com/mojang/renderpearl/api/commands/CommandEncoder.createRenderPass:(Lcom/mojang/renderpearl/api/commands/RenderPassDescriptor;)Lcom/mojang/renderpearl/api/commands/RenderPass;
+     631: astore        15
+     633: aload         15
+     635: aload_0
+     636: getfield      #55                 // Field pipelines:Ljava/util/Map;
+     639: aload         11
+     641: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     646: checkcast     #461                // class com/mojang/renderpearl/api/pipeline/RenderPipeline
+     649: invokestatic  #840                // Method com/mojang/blaze3d/systems/RenderSystem.getCompiledPipeline:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)Lcom/mojang/renderpearl/api/pipeline/CompiledRenderPipeline;
+     652: invokeinterface #843,  2          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.setPipeline:(Lcom/mojang/renderpearl/api/pipeline/CompiledRenderPipeline;)V
+     657: aload         15
+     659: invokestatic  #849                // Method com/mojang/blaze3d/systems/RenderSystem.bindDefaultUniforms:(Lcom/mojang/renderpearl/api/commands/RenderPass;)V
+     662: aload         15
+     664: ldc_w         #408                // String SulkanFrame
+     667: aload         8
+     669: invokeinterface #853,  3          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.setUniform:(Ljava/lang/String;Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;)V
+     674: aload_0
+     675: getfield      #108                // Field shadowPostPipelines:Ljava/util/Set;
+     678: aload_0
+     679: getfield      #55                 // Field pipelines:Ljava/util/Map;
+     682: aload         11
+     684: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     689: invokeinterface #625,  2          // InterfaceMethod java/util/Set.contains:(Ljava/lang/Object;)Z
+     694: ifeq          702
+     697: aload         15
+     699: invokestatic  #857                // Method com/sulkan/shaders/render/shadow/ShadowService.bindTerrain:(Lcom/mojang/renderpearl/api/commands/RenderPass;)V
+     702: aload         11
+     704: invokevirtual #308                // Method com/sulkan/shaders/graph/PackGraph$Pass.reads:()Ljava/util/Map;
+     707: aload_0
+     708: aload         15
+     710: aload_1
+     711: aload         11
+     713: invokedynamic #860,  0            // InvokeDynamic #17:accept:(Lcom/sulkan/shaders/graph/GraphRenderer;Lcom/mojang/renderpearl/api/commands/RenderPass;Lcom/mojang/blaze3d/pipeline/RenderTarget;Lcom/sulkan/shaders/graph/PackGraph$Pass;)Ljava/util/function/BiConsumer;
+     718: invokeinterface #863,  2          // InterfaceMethod java/util/Map.forEach:(Ljava/util/function/BiConsumer;)V
+     723: aload         15
+     725: iconst_3
+     726: iconst_1
+     727: iconst_0
+     728: iconst_0
+     729: invokeinterface #866,  5          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.draw:(IIII)V
+     734: aload         15
+     736: ifnull        778
+     739: aload         15
+     741: invokeinterface #869,  1          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.close:()V
+     746: goto          778
+     749: astore        16
+     751: aload         15
+     753: ifnull        775
+     756: aload         15
+     758: invokeinterface #869,  1          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.close:()V
+     763: goto          775
+     766: astore        17
+     768: aload         16
+     770: aload         17
+     772: invokevirtual #667                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     775: aload         16
+     777: athrow
+     778: aload         11
+     780: invokevirtual #271                // Method com/sulkan/shaders/graph/PackGraph$Pass.writes:()Ljava/util/List;
+     783: aload_0
+     784: invokedynamic #775,  0            // InvokeDynamic #13:accept:(Lcom/sulkan/shaders/graph/GraphRenderer;)Ljava/util/function/Consumer;
+     789: invokeinterface #778,  2          // InterfaceMethod java/util/List.forEach:(Ljava/util/function/Consumer;)V
+     794: goto          362
+     797: iload         9
+     799: ifne          925
+     802: aload         5
+     804: invokedynamic #870,  0            // InvokeDynamic #18:get:()Ljava/util/function/Supplier;
+     809: aload_1
+     810: invokevirtual #818                // Method com/mojang/blaze3d/pipeline/RenderTarget.getColorTextureView:()Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     813: invokestatic  #499                // Method java/util/Optional.empty:()Ljava/util/Optional;
+     816: invokeinterface #873,  4          // InterfaceMethod com/mojang/renderpearl/api/commands/CommandEncoder.createRenderPass:(Ljava/util/function/Supplier;Lcom/mojang/renderpearl/api/textures/GpuTextureView;Ljava/util/Optional;)Lcom/mojang/renderpearl/api/commands/RenderPass;
+     821: astore        10
+     823: aload         10
+     825: aload_0
+     826: getfield      #346                // Field present:Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;
+     829: invokestatic  #840                // Method com/mojang/blaze3d/systems/RenderSystem.getCompiledPipeline:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)Lcom/mojang/renderpearl/api/pipeline/CompiledRenderPipeline;
+     832: invokeinterface #843,  2          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.setPipeline:(Lcom/mojang/renderpearl/api/pipeline/CompiledRenderPipeline;)V
+     837: aload         10
+     839: invokestatic  #849                // Method com/mojang/blaze3d/systems/RenderSystem.bindDefaultUniforms:(Lcom/mojang/renderpearl/api/commands/RenderPass;)V
+     842: aload         10
+     844: ldc_w         #323                // String Source
+     847: aload_0
+     848: aload_0
+     849: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+     852: invokevirtual #876                // Method com/sulkan/shaders/graph/PackGraph.present:()Ljava/lang/String;
+     855: invokevirtual #800                // Method image:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/GraphRenderer$Image;
+     858: getfield      #878                // Field com/sulkan/shaders/graph/GraphRenderer$Image.view:Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     861: aload_0
+     862: getfield      #197                // Field sampler:Lcom/mojang/renderpearl/api/textures/GpuSampler;
+     865: invokeinterface #881,  4          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.setUniform:(Ljava/lang/String;Lcom/mojang/renderpearl/api/textures/GpuTextureView;Lcom/mojang/renderpearl/api/textures/GpuSampler;)V
+     870: aload         10
+     872: iconst_3
+     873: iconst_1
+     874: iconst_0
+     875: iconst_0
+     876: invokeinterface #866,  5          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.draw:(IIII)V
+     881: aload         10
+     883: ifnull        925
+     886: aload         10
+     888: invokeinterface #869,  1          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.close:()V
+     893: goto          925
+     896: astore        11
+     898: aload         10
+     900: ifnull        922
+     903: aload         10
+     905: invokeinterface #869,  1          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.close:()V
+     910: goto          922
+     913: astore        12
+     915: aload         11
+     917: aload         12
+     919: invokevirtual #667                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     922: aload         11
+     924: athrow
+     925: aload_0
+     926: dup
+     927: getfield      #699                // Field parity:I
+     930: iconst_1
+     931: ixor
+     932: putfield      #699                // Field parity:I
+     935: aload_0
+     936: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+     939: aload_2
+     940: aload_3
+     941: aload         4
+     943: invokevirtual #884                // Method com/sulkan/shaders/graph/GraphFrame.commit:(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lorg/joml/Matrix4fc;Ljava/lang/Object;)V
+     946: aload_0
+     947: dup
+     948: getfield      #7                  // Field renderedFrames:J
+     951: lconst_1
+     952: ladd
+     953: putfield      #7                  // Field renderedFrames:J
+     956: return
+    Exception table:
+       from    to  target type
+         633   734   749   Class java/lang/Throwable
+         756   763   766   Class java/lang/Throwable
+         823   881   896   Class java/lang/Throwable
+         903   910   913   Class java/lang/Throwable
+
+  static boolean canPresentDirectly(com.sulkan.shaders.graph.PackGraph, com.sulkan.shaders.graph.PackGraph$Pass, com.mojang.renderpearl.api.GpuFormat, int, int);
+    Code:
+       0: aload_0
+       1: invokevirtual #581                // Method com/sulkan/shaders/graph/PackGraph.resources:()Ljava/util/Map;
+       4: aload_0
+       5: invokevirtual #876                // Method com/sulkan/shaders/graph/PackGraph.present:()Ljava/lang/String;
+       8: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      13: checkcast     #584                // class com/sulkan/shaders/graph/PackGraph$Resource
+      16: astore        5
+      18: aload_1
+      19: invokevirtual #260                // Method com/sulkan/shaders/graph/PackGraph$Pass.isCompute:()Z
+      22: ifne          119
+      25: aload_1
+      26: invokevirtual #271                // Method com/sulkan/shaders/graph/PackGraph$Pass.writes:()Ljava/util/List;
+      29: aload_0
+      30: invokevirtual #876                // Method com/sulkan/shaders/graph/PackGraph.present:()Ljava/lang/String;
+      33: invokestatic  #343                // InterfaceMethod java/util/List.of:(Ljava/lang/Object;)Ljava/util/List;
+      36: invokeinterface #888,  2          // InterfaceMethod java/util/List.equals:(Ljava/lang/Object;)Z
+      41: ifeq          119
+      44: aload_1
+      45: invokevirtual #308                // Method com/sulkan/shaders/graph/PackGraph$Pass.reads:()Ljava/util/Map;
+      48: ldc_w         #889                // String $scene
+      51: invokeinterface #891,  2          // InterfaceMethod java/util/Map.containsValue:(Ljava/lang/Object;)Z
+      56: ifne          119
+      59: aload         5
+      61: invokevirtual #618                // Method com/sulkan/shaders/graph/PackGraph$Resource.history:()Z
+      64: ifne          119
+      67: aload         5
+      69: invokevirtual #586                // Method com/sulkan/shaders/graph/PackGraph$Resource.mipmaps:()Z
+      72: ifne          119
+      75: aload         5
+      77: invokevirtual #627                // Method com/sulkan/shaders/graph/PackGraph$Resource.depth:()I
+      80: iconst_1
+      81: if_icmpne     119
+      84: aload         5
+      86: invokevirtual #589                // Method com/sulkan/shaders/graph/PackGraph$Resource.format:()Lcom/mojang/renderpearl/api/GpuFormat;
+      89: aload_2
+      90: if_acmpne     119
+      93: aload         5
+      95: iload_3
+      96: invokevirtual #604                // Method com/sulkan/shaders/graph/PackGraph$Resource.width:(I)I
+      99: iload_3
+     100: if_icmpne     119
+     103: aload         5
+     105: iload         4
+     107: invokevirtual #607                // Method com/sulkan/shaders/graph/PackGraph$Resource.height:(I)I
+     110: iload         4
+     112: if_icmpne     119
+     115: iconst_1
+     116: goto          120
+     119: iconst_0
+     120: ireturn
+
+  private com.sulkan.shaders.graph.GraphRenderer$Image image(java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #69                 // Field images:Ljava/util/Map;
+       4: aload_1
+       5: invokestatic  #894                // Method com/sulkan/shaders/graph/PackGraph.current:(Ljava/lang/String;)Ljava/lang/String;
+       8: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      13: checkcast     #671                // class "[Lcom/sulkan/shaders/graph/GraphRenderer$Image;"
+      16: astore_2
+      17: aload_2
+      18: aload_2
+      19: arraylength
+      20: iconst_1
+      21: if_icmpne     28
+      24: iconst_0
+      25: goto          48
+      28: aload_1
+      29: invokestatic  #896                // Method com/sulkan/shaders/graph/PackGraph.previous:(Ljava/lang/String;)Z
+      32: ifeq          44
+      35: aload_0
+      36: getfield      #699                // Field parity:I
+      39: iconst_1
+      40: ixor
+      41: goto          48
+      44: aload_0
+      45: getfield      #699                // Field parity:I
+      48: aaload
+      49: areturn
+
+  private void generateMipmaps(java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+       4: invokevirtual #581                // Method com/sulkan/shaders/graph/PackGraph.resources:()Ljava/util/Map;
+       7: aload_1
+       8: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      13: checkcast     #584                // class com/sulkan/shaders/graph/PackGraph$Resource
+      16: invokevirtual #586                // Method com/sulkan/shaders/graph/PackGraph$Resource.mipmaps:()Z
+      19: ifeq          49
+      22: aload_0
+      23: aload_1
+      24: invokevirtual #800                // Method image:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/GraphRenderer$Image;
+      27: getfield      #736                // Field com/sulkan/shaders/graph/GraphRenderer$Image.texture:Lcom/mojang/renderpearl/api/textures/GpuTexture;
+      30: aload_0
+      31: getfield      #102                // Field mipFilters:Ljava/util/Map;
+      34: aload_1
+      35: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      40: checkcast     #578                // class java/lang/Integer
+      43: invokevirtual #601                // Method java/lang/Integer.intValue:()I
+      46: invokestatic  #900                // Method com/sulkan/shaders/graph/GraphMipmaps.generate:(Lcom/mojang/renderpearl/api/textures/GpuTexture;I)V
+      49: return
+
+  private com.mojang.renderpearl.api.textures.GpuTextureView resolve(java.lang.String, com.mojang.blaze3d.pipeline.RenderTarget);
+    Code:
+       0: aload_1
+       1: astore_3
+       2: iconst_m1
+       3: istore        4
+       5: aload_3
+       6: invokevirtual #904                // Method java/lang/String.hashCode:()I
+       9: lookupswitch  { // 6
+
+           -1218251823: 148
+
+            -459897008: 84
+
+             126837266: 132
+
+            1126121759: 100
+
+            1139904232: 68
+
+            1542647792: 116
+               default: 161
+          }
+      68: aload_3
+      69: ldc_w         #889                // String $scene
+      72: invokevirtual #907                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      75: ifeq          161
+      78: iconst_0
+      79: istore        4
+      81: goto          161
+      84: aload_3
+      85: ldc_w         #908                // String $weather
+      88: invokevirtual #907                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      91: ifeq          161
+      94: iconst_1
+      95: istore        4
+      97: goto          161
+     100: aload_3
+     101: ldc_w         #910                // String $depth
+     104: invokevirtual #907                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     107: ifeq          161
+     110: iconst_2
+     111: istore        4
+     113: goto          161
+     116: aload_3
+     117: ldc_w         #912                // String $handDepth
+     120: invokevirtual #907                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     123: ifeq          161
+     126: iconst_3
+     127: istore        4
+     129: goto          161
+     132: aload_3
+     133: ldc_w         #914                // String $terrainOpaque
+     136: invokevirtual #907                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     139: ifeq          161
+     142: iconst_4
+     143: istore        4
+     145: goto          161
+     148: aload_3
+     149: ldc_w         #916                // String $terrainOpaqueDepth
+     152: invokevirtual #907                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     155: ifeq          161
+     158: iconst_5
+     159: istore        4
+     161: iload         4
+     163: tableswitch   { // 0 to 5
+
+                     0: 200
+
+                     1: 207
+
+                     2: 220
+
+                     3: 233
+
+                     4: 240
+
+                     5: 240
+               default: 251
+          }
+     200: aload_2
+     201: invokevirtual #818                // Method com/mojang/blaze3d/pipeline/RenderTarget.getColorTextureView:()Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     204: goto          293
+     207: aload_0
+     208: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+     211: ldc_w         #908                // String $weather
+     214: invokevirtual #918                // Method com/sulkan/shaders/graph/GraphSceneCapture.view:(Ljava/lang/String;)Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     217: goto          293
+     220: aload_0
+     221: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+     224: ldc_w         #910                // String $depth
+     227: invokevirtual #918                // Method com/sulkan/shaders/graph/GraphSceneCapture.view:(Ljava/lang/String;)Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     230: goto          293
+     233: aload_2
+     234: invokevirtual #921                // Method com/mojang/blaze3d/pipeline/RenderTarget.getDepthTextureView:()Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     237: goto          293
+     240: aload_0
+     241: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+     244: aload_1
+     245: invokevirtual #918                // Method com/sulkan/shaders/graph/GraphSceneCapture.view:(Ljava/lang/String;)Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     248: goto          293
+     251: aload_1
+     252: ldc_w         #924                // String $texture/
+     255: invokevirtual #926                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+     258: ifeq          285
+     261: aload_0
+     262: getfield      #93                 // Field customTextures:Ljava/util/Map;
+     265: aload_1
+     266: bipush        9
+     268: invokevirtual #929                // Method java/lang/String.substring:(I)Ljava/lang/String;
+     271: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     276: checkcast     #621                // class com/sulkan/shaders/graph/GraphRenderer$Image
+     279: getfield      #878                // Field com/sulkan/shaders/graph/GraphRenderer$Image.view:Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     282: goto          293
+     285: aload_0
+     286: aload_1
+     287: invokevirtual #800                // Method image:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/GraphRenderer$Image;
+     290: getfield      #878                // Field com/sulkan/shaders/graph/GraphRenderer$Image.view:Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     293: areturn
+
+  private com.mojang.renderpearl.api.textures.GpuSampler sampler(java.lang.String);
+    Code:
+       0: aload_1
+       1: ldc_w         #924                // String $texture/
+       4: invokevirtual #926                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+       7: ifeq          31
+      10: aload_0
+      11: getfield      #96                 // Field textureSamplers:Ljava/util/Map;
+      14: aload_1
+      15: bipush        9
+      17: invokevirtual #929                // Method java/lang/String.substring:(I)Ljava/lang/String;
+      20: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      25: checkcast     #933                // class com/mojang/renderpearl/api/textures/GpuSampler
+      28: goto          35
+      31: aload_0
+      32: getfield      #197                // Field sampler:Lcom/mojang/renderpearl/api/textures/GpuSampler;
+      35: areturn
+
+  private void loadTextures(com.sulkan.shaders.graph.PackFiles) throws java.io.IOException;
+    Code:
+       0: new           #105                // class java/util/HashSet
+       3: dup
+       4: invokespecial #107                // Method java/util/HashSet."<init>":()V
+       7: astore_2
+       8: aload_0
+       9: getfield      #122                // Field schedule:Ljava/util/List;
+      12: aload_2
+      13: invokedynamic #935,  0            // InvokeDynamic #19:accept:(Ljava/util/Set;)Ljava/util/function/Consumer;
+      18: invokeinterface #778,  2          // InterfaceMethod java/util/List.forEach:(Ljava/util/function/Consumer;)V
+      23: aload_0
+      24: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+      27: invokevirtual #938                // Method com/sulkan/shaders/graph/PackGraph.scenePrograms:()Ljava/util/List;
+      30: aload_2
+      31: invokedynamic #940,  0            // InvokeDynamic #20:accept:(Ljava/util/Set;)Ljava/util/function/Consumer;
+      36: invokeinterface #778,  2          // InterfaceMethod java/util/List.forEach:(Ljava/util/function/Consumer;)V
+      41: invokestatic  #167                // Method com/mojang/blaze3d/systems/RenderSystem.getDevice:()Lcom/mojang/renderpearl/api/device/GpuDevice;
+      44: astore_3
+      45: aload_2
+      46: invokeinterface #580,  1          // InterfaceMethod java/util/Set.iterator:()Ljava/util/Iterator;
+      51: astore        4
+      53: aload         4
+      55: invokeinterface #248,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      60: ifeq          639
+      63: aload         4
+      65: invokeinterface #254,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      70: checkcast     #428                // class java/lang/String
+      73: astore        5
+      75: aload_0
+      76: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+      79: invokevirtual #941                // Method com/sulkan/shaders/graph/PackGraph.textures:()Ljava/util/Map;
+      82: aload         5
+      84: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      89: checkcast     #944                // class com/sulkan/shaders/graph/PackGraph$Texture
+      92: astore        6
+      94: aload         6
+      96: invokevirtual #946                // Method com/sulkan/shaders/graph/PackGraph$Texture.source:()Ljava/lang/String;
+      99: ldc_w         #949                // String $minecraft/clouds
+     102: invokevirtual #907                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     105: ifeq          200
+     108: invokestatic  #951                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+     111: invokevirtual #957                // Method net/minecraft/client/Minecraft.getResourceManager:()Lnet/minecraft/server/packs/resources/ResourceManager;
+     114: ldc_w         #961                // String textures/environment/clouds.png
+     117: invokestatic  #963                // Method net/minecraft/resources/Identifier.withDefaultNamespace:(Ljava/lang/String;)Lnet/minecraft/resources/Identifier;
+     120: invokeinterface #967,  2          // InterfaceMethod net/minecraft/server/packs/resources/ResourceManager.open:(Lnet/minecraft/resources/Identifier;)Ljava/io/InputStream;
+     125: astore        8
+     127: aload         8
+     129: ldc_w         #973                // int 8388609
+     132: invokevirtual #974                // Method java/io/InputStream.readNBytes:(I)[B
+     135: astore        7
+     137: aload         7
+     139: arraylength
+     140: ldc_w         #980                // int 8388608
+     143: if_icmple     157
+     146: new           #231                // class java/io/IOException
+     149: dup
+     150: ldc_w         #981                // String Cloud texture exceeds 8 MiB
+     153: invokespecial #235                // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     156: athrow
+     157: aload         8
+     159: ifnull        197
+     162: aload         8
+     164: invokevirtual #983                // Method java/io/InputStream.close:()V
+     167: goto          197
+     170: astore        9
+     172: aload         8
+     174: ifnull        194
+     177: aload         8
+     179: invokevirtual #983                // Method java/io/InputStream.close:()V
+     182: goto          194
+     185: astore        10
+     187: aload         9
+     189: aload         10
+     191: invokevirtual #667                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     194: aload         9
+     196: athrow
+     197: goto          211
+     200: aload_1
+     201: aload         6
+     203: invokevirtual #946                // Method com/sulkan/shaders/graph/PackGraph$Texture.source:()Ljava/lang/String;
+     206: invokevirtual #984                // Method com/sulkan/shaders/graph/PackFiles.binary:(Ljava/lang/String;)[B
+     209: astore        7
+     211: aload         7
+     213: invokestatic  #988                // Method java/nio/ByteBuffer.wrap:([B)Ljava/nio/ByteBuffer;
+     216: getstatic     #992                // Field java/nio/ByteOrder.BIG_ENDIAN:Ljava/nio/ByteOrder;
+     219: invokevirtual #85                 // Method java/nio/ByteBuffer.order:(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;
+     222: astore        8
+     224: aload         7
+     226: arraylength
+     227: bipush        24
+     229: if_icmplt     624
+     232: aload         8
+     234: iconst_0
+     235: invokevirtual #996                // Method java/nio/ByteBuffer.getLong:(I)J
+     238: ldc2_w        #999                // long -8552249625308161526l
+     241: lcmp
+     242: ifne          624
+     245: aload         8
+     247: bipush        12
+     249: invokevirtual #1001               // Method java/nio/ByteBuffer.getInt:(I)I
+     252: ldc_w         #1004               // int 1229472850
+     255: if_icmpne     624
+     258: aload         8
+     260: bipush        16
+     262: invokevirtual #1001               // Method java/nio/ByteBuffer.getInt:(I)I
+     265: istore        9
+     267: aload         8
+     269: bipush        20
+     271: invokevirtual #1001               // Method java/nio/ByteBuffer.getInt:(I)I
+     274: istore        10
+     276: aload_3
+     277: invokeinterface #216,  1          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.getDeviceInfo:()Lcom/mojang/renderpearl/api/device/DeviceInfo;
+     282: invokevirtual #220                // Method com/mojang/renderpearl/api/device/DeviceInfo.limits:()Lcom/mojang/renderpearl/api/device/DeviceLimits;
+     285: getstatic     #1005               // Field com/mojang/renderpearl/api/GpuFormat.RGBA8_UNORM:Lcom/mojang/renderpearl/api/GpuFormat;
+     288: invokevirtual #609                // Method com/mojang/renderpearl/api/device/DeviceLimits.maxTextureSizeForFormat:(Lcom/mojang/renderpearl/api/GpuFormat;)I
+     291: istore        11
+     293: iload         9
+     295: i2l
+     296: iload         10
+     298: i2l
+     299: lmul
+     300: ldc2_w        #1009               // long 4l
+     303: lmul
+     304: lstore        12
+     306: iload         9
+     308: ifle          609
+     311: iload         10
+     313: ifle          609
+     316: iload         9
+     318: iload         11
+     320: if_icmpgt     609
+     323: iload         10
+     325: iload         11
+     327: if_icmpgt     609
+     330: lload         12
+     332: aload_3
+     333: invokeinterface #216,  1          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.getDeviceInfo:()Lcom/mojang/renderpearl/api/device/DeviceInfo;
+     338: invokevirtual #220                // Method com/mojang/renderpearl/api/device/DeviceInfo.limits:()Lcom/mojang/renderpearl/api/device/DeviceLimits;
+     341: invokevirtual #614                // Method com/mojang/renderpearl/api/device/DeviceLimits.maxMemoryAllocationSize:()J
+     344: lcmp
+     345: ifgt          609
+     348: lload         12
+     350: aload_0
+     351: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+     354: invokevirtual #558                // Method com/sulkan/shaders/graph/PackGraph.budgetBytes:()J
+     357: aload_0
+     358: getfield      #548                // Field textureBytes:J
+     361: lsub
+     362: lcmp
+     363: ifgt          609
+     366: new           #1011               // class java/io/ByteArrayInputStream
+     369: dup
+     370: aload         7
+     372: invokespecial #1013               // Method java/io/ByteArrayInputStream."<init>":([B)V
+     375: invokestatic  #1016               // Method com/mojang/blaze3d/platform/NativeImage.read:(Ljava/io/InputStream;)Lcom/mojang/blaze3d/platform/NativeImage;
+     378: astore        14
+     380: aload_3
+     381: aload         5
+     383: invokedynamic #1022,  0           // InvokeDynamic #21:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     388: iconst_5
+     389: getstatic     #1005               // Field com/mojang/renderpearl/api/GpuFormat.RGBA8_UNORM:Lcom/mojang/renderpearl/api/GpuFormat;
+     392: iload         9
+     394: iload         10
+     396: iconst_1
+     397: iconst_1
+     398: invokeinterface #1023,  8         // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.createTexture:(Ljava/lang/String;ILcom/mojang/renderpearl/api/GpuFormat;IIII)Lcom/mojang/renderpearl/api/textures/GpuTexture;
+     403: astore        15
+     405: aload_0
+     406: getfield      #93                 // Field customTextures:Ljava/util/Map;
+     409: aload         5
+     411: new           #621                // class com/sulkan/shaders/graph/GraphRenderer$Image
+     414: dup
+     415: aload         15
+     417: aload_3
+     418: aload         15
+     420: invokeinterface #650,  2          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.createTextureView:(Lcom/mojang/renderpearl/api/textures/GpuTexture;)Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     425: invokespecial #1024               // Method com/sulkan/shaders/graph/GraphRenderer$Image."<init>":(Lcom/mojang/renderpearl/api/textures/GpuTexture;Lcom/mojang/renderpearl/api/textures/GpuTextureView;)V
+     428: invokeinterface #268,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     433: pop
+     434: goto          449
+     437: astore        16
+     439: aload         15
+     441: invokeinterface #663,  1          // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTexture.close:()V
+     446: aload         16
+     448: athrow
+     449: aload_3
+     450: invokeinterface #713,  1          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.createCommandEncoder:()Lcom/mojang/renderpearl/api/commands/CommandEncoder;
+     455: aload         15
+     457: aload         14
+     459: invokeinterface #1027,  3         // InterfaceMethod com/mojang/renderpearl/api/commands/CommandEncoder.writeToTexture:(Lcom/mojang/renderpearl/api/textures/GpuTexture;Lcom/mojang/blaze3d/platform/NativeImage;)V
+     464: aload         14
+     466: ifnull        504
+     469: aload         14
+     471: invokevirtual #1031               // Method com/mojang/blaze3d/platform/NativeImage.close:()V
+     474: goto          504
+     477: astore        15
+     479: aload         14
+     481: ifnull        501
+     484: aload         14
+     486: invokevirtual #1031               // Method com/mojang/blaze3d/platform/NativeImage.close:()V
+     489: goto          501
+     492: astore        16
+     494: aload         15
+     496: aload         16
+     498: invokevirtual #667                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     501: aload         15
+     503: athrow
+     504: aload         6
+     506: invokevirtual #1032               // Method com/sulkan/shaders/graph/PackGraph$Texture.repeat:()Z
+     509: ifeq          518
+     512: getstatic     #1035               // Field com/mojang/renderpearl/api/textures/AddressMode.REPEAT:Lcom/mojang/renderpearl/api/textures/AddressMode;
+     515: goto          521
+     518: getstatic     #173                // Field com/mojang/renderpearl/api/textures/AddressMode.CLAMP_TO_EDGE:Lcom/mojang/renderpearl/api/textures/AddressMode;
+     521: astore        14
+     523: aload         6
+     525: invokevirtual #1038               // Method com/sulkan/shaders/graph/PackGraph$Texture.linear:()Z
+     528: ifeq          537
+     531: getstatic     #201                // Field com/mojang/renderpearl/api/textures/FilterMode.LINEAR:Lcom/mojang/renderpearl/api/textures/FilterMode;
+     534: goto          540
+     537: getstatic     #179                // Field com/mojang/renderpearl/api/textures/FilterMode.NEAREST:Lcom/mojang/renderpearl/api/textures/FilterMode;
+     540: astore        15
+     542: aload_0
+     543: getfield      #96                 // Field textureSamplers:Ljava/util/Map;
+     546: aload         5
+     548: aload_3
+     549: aload         14
+     551: aload         14
+     553: aload         15
+     555: aload         15
+     557: iconst_1
+     558: invokestatic  #185                // Method java/util/OptionalDouble.empty:()Ljava/util/OptionalDouble;
+     561: invokeinterface #191,  7          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.createSampler:(Lcom/mojang/renderpearl/api/textures/AddressMode;Lcom/mojang/renderpearl/api/textures/AddressMode;Lcom/mojang/renderpearl/api/textures/FilterMode;Lcom/mojang/renderpearl/api/textures/FilterMode;ILjava/util/OptionalDouble;)Lcom/mojang/renderpearl/api/textures/GpuSampler;
+     566: invokeinterface #268,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     571: pop
+     572: aload_0
+     573: dup
+     574: getfield      #548                // Field textureBytes:J
+     577: lload         12
+     579: ladd
+     580: putfield      #548                // Field textureBytes:J
+     583: aload         6
+     585: invokevirtual #946                // Method com/sulkan/shaders/graph/PackGraph$Texture.source:()Ljava/lang/String;
+     588: ldc_w         #949                // String $minecraft/clouds
+     591: invokevirtual #907                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     594: ifeq          53
+     597: aload_0
+     598: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+     601: iload         9
+     603: invokevirtual #1041               // Method com/sulkan/shaders/graph/GraphFrame.cloudTextureWidth:(I)V
+     606: goto          53
+     609: new           #231                // class java/io/IOException
+     612: dup
+     613: aload         5
+     615: invokedynamic #1045,  0           // InvokeDynamic #22:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     620: invokespecial #235                // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     623: athrow
+     624: new           #231                // class java/io/IOException
+     627: dup
+     628: aload         5
+     630: invokedynamic #1046,  0           // InvokeDynamic #23:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     635: invokespecial #235                // Method java/io/IOException."<init>":(Ljava/lang/String;)V
+     638: athrow
+     639: return
+    Exception table:
+       from    to  target type
+         127   157   170   Class java/lang/Throwable
+         177   182   185   Class java/lang/Throwable
+         405   434   437   Class java/lang/Exception
+         380   464   477   Class java/lang/Throwable
+         484   489   492   Class java/lang/Throwable
+
+  public void beginScene(com.mojang.blaze3d.pipeline.RenderTarget, net.minecraft.client.renderer.state.level.CameraRenderState, org.joml.Matrix4fc, java.lang.Object);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: getfield      #353                // Field com/mojang/blaze3d/pipeline/RenderTarget.width:I
+       5: aload_1
+       6: getfield      #357                // Field com/mojang/blaze3d/pipeline/RenderTarget.height:I
+       9: invokevirtual #360                // Method allocate:(II)V
+      12: aload_0
+      13: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+      16: invokevirtual #1047               // Method com/sulkan/shaders/graph/GraphSceneCapture.beginFrame:()V
+      19: invokestatic  #167                // Method com/mojang/blaze3d/systems/RenderSystem.getDevice:()Lcom/mojang/renderpearl/api/device/GpuDevice;
+      22: invokeinterface #713,  1          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.createCommandEncoder:()Lcom/mojang/renderpearl/api/commands/CommandEncoder;
+      27: astore        5
+      29: aload_0
+      30: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+      33: invokevirtual #207                // Method com/sulkan/shaders/graph/PackGraph.sceneTargets:()Ljava/util/List;
+      36: invokeinterface #244,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+      41: astore        6
+      43: aload         6
+      45: invokeinterface #248,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      50: ifeq          92
+      53: aload         6
+      55: invokeinterface #254,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      60: checkcast     #428                // class java/lang/String
+      63: astore        7
+      65: aload         5
+      67: aload_0
+      68: aload         7
+      70: invokevirtual #800                // Method image:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/GraphRenderer$Image;
+      73: getfield      #736                // Field com/sulkan/shaders/graph/GraphRenderer$Image.texture:Lcom/mojang/renderpearl/api/textures/GpuTexture;
+      76: new           #753                // class org/joml/Vector4f
+      79: dup
+      80: fconst_0
+      81: invokespecial #755                // Method org/joml/Vector4f."<init>":(F)V
+      84: invokeinterface #758,  3          // InterfaceMethod com/mojang/renderpearl/api/commands/CommandEncoder.clearColorTexture:(Lcom/mojang/renderpearl/api/textures/GpuTexture;Lorg/joml/Vector4fc;)V
+      89: goto          43
+      92: aload_0
+      93: aload_0
+      94: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+      97: aload         5
+      99: aload_2
+     100: aload_3
+     101: aload_0
+     102: getfield      #542                // Field width:I
+     105: aload_0
+     106: getfield      #543                // Field height:I
+     109: aload_0
+     110: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+     113: aload_2
+     114: aload         4
+     116: aload_3
+     117: invokevirtual #717                // Method com/sulkan/shaders/graph/GraphFrame.discontinuity:(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Ljava/lang/Object;Lorg/joml/Matrix4fc;)Z
+     120: invokevirtual #764                // Method com/sulkan/shaders/graph/GraphFrame.upload:(Lcom/mojang/renderpearl/api/commands/CommandEncoder;Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lorg/joml/Matrix4fc;IIZ)Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+     123: putfield      #1049               // Field sceneUniforms:Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+     126: aload_0
+     127: getfield      #89                 // Field windBytes:Ljava/nio/ByteBuffer;
+     130: invokevirtual #1053               // Method java/nio/ByteBuffer.clear:()Ljava/nio/ByteBuffer;
+     133: pop
+     134: aload_0
+     135: getfield      #89                 // Field windBytes:Ljava/nio/ByteBuffer;
+     138: aload_2
+     139: getfield      #1056               // Field net/minecraft/client/renderer/state/level/CameraRenderState.pos:Lnet/minecraft/world/phys/Vec3;
+     142: getfield      #1062               // Field net/minecraft/world/phys/Vec3.x:D
+     145: aload_2
+     146: getfield      #1056               // Field net/minecraft/client/renderer/state/level/CameraRenderState.pos:Lnet/minecraft/world/phys/Vec3;
+     149: getfield      #1062               // Field net/minecraft/world/phys/Vec3.x:D
+     152: ldc2_w        #1068               // double 4096.0d
+     155: ddiv
+     156: invokestatic  #1070               // Method java/lang/Math.floor:(D)D
+     159: ldc2_w        #1068               // double 4096.0d
+     162: dmul
+     163: dsub
+     164: d2f
+     165: invokevirtual #1074               // Method java/nio/ByteBuffer.putFloat:(F)Ljava/nio/ByteBuffer;
+     168: aload_2
+     169: getfield      #1056               // Field net/minecraft/client/renderer/state/level/CameraRenderState.pos:Lnet/minecraft/world/phys/Vec3;
+     172: getfield      #1078               // Field net/minecraft/world/phys/Vec3.y:D
+     175: aload_2
+     176: getfield      #1056               // Field net/minecraft/client/renderer/state/level/CameraRenderState.pos:Lnet/minecraft/world/phys/Vec3;
+     179: getfield      #1078               // Field net/minecraft/world/phys/Vec3.y:D
+     182: ldc2_w        #1068               // double 4096.0d
+     185: ddiv
+     186: invokestatic  #1070               // Method java/lang/Math.floor:(D)D
+     189: ldc2_w        #1068               // double 4096.0d
+     192: dmul
+     193: dsub
+     194: d2f
+     195: invokevirtual #1074               // Method java/nio/ByteBuffer.putFloat:(F)Ljava/nio/ByteBuffer;
+     198: aload_2
+     199: getfield      #1056               // Field net/minecraft/client/renderer/state/level/CameraRenderState.pos:Lnet/minecraft/world/phys/Vec3;
+     202: getfield      #1081               // Field net/minecraft/world/phys/Vec3.z:D
+     205: aload_2
+     206: getfield      #1056               // Field net/minecraft/client/renderer/state/level/CameraRenderState.pos:Lnet/minecraft/world/phys/Vec3;
+     209: getfield      #1081               // Field net/minecraft/world/phys/Vec3.z:D
+     212: ldc2_w        #1068               // double 4096.0d
+     215: ddiv
+     216: invokestatic  #1070               // Method java/lang/Math.floor:(D)D
+     219: ldc2_w        #1068               // double 4096.0d
+     222: dmul
+     223: dsub
+     224: d2f
+     225: invokevirtual #1074               // Method java/nio/ByteBuffer.putFloat:(F)Ljava/nio/ByteBuffer;
+     228: invokestatic  #1084               // Method java/lang/System.nanoTime:()J
+     231: getstatic     #1089               // Field WIND_START:J
+     234: lsub
+     235: l2f
+     236: ldc_w         #1092               // float 1.0E-9f
+     239: fmul
+     240: invokevirtual #1074               // Method java/nio/ByteBuffer.putFloat:(F)Ljava/nio/ByteBuffer;
+     243: pop
+     244: aload_0
+     245: getfield      #89                 // Field windBytes:Ljava/nio/ByteBuffer;
+     248: aload_0
+     249: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+     252: invokevirtual #124                // Method com/sulkan/shaders/graph/PackGraph.options:()Ljava/util/Map;
+     255: ldc           #158                // String VEGETATION_WIND
+     257: dconst_0
+     258: invokestatic  #130                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+     261: invokeinterface #136,  3          // InterfaceMethod java/util/Map.getOrDefault:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     266: checkcast     #131                // class java/lang/Double
+     269: invokevirtual #1093               // Method java/lang/Double.floatValue:()F
+     272: invokevirtual #1074               // Method java/nio/ByteBuffer.putFloat:(F)Ljava/nio/ByteBuffer;
+     275: fconst_0
+     276: invokevirtual #1074               // Method java/nio/ByteBuffer.putFloat:(F)Ljava/nio/ByteBuffer;
+     279: fconst_0
+     280: invokevirtual #1074               // Method java/nio/ByteBuffer.putFloat:(F)Ljava/nio/ByteBuffer;
+     283: fconst_0
+     284: invokevirtual #1074               // Method java/nio/ByteBuffer.putFloat:(F)Ljava/nio/ByteBuffer;
+     287: invokevirtual #1097               // Method java/nio/ByteBuffer.flip:()Ljava/nio/ByteBuffer;
+     290: pop
+     291: aload_0
+     292: aload         5
+     294: invokeinterface #1100,  1         // InterfaceMethod com/mojang/renderpearl/api/commands/CommandEncoder.transientMemory:()Lcom/mojang/renderpearl/api/buffers/TransientMemory;
+     299: aload_0
+     300: getfield      #89                 // Field windBytes:Ljava/nio/ByteBuffer;
+     303: invokestatic  #167                // Method com/mojang/blaze3d/systems/RenderSystem.getDevice:()Lcom/mojang/renderpearl/api/device/GpuDevice;
+     306: invokeinterface #216,  1          // InterfaceMethod com/mojang/renderpearl/api/device/GpuDevice.getDeviceInfo:()Lcom/mojang/renderpearl/api/device/DeviceInfo;
+     311: invokevirtual #220                // Method com/mojang/renderpearl/api/device/DeviceInfo.limits:()Lcom/mojang/renderpearl/api/device/DeviceLimits;
+     314: invokevirtual #1104               // Method com/mojang/renderpearl/api/device/DeviceLimits.minUniformOffsetAlignment:()I
+     317: i2l
+     318: sipush        128
+     321: invokeinterface #1107,  5         // InterfaceMethod com/mojang/renderpearl/api/buffers/TransientMemory.uploadGpu:(Ljava/nio/ByteBuffer;JI)Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+     326: putfield      #1113               // Field windUniforms:Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+     329: return
+
+  public com.mojang.renderpearl.api.textures.GpuTextureView weatherView();
+    Code:
+       0: aload_0
+       1: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+       4: invokevirtual #1116               // Method com/sulkan/shaders/graph/GraphSceneCapture.weatherView:()Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+       7: areturn
+
+  public void handProjection(org.joml.Matrix4fc);
+    Code:
+       0: aload_0
+       1: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+       4: aload_1
+       5: invokevirtual #1119               // Method com/sulkan/shaders/graph/GraphFrame.handProjection:(Lorg/joml/Matrix4fc;)V
+       8: return
+
+  public void projection(org.joml.Matrix4fc);
+    Code:
+       0: aload_0
+       1: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+       4: aload_1
+       5: invokevirtual #1123               // Method com/sulkan/shaders/graph/GraphFrame.projection:(Lorg/joml/Matrix4fc;)V
+       8: return
+
+  public void environment(net.minecraft.client.renderer.state.level.LevelRenderState, net.minecraft.client.multiplayer.ClientLevel, float);
+    Code:
+       0: aload_0
+       1: getfield      #21                 // Field frame:Lcom/sulkan/shaders/graph/GraphFrame;
+       4: aload_1
+       5: aload_2
+       6: fload_3
+       7: invokevirtual #1126               // Method com/sulkan/shaders/graph/GraphFrame.environment:(Lnet/minecraft/client/renderer/state/level/LevelRenderState;Lnet/minecraft/client/multiplayer/ClientLevel;F)V
+      10: return
+
+  public com.sulkan.shaders.graph.PackGraph$Environment environment();
+    Code:
+       0: aload_0
+       1: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+       4: invokevirtual #1130               // Method com/sulkan/shaders/graph/PackGraph.environment:()Lcom/sulkan/shaders/graph/PackGraph$Environment;
+       7: areturn
+
+  public int shadowQuality();
+    Code:
+       0: aload_0
+       1: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+       4: invokevirtual #422                // Method com/sulkan/shaders/graph/PackGraph.shadowQuality:()I
+       7: ireturn
+
+  public int shadowDistance();
+    Code:
+       0: aload_0
+       1: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+       4: invokevirtual #1133               // Method com/sulkan/shaders/graph/PackGraph.shadowDistance:()I
+       7: ireturn
+
+  public boolean animatedShadowCasters();
+    Code:
+       0: aload_0
+       1: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+       4: invokevirtual #124                // Method com/sulkan/shaders/graph/PackGraph.options:()Ljava/util/Map;
+       7: ldc           #158                // String VEGETATION_WIND
+       9: dconst_0
+      10: invokestatic  #130                // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+      13: invokeinterface #136,  3          // InterfaceMethod java/util/Map.getOrDefault:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      18: checkcast     #131                // class java/lang/Double
+      21: invokevirtual #142                // Method java/lang/Double.doubleValue:()D
+      24: dconst_0
+      25: dcmpl
+      26: ifle          33
+      29: iconst_1
+      30: goto          34
+      33: iconst_0
+      34: ireturn
+
+  public com.mojang.renderpearl.api.pipeline.RenderPipeline scenePipeline(com.mojang.renderpearl.api.pipeline.RenderPipeline);
+    Code:
+       0: aload_0
+       1: getfield      #11                 // Field scenePrograms:Lcom/sulkan/shaders/graph/ScenePrograms;
+       4: aload_1
+       5: aload_0
+       6: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+       9: invokevirtual #207                // Method com/sulkan/shaders/graph/PackGraph.sceneTargets:()Ljava/util/List;
+      12: invokeinterface #1136,  1         // InterfaceMethod java/util/List.isEmpty:()Z
+      17: ifne          24
+      20: iconst_1
+      21: goto          25
+      24: iconst_0
+      25: invokevirtual #1137               // Method com/sulkan/shaders/graph/ScenePrograms.replace:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Z)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;
+      28: areturn
+
+  public com.mojang.renderpearl.api.pipeline.RenderPipeline scenePipeline(com.mojang.renderpearl.api.pipeline.RenderPipeline, boolean);
+    Code:
+       0: aload_0
+       1: getfield      #11                 // Field scenePrograms:Lcom/sulkan/shaders/graph/ScenePrograms;
+       4: aload_1
+       5: iload_2
+       6: invokevirtual #1137               // Method com/sulkan/shaders/graph/ScenePrograms.replace:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Z)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;
+       9: areturn
+
+  public com.mojang.renderpearl.api.pipeline.RenderPipeline sceneFallback(com.mojang.renderpearl.api.pipeline.RenderPipeline, boolean);
+    Code:
+       0: aload_0
+       1: getfield      #11                 // Field scenePrograms:Lcom/sulkan/shaders/graph/ScenePrograms;
+       4: aload_1
+       5: iload_2
+       6: invokevirtual #1141               // Method com/sulkan/shaders/graph/ScenePrograms.fallback:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Z)Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;
+       9: areturn
+
+  public com.mojang.renderpearl.api.commands.RenderPassDescriptor sceneAttachments(com.mojang.renderpearl.api.commands.RenderPassDescriptor, com.mojang.blaze3d.pipeline.RenderTarget);
+    Code:
+       0: aload_0
+       1: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+       4: invokevirtual #207                // Method com/sulkan/shaders/graph/PackGraph.sceneTargets:()Ljava/util/List;
+       7: invokeinterface #1136,  1         // InterfaceMethod java/util/List.isEmpty:()Z
+      12: ifne          40
+      15: aload_1
+      16: invokevirtual #1144               // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor.colorAttachments:()Ljava/util/List;
+      19: invokeinterface #210,  1          // InterfaceMethod java/util/List.size:()I
+      24: iconst_1
+      25: if_icmpne     40
+      28: aload_1
+      29: invokevirtual #1144               // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor.colorAttachments:()Ljava/util/List;
+      32: invokeinterface #797,  1          // InterfaceMethod java/util/List.getFirst:()Ljava/lang/Object;
+      37: ifnonnull     42
+      40: aload_1
+      41: areturn
+      42: aload_1
+      43: invokevirtual #1144               // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor.colorAttachments:()Ljava/util/List;
+      46: invokeinterface #797,  1          // InterfaceMethod java/util/List.getFirst:()Ljava/lang/Object;
+      51: checkcast     #1147               // class com/mojang/renderpearl/api/commands/RenderPassDescriptor$Attachment
+      54: invokevirtual #1149               // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor$Attachment.textureView:()Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+      57: invokeinterface #1152,  1         // InterfaceMethod com/mojang/renderpearl/api/textures/GpuTextureView.texture:()Lcom/mojang/renderpearl/api/textures/GpuTexture;
+      62: aload_2
+      63: invokevirtual #331                // Method com/mojang/blaze3d/pipeline/RenderTarget.getColorTexture:()Lcom/mojang/renderpearl/api/textures/GpuTexture;
+      66: if_acmpeq     71
+      69: aload_1
+      70: areturn
+      71: new           #62                 // class java/util/ArrayList
+      74: dup
+      75: aload_1
+      76: invokevirtual #1144               // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor.colorAttachments:()Ljava/util/List;
+      79: invokespecial #1154               // Method java/util/ArrayList."<init>":(Ljava/util/Collection;)V
+      82: astore_3
+      83: aload_0
+      84: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+      87: invokevirtual #207                // Method com/sulkan/shaders/graph/PackGraph.sceneTargets:()Ljava/util/List;
+      90: invokeinterface #244,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+      95: astore        4
+      97: aload         4
+      99: invokeinterface #248,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     104: ifeq          146
+     107: aload         4
+     109: invokeinterface #254,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     114: checkcast     #428                // class java/lang/String
+     117: astore        5
+     119: aload_3
+     120: new           #1147               // class com/mojang/renderpearl/api/commands/RenderPassDescriptor$Attachment
+     123: dup
+     124: aload_0
+     125: aload         5
+     127: invokevirtual #800                // Method image:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/GraphRenderer$Image;
+     130: getfield      #822                // Field com/sulkan/shaders/graph/GraphRenderer$Image.attachment:Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+     133: invokestatic  #499                // Method java/util/Optional.empty:()Ljava/util/Optional;
+     136: invokespecial #1157               // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor$Attachment."<init>":(Lcom/mojang/renderpearl/api/textures/GpuTextureView;Ljava/lang/Object;)V
+     139: invokevirtual #1160               // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+     142: pop
+     143: goto          97
+     146: new           #793                // class com/mojang/renderpearl/api/commands/RenderPassDescriptor
+     149: dup
+     150: aload_1
+     151: invokevirtual #1161               // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor.label:()Ljava/util/function/Supplier;
+     154: aload_3
+     155: aload_1
+     156: invokevirtual #1164               // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor.depthAttachment:()Lcom/mojang/renderpearl/api/commands/RenderPassDescriptor$Attachment;
+     159: aload_1
+     160: invokevirtual #1168               // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor.renderArea:()Lcom/mojang/renderpearl/api/commands/RenderPass$RenderArea;
+     163: invokespecial #1172               // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor."<init>":(Ljava/util/function/Supplier;Ljava/util/List;Lcom/mojang/renderpearl/api/commands/RenderPassDescriptor$Attachment;Lcom/mojang/renderpearl/api/commands/RenderPass$RenderArea;)V
+     166: areturn
+
+  public boolean hasSceneAttachments(java.util.List<com.mojang.renderpearl.api.commands.RenderPassDescriptor$Attachment<java.util.Optional<org.joml.Vector4fc>>>);
+    Code:
+       0: aload_0
+       1: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+       4: invokevirtual #207                // Method com/sulkan/shaders/graph/PackGraph.sceneTargets:()Ljava/util/List;
+       7: invokeinterface #1136,  1         // InterfaceMethod java/util/List.isEmpty:()Z
+      12: ifne          90
+      15: aload_1
+      16: invokeinterface #210,  1          // InterfaceMethod java/util/List.size:()I
+      21: aload_0
+      22: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+      25: invokevirtual #207                // Method com/sulkan/shaders/graph/PackGraph.sceneTargets:()Ljava/util/List;
+      28: invokeinterface #210,  1          // InterfaceMethod java/util/List.size:()I
+      33: iconst_1
+      34: iadd
+      35: if_icmpne     90
+      38: aload_1
+      39: iconst_1
+      40: invokeinterface #504,  2          // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+      45: ifnull        90
+      48: aload_1
+      49: iconst_1
+      50: invokeinterface #504,  2          // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+      55: checkcast     #1147               // class com/mojang/renderpearl/api/commands/RenderPassDescriptor$Attachment
+      58: invokevirtual #1149               // Method com/mojang/renderpearl/api/commands/RenderPassDescriptor$Attachment.textureView:()Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+      61: aload_0
+      62: aload_0
+      63: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+      66: invokevirtual #207                // Method com/sulkan/shaders/graph/PackGraph.sceneTargets:()Ljava/util/List;
+      69: invokeinterface #797,  1          // InterfaceMethod java/util/List.getFirst:()Ljava/lang/Object;
+      74: checkcast     #428                // class java/lang/String
+      77: invokevirtual #800                // Method image:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/GraphRenderer$Image;
+      80: getfield      #822                // Field com/sulkan/shaders/graph/GraphRenderer$Image.attachment:Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+      83: if_acmpne     90
+      86: iconst_1
+      87: goto          91
+      90: iconst_0
+      91: ireturn
+
+  public void bindSceneUniforms(com.mojang.renderpearl.api.commands.RenderPass, com.mojang.renderpearl.api.pipeline.RenderPipeline);
+    Code:
+       0: aload_2
+       1: invokestatic  #1175               // Method com/sulkan/shaders/graph/ScenePrograms.isReplacement:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)Z
+       4: ifeq          40
+       7: aload_0
+       8: getfield      #1049               // Field sceneUniforms:Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+      11: ifnull        40
+      14: aload_0
+      15: getfield      #1049               // Field sceneUniforms:Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+      18: invokevirtual #1179               // Method com/mojang/renderpearl/api/buffers/GpuBufferSlice.buffer:()Lcom/mojang/renderpearl/api/buffers/GpuBuffer;
+      21: invokeinterface #1185,  1         // InterfaceMethod com/mojang/renderpearl/api/buffers/GpuBuffer.isClosed:()Z
+      26: ifeq          40
+      29: new           #705                // class java/lang/IllegalStateException
+      32: dup
+      33: ldc_w         #1190               // String Scene uniforms expired before terrain rendering
+      36: invokespecial #709                // Method java/lang/IllegalStateException."<init>":(Ljava/lang/String;)V
+      39: athrow
+      40: aload_0
+      41: getfield      #1113               // Field windUniforms:Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+      44: ifnull        98
+      47: aload_2
+      48: invokestatic  #1175               // Method com/sulkan/shaders/graph/ScenePrograms.isReplacement:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)Z
+      51: ifne          72
+      54: aload_2
+      55: invokevirtual #1192               // Method com/mojang/renderpearl/api/pipeline/RenderPipeline.getShaderDefines:()Lnet/minecraft/client/renderer/ShaderDefines;
+      58: invokevirtual #1196               // Method net/minecraft/client/renderer/ShaderDefines.flags:()Ljava/util/Set;
+      61: ldc_w         #1201               // String SULKAN_VEGETATION
+      64: invokeinterface #625,  2          // InterfaceMethod java/util/Set.contains:(Ljava/lang/Object;)Z
+      69: ifeq          98
+      72: aload_0
+      73: getfield      #1113               // Field windUniforms:Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+      76: invokevirtual #1179               // Method com/mojang/renderpearl/api/buffers/GpuBufferSlice.buffer:()Lcom/mojang/renderpearl/api/buffers/GpuBuffer;
+      79: invokeinterface #1185,  1         // InterfaceMethod com/mojang/renderpearl/api/buffers/GpuBuffer.isClosed:()Z
+      84: ifeq          98
+      87: new           #705                // class java/lang/IllegalStateException
+      90: dup
+      91: ldc_w         #1203               // String Wind uniforms expired before geometry rendering
+      94: invokespecial #709                // Method java/lang/IllegalStateException."<init>":(Ljava/lang/String;)V
+      97: athrow
+      98: aload_0
+      99: getfield      #1113               // Field windUniforms:Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+     102: ifnull        143
+     105: aload_2
+     106: invokestatic  #1175               // Method com/sulkan/shaders/graph/ScenePrograms.isReplacement:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)Z
+     109: ifne          130
+     112: aload_2
+     113: invokevirtual #1192               // Method com/mojang/renderpearl/api/pipeline/RenderPipeline.getShaderDefines:()Lnet/minecraft/client/renderer/ShaderDefines;
+     116: invokevirtual #1196               // Method net/minecraft/client/renderer/ShaderDefines.flags:()Ljava/util/Set;
+     119: ldc_w         #1201               // String SULKAN_VEGETATION
+     122: invokeinterface #625,  2          // InterfaceMethod java/util/Set.contains:(Ljava/lang/Object;)Z
+     127: ifeq          143
+     130: aload_1
+     131: ldc_w         #1205               // String SulkanWind
+     134: aload_0
+     135: getfield      #1113               // Field windUniforms:Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+     138: invokeinterface #853,  3          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.setUniform:(Ljava/lang/String;Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;)V
+     143: aload_2
+     144: invokestatic  #1175               // Method com/sulkan/shaders/graph/ScenePrograms.isReplacement:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)Z
+     147: ifeq          170
+     150: aload_0
+     151: getfield      #1049               // Field sceneUniforms:Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+     154: ifnull        170
+     157: aload_1
+     158: ldc_w         #408                // String SulkanFrame
+     161: aload_0
+     162: getfield      #1049               // Field sceneUniforms:Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;
+     165: invokeinterface #853,  3          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.setUniform:(Ljava/lang/String;Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;)V
+     170: aload_2
+     171: invokestatic  #1175               // Method com/sulkan/shaders/graph/ScenePrograms.isReplacement:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)Z
+     174: ifeq          191
+     177: aload_0
+     178: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+     181: invokevirtual #422                // Method com/sulkan/shaders/graph/PackGraph.shadowQuality:()I
+     184: ifle          191
+     187: aload_1
+     188: invokestatic  #857                // Method com/sulkan/shaders/render/shadow/ShadowService.bindTerrain:(Lcom/mojang/renderpearl/api/commands/RenderPass;)V
+     191: aload_2
+     192: invokestatic  #1207               // Method com/sulkan/shaders/graph/ScenePrograms.textures:(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;)Ljava/util/Map;
+     195: aload_0
+     196: aload_1
+     197: invokedynamic #1210,  0           // InvokeDynamic #24:accept:(Lcom/sulkan/shaders/graph/GraphRenderer;Lcom/mojang/renderpearl/api/commands/RenderPass;)Ljava/util/function/BiConsumer;
+     202: invokeinterface #863,  2          // InterfaceMethod java/util/Map.forEach:(Ljava/util/function/BiConsumer;)V
+     207: return
+
+  private static void destroy(java.util.Map<java.lang.String, com.sulkan.shaders.graph.GraphRenderer$Image[]>);
+    Code:
+       0: new           #1213               // class java/util/IdentityHashMap
+       3: dup
+       4: invokespecial #1215               // Method java/util/IdentityHashMap."<init>":()V
+       7: invokestatic  #1216               // Method java/util/Collections.newSetFromMap:(Ljava/util/Map;)Ljava/util/Set;
+      10: astore_1
+      11: aload_1
+      12: aload_0
+      13: invokeinterface #729,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+      18: invokeinterface #1222,  2         // InterfaceMethod java/util/Set.addAll:(Ljava/util/Collection;)Z
+      23: pop
+      24: aload_1
+      25: invokedynamic #1226,  0           // InvokeDynamic #25:accept:()Ljava/util/function/Consumer;
+      30: invokeinterface #404,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+      35: return
+
+  public void close();
+    Code:
+       0: aload_0
+       1: getfield      #702                // Field closed:Z
+       4: ifne          202
+       7: aload_0
+       8: iconst_1
+       9: putfield      #702                // Field closed:Z
+      12: aload_0
+      13: getfield      #11                 // Field scenePrograms:Lcom/sulkan/shaders/graph/ScenePrograms;
+      16: ifnull        26
+      19: aload_0
+      20: getfield      #11                 // Field scenePrograms:Lcom/sulkan/shaders/graph/ScenePrograms;
+      23: invokevirtual #1229               // Method com/sulkan/shaders/graph/ScenePrograms.close:()V
+      26: aload_0
+      27: getfield      #369                // Field buffers:Lcom/sulkan/shaders/graph/GraphBuffers;
+      30: ifnull        40
+      33: aload_0
+      34: getfield      #369                // Field buffers:Lcom/sulkan/shaders/graph/GraphBuffers;
+      37: invokevirtual #1230               // Method com/sulkan/shaders/graph/GraphBuffers.close:()V
+      40: aload_0
+      41: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+      44: ifnull        54
+      47: aload_0
+      48: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+      51: invokevirtual #1231               // Method com/sulkan/shaders/graph/GraphSceneCapture.close:()V
+      54: aload_0
+      55: getfield      #59                 // Field computePipelines:Ljava/util/Map;
+      58: invokeinterface #729,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+      63: invokedynamic #1232,  0           // InvokeDynamic #26:accept:()Ljava/util/function/Consumer;
+      68: invokeinterface #1233,  2         // InterfaceMethod java/util/Collection.forEach:(Ljava/util/function/Consumer;)V
+      73: aload_0
+      74: getfield      #59                 // Field computePipelines:Ljava/util/Map;
+      77: invokeinterface #682,  1          // InterfaceMethod java/util/Map.clear:()V
+      82: aload_0
+      83: getfield      #93                 // Field customTextures:Ljava/util/Map;
+      86: invokeinterface #729,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+      91: invokedynamic #1234,  0           // InvokeDynamic #27:accept:()Ljava/util/function/Consumer;
+      96: invokeinterface #1233,  2         // InterfaceMethod java/util/Collection.forEach:(Ljava/util/function/Consumer;)V
+     101: aload_0
+     102: getfield      #93                 // Field customTextures:Ljava/util/Map;
+     105: invokeinterface #682,  1          // InterfaceMethod java/util/Map.clear:()V
+     110: aload_0
+     111: getfield      #96                 // Field textureSamplers:Ljava/util/Map;
+     114: invokeinterface #729,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+     119: invokedynamic #1235,  0           // InvokeDynamic #28:accept:()Ljava/util/function/Consumer;
+     124: invokeinterface #1233,  2         // InterfaceMethod java/util/Collection.forEach:(Ljava/util/function/Consumer;)V
+     129: aload_0
+     130: getfield      #96                 // Field textureSamplers:Ljava/util/Map;
+     133: invokeinterface #682,  1          // InterfaceMethod java/util/Map.clear:()V
+     138: aload_0
+     139: getfield      #69                 // Field images:Ljava/util/Map;
+     142: invokestatic  #673                // Method destroy:(Ljava/util/Map;)V
+     145: aload_0
+     146: getfield      #69                 // Field images:Ljava/util/Map;
+     149: invokeinterface #682,  1          // InterfaceMethod java/util/Map.clear:()V
+     154: aload_0
+     155: getfield      #197                // Field sampler:Lcom/mojang/renderpearl/api/textures/GpuSampler;
+     158: invokeinterface #1236,  1         // InterfaceMethod com/mojang/renderpearl/api/textures/GpuSampler.close:()V
+     163: aload_0
+     164: getfield      #204                // Field linearSampler:Lcom/mojang/renderpearl/api/textures/GpuSampler;
+     167: ifnull        179
+     170: aload_0
+     171: getfield      #204                // Field linearSampler:Lcom/mojang/renderpearl/api/textures/GpuSampler;
+     174: invokeinterface #1236,  1         // InterfaceMethod com/mojang/renderpearl/api/textures/GpuSampler.close:()V
+     179: aload_0
+     180: getfield      #65                 // Field ownedPipelines:Ljava/util/List;
+     183: invokedynamic #1237,  0           // InvokeDynamic #29:accept:()Ljava/util/function/Consumer;
+     188: invokeinterface #778,  2          // InterfaceMethod java/util/List.forEach:(Ljava/util/function/Consumer;)V
+     193: aload_0
+     194: getfield      #65                 // Field ownedPipelines:Ljava/util/List;
+     197: invokeinterface #1238,  1         // InterfaceMethod java/util/List.clear:()V
+     202: return
+
+  private static void lambda$destroy$0(com.sulkan.shaders.graph.GraphRenderer$Image[]);
+    Code:
+       0: aload_0
+       1: astore_1
+       2: aload_1
+       3: arraylength
+       4: istore_2
+       5: iconst_0
+       6: istore_3
+       7: iload_3
+       8: iload_2
+       9: if_icmpge     33
+      12: aload_1
+      13: iload_3
+      14: aaload
+      15: astore        4
+      17: aload         4
+      19: ifnull        27
+      22: aload         4
+      24: invokevirtual #1239               // Method com/sulkan/shaders/graph/GraphRenderer$Image.close:()V
+      27: iinc          3, 1
+      30: goto          7
+      33: return
+
+  private void lambda$bindSceneUniforms$0(com.mojang.renderpearl.api.commands.RenderPass, java.lang.String, java.lang.String);
+    Code:
+       0: aload_1
+       1: aload_2
+       2: aload_3
+       3: invokestatic  #1240               // Method com/sulkan/shaders/graph/GraphSceneCapture.isInput:(Ljava/lang/String;)Z
+       6: ifeq          20
+       9: aload_0
+      10: getfield      #31                 // Field sceneCapture:Lcom/sulkan/shaders/graph/GraphSceneCapture;
+      13: aload_3
+      14: invokevirtual #918                // Method com/sulkan/shaders/graph/GraphSceneCapture.view:(Ljava/lang/String;)Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+      17: goto          36
+      20: aload_0
+      21: getfield      #93                 // Field customTextures:Ljava/util/Map;
+      24: aload_3
+      25: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      30: checkcast     #621                // class com/sulkan/shaders/graph/GraphRenderer$Image
+      33: getfield      #878                // Field com/sulkan/shaders/graph/GraphRenderer$Image.view:Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+      36: aload_3
+      37: invokestatic  #1240               // Method com/sulkan/shaders/graph/GraphSceneCapture.isInput:(Ljava/lang/String;)Z
+      40: ifeq          50
+      43: aload_0
+      44: getfield      #197                // Field sampler:Lcom/mojang/renderpearl/api/textures/GpuSampler;
+      47: goto          63
+      50: aload_0
+      51: getfield      #96                 // Field textureSamplers:Ljava/util/Map;
+      54: aload_3
+      55: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      60: checkcast     #933                // class com/mojang/renderpearl/api/textures/GpuSampler
+      63: invokeinterface #881,  4          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.setUniform:(Ljava/lang/String;Lcom/mojang/renderpearl/api/textures/GpuTextureView;Lcom/mojang/renderpearl/api/textures/GpuSampler;)V
+      68: return
+
+  private static void lambda$loadTextures$2(java.util.Set, com.sulkan.shaders.graph.PackGraph$SceneProgram);
+    Code:
+       0: aload_1
+       1: invokevirtual #1243               // Method com/sulkan/shaders/graph/PackGraph$SceneProgram.textures:()Ljava/util/Map;
+       4: invokeinterface #729,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+       9: invokeinterface #1246,  1         // InterfaceMethod java/util/Collection.stream:()Ljava/util/stream/Stream;
+      14: invokedynamic #1247,  0           // InvokeDynamic #30:test:()Ljava/util/function/Predicate;
+      19: invokeinterface #1251,  2         // InterfaceMethod java/util/stream/Stream.filter:(Ljava/util/function/Predicate;)Ljava/util/stream/Stream;
+      24: aload_0
+      25: dup
+      26: invokestatic  #1254               // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+      29: pop
+      30: invokedynamic #1259,  0           // InvokeDynamic #31:accept:(Ljava/util/Set;)Ljava/util/function/Consumer;
+      35: invokeinterface #1260,  2         // InterfaceMethod java/util/stream/Stream.forEach:(Ljava/util/function/Consumer;)V
+      40: return
+
+  private static boolean lambda$loadTextures$3(java.lang.String);
+    Code:
+       0: aload_0
+       1: invokestatic  #1240               // Method com/sulkan/shaders/graph/GraphSceneCapture.isInput:(Ljava/lang/String;)Z
+       4: ifne          11
+       7: iconst_1
+       8: goto          12
+      11: iconst_0
+      12: ireturn
+
+  private static void lambda$loadTextures$0(java.util.Set, com.sulkan.shaders.graph.PackGraph$Pass);
+    Code:
+       0: aload_1
+       1: invokevirtual #308                // Method com/sulkan/shaders/graph/PackGraph$Pass.reads:()Ljava/util/Map;
+       4: invokeinterface #729,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+       9: aload_0
+      10: invokedynamic #1261,  0           // InvokeDynamic #32:accept:(Ljava/util/Set;)Ljava/util/function/Consumer;
+      15: invokeinterface #1233,  2         // InterfaceMethod java/util/Collection.forEach:(Ljava/util/function/Consumer;)V
+      20: return
+
+  private static void lambda$loadTextures$1(java.util.Set, java.lang.String);
+    Code:
+       0: aload_1
+       1: ldc_w         #924                // String $texture/
+       4: invokevirtual #926                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+       7: ifeq          23
+      10: aload_0
+      11: aload_1
+      12: bipush        9
+      14: invokevirtual #929                // Method java/lang/String.substring:(I)Ljava/lang/String;
+      17: invokeinterface #523,  2          // InterfaceMethod java/util/Set.add:(Ljava/lang/Object;)Z
+      22: pop
+      23: return
+
+  private static java.lang.String lambda$render$3();
+    Code:
+       0: ldc_w         #1262               // String Sulkan present
+       3: areturn
+
+  private void lambda$render$2(com.mojang.renderpearl.api.commands.RenderPass, com.mojang.blaze3d.pipeline.RenderTarget, com.sulkan.shaders.graph.PackGraph$Pass, java.lang.String, java.lang.String);
+    Code:
+       0: aload_1
+       1: aload         4
+       3: aload_0
+       4: aload         5
+       6: aload_2
+       7: invokevirtual #1264               // Method resolve:(Ljava/lang/String;Lcom/mojang/blaze3d/pipeline/RenderTarget;)Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+      10: aload_3
+      11: invokevirtual #1268               // Method com/sulkan/shaders/graph/PackGraph$Pass.linearReads:()Ljava/util/Set;
+      14: aload         4
+      16: invokeinterface #625,  2          // InterfaceMethod java/util/Set.contains:(Ljava/lang/Object;)Z
+      21: ifeq          31
+      24: aload_0
+      25: getfield      #204                // Field linearSampler:Lcom/mojang/renderpearl/api/textures/GpuSampler;
+      28: goto          37
+      31: aload_0
+      32: aload         5
+      34: invokevirtual #1271               // Method sampler:(Ljava/lang/String;)Lcom/mojang/renderpearl/api/textures/GpuSampler;
+      37: invokeinterface #881,  4          // InterfaceMethod com/mojang/renderpearl/api/commands/RenderPass.setUniform:(Ljava/lang/String;Lcom/mojang/renderpearl/api/textures/GpuTextureView;Lcom/mojang/renderpearl/api/textures/GpuSampler;)V
+      42: return
+
+  private java.lang.String lambda$render$1(com.sulkan.shaders.graph.PackGraph$Pass);
+    Code:
+       0: aload_0
+       1: getfield      #112                // Field graph:Lcom/sulkan/shaders/graph/PackGraph;
+       4: invokevirtual #378                // Method com/sulkan/shaders/graph/PackGraph.name:()Ljava/lang/String;
+       7: aload_1
+       8: invokevirtual #274                // Method com/sulkan/shaders/graph/PackGraph$Pass.name:()Ljava/lang/String;
+      11: invokedynamic #1274,  0           // InvokeDynamic #33:makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+      16: areturn
+
+  private com.mojang.renderpearl.api.textures.GpuTextureView lambda$render$0(com.sulkan.shaders.graph.PackGraph$Pass, com.mojang.blaze3d.pipeline.RenderTarget, java.lang.String);
+    Code:
+       0: aload_1
+       1: invokevirtual #271                // Method com/sulkan/shaders/graph/PackGraph$Pass.writes:()Ljava/util/List;
+       4: aload_3
+       5: invokeinterface #640,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+      10: ifeq          24
+      13: aload_0
+      14: aload_3
+      15: invokevirtual #800                // Method image:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/GraphRenderer$Image;
+      18: getfield      #822                // Field com/sulkan/shaders/graph/GraphRenderer$Image.attachment:Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+      21: goto          30
+      24: aload_0
+      25: aload_3
+      26: aload_2
+      27: invokevirtual #1264               // Method resolve:(Ljava/lang/String;Lcom/mojang/blaze3d/pipeline/RenderTarget;)Lcom/mojang/renderpearl/api/textures/GpuTextureView;
+      30: areturn
+
+  private static void lambda$allocate$0(java.util.Map);
+    Code:
+       0: aload_0
+       1: invokestatic  #673                // Method destroy:(Ljava/util/Map;)V
+       4: return
+
+  private static void lambda$pipeline$0(com.mojang.renderpearl.api.pipeline.BindGroupLayout$Builder, java.lang.String);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: getstatic     #1275               // Field com/mojang/renderpearl/api/pipeline/UniformType.COMBINED_IMAGE_SAMPLER:Lcom/mojang/renderpearl/api/pipeline/UniformType;
+       5: invokevirtual #416                // Method com/mojang/renderpearl/api/pipeline/BindGroupLayout$Builder.withUniform:(Ljava/lang/String;Lcom/mojang/renderpearl/api/pipeline/UniformType;)Lcom/mojang/renderpearl/api/pipeline/BindGroupLayout$Builder;
+       8: pop
+       9: return
+
+  private static com.mojang.renderpearl.api.GpuFormat lambda$new$0(com.sulkan.shaders.graph.PackGraph, java.lang.String);
+    Code:
+       0: aload_0
+       1: invokevirtual #581                // Method com/sulkan/shaders/graph/PackGraph.resources:()Ljava/util/Map;
+       4: aload_1
+       5: invokeinterface #575,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      10: checkcast     #584                // class com/sulkan/shaders/graph/PackGraph$Resource
+      13: invokevirtual #589                // Method com/sulkan/shaders/graph/PackGraph$Resource.format:()Lcom/mojang/renderpearl/api/GpuFormat;
+      16: areturn
+
+  static {};
+    Code:
+       0: invokestatic  #1084               // Method java/lang/System.nanoTime:()J
+       3: putstatic     #1089               // Field WIND_START:J
+       6: return
+}

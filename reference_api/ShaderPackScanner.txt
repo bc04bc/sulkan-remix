@@ -1,0 +1,412 @@
+Compiled from "ShaderPackScanner.java"
+public final class com.sulkan.shaders.pack.ShaderPackScanner {
+  private static final org.slf4j.Logger LOGGER;
+
+  private static final java.lang.String SHADER_DIRECTORY_NAME;
+
+  private static final java.lang.String LEGACY_DIRECTORY_NAME;
+
+  private static boolean legacyMigrated;
+
+  private com.sulkan.shaders.pack.ShaderPackScanner();
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+       4: return
+
+  public static java.nio.file.Path shaderPackDirectory();
+    Code:
+       0: invokestatic  #7                  // InterfaceMethod net/fabricmc/loader/api/FabricLoader.getInstance:()Lnet/fabricmc/loader/api/FabricLoader;
+       3: invokeinterface #13,  1           // InterfaceMethod net/fabricmc/loader/api/FabricLoader.getGameDir:()Ljava/nio/file/Path;
+       8: ldc           #19                 // String shaderpacks
+      10: invokeinterface #21,  2           // InterfaceMethod java/nio/file/Path.resolve:(Ljava/lang/String;)Ljava/nio/file/Path;
+      15: areturn
+
+  public static void ensureShaderPackDirectory();
+    Code:
+       0: invokestatic  #27                 // Method shaderPackDirectory:()Ljava/nio/file/Path;
+       3: iconst_0
+       4: anewarray     #30                 // class java/nio/file/attribute/FileAttribute
+       7: invokestatic  #32                 // Method java/nio/file/Files.createDirectories:(Ljava/nio/file/Path;[Ljava/nio/file/attribute/FileAttribute;)Ljava/nio/file/Path;
+      10: pop
+      11: goto          26
+      14: astore_0
+      15: new           #40                 // class java/lang/IllegalStateException
+      18: dup
+      19: ldc           #42                 // String Failed to create Sulkan shader pack directory
+      21: aload_0
+      22: invokespecial #44                 // Method java/lang/IllegalStateException."<init>":(Ljava/lang/String;Ljava/lang/Throwable;)V
+      25: athrow
+      26: getstatic     #47                 // Field legacyMigrated:Z
+      29: ifne          57
+      32: iconst_1
+      33: putstatic     #47                 // Field legacyMigrated:Z
+      36: invokestatic  #7                  // InterfaceMethod net/fabricmc/loader/api/FabricLoader.getInstance:()Lnet/fabricmc/loader/api/FabricLoader;
+      39: invokeinterface #13,  1           // InterfaceMethod net/fabricmc/loader/api/FabricLoader.getGameDir:()Ljava/nio/file/Path;
+      44: ldc           #51                 // String shaders
+      46: invokeinterface #21,  2           // InterfaceMethod java/nio/file/Path.resolve:(Ljava/lang/String;)Ljava/nio/file/Path;
+      51: invokestatic  #27                 // Method shaderPackDirectory:()Ljava/nio/file/Path;
+      54: invokestatic  #53                 // Method migrateLegacyDirectory:(Ljava/nio/file/Path;Ljava/nio/file/Path;)V
+      57: return
+    Exception table:
+       from    to  target type
+           0    11    14   Class java/io/IOException
+
+  static void migrateLegacyDirectory(java.nio.file.Path, java.nio.file.Path);
+    Code:
+       0: aload_0
+       1: iconst_0
+       2: anewarray     #57                 // class java/nio/file/LinkOption
+       5: invokestatic  #59                 // Method java/nio/file/Files.isDirectory:(Ljava/nio/file/Path;[Ljava/nio/file/LinkOption;)Z
+       8: ifne          12
+      11: return
+      12: aload_0
+      13: invokestatic  #63                 // Method java/nio/file/Files.list:(Ljava/nio/file/Path;)Ljava/util/stream/Stream;
+      16: astore_2
+      17: aload_2
+      18: invokeinterface #67,  1           // InterfaceMethod java/util/stream/Stream.toList:()Ljava/util/List;
+      23: invokeinterface #73,  1           // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+      28: astore_3
+      29: aload_3
+      30: invokeinterface #79,  1           // InterfaceMethod java/util/Iterator.hasNext:()Z
+      35: ifeq          161
+      38: aload_3
+      39: invokeinterface #85,  1           // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      44: checkcast     #22                 // class java/nio/file/Path
+      47: astore        4
+      49: aload_1
+      50: aload         4
+      52: invokeinterface #89,  1           // InterfaceMethod java/nio/file/Path.getFileName:()Ljava/nio/file/Path;
+      57: invokeinterface #92,  1           // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      62: invokeinterface #21,  2           // InterfaceMethod java/nio/file/Path.resolve:(Ljava/lang/String;)Ljava/nio/file/Path;
+      67: astore        5
+      69: aload         5
+      71: iconst_0
+      72: anewarray     #57                 // class java/nio/file/LinkOption
+      75: invokestatic  #96                 // Method java/nio/file/Files.exists:(Ljava/nio/file/Path;[Ljava/nio/file/LinkOption;)Z
+      78: ifeq          98
+      81: getstatic     #99                 // Field LOGGER:Lorg/slf4j/Logger;
+      84: ldc           #103                // String Not moving legacy shader pack {}: {} already exists
+      86: aload         4
+      88: aload         5
+      90: invokeinterface #105,  4          // InterfaceMethod org/slf4j/Logger.warn:(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+      95: goto          29
+      98: aload         4
+     100: aload         5
+     102: iconst_0
+     103: anewarray     #111                // class java/nio/file/CopyOption
+     106: invokestatic  #113                // Method java/nio/file/Files.move:(Ljava/nio/file/Path;Ljava/nio/file/Path;[Ljava/nio/file/CopyOption;)Ljava/nio/file/Path;
+     109: pop
+     110: getstatic     #99                 // Field LOGGER:Lorg/slf4j/Logger;
+     113: ldc           #117                // String Moved legacy shader pack {} to {}
+     115: aload         4
+     117: aload         5
+     119: invokeinterface #119,  4          // InterfaceMethod org/slf4j/Logger.info:(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+     124: goto          158
+     127: astore        6
+     129: getstatic     #99                 // Field LOGGER:Lorg/slf4j/Logger;
+     132: ldc           #122                // String Failed to move legacy shader pack {} to {}
+     134: iconst_3
+     135: anewarray     #2                  // class java/lang/Object
+     138: dup
+     139: iconst_0
+     140: aload         4
+     142: aastore
+     143: dup
+     144: iconst_1
+     145: aload         5
+     147: aastore
+     148: dup
+     149: iconst_2
+     150: aload         6
+     152: aastore
+     153: invokeinterface #124,  3          // InterfaceMethod org/slf4j/Logger.warn:(Ljava/lang/String;[Ljava/lang/Object;)V
+     158: goto          29
+     161: aload_2
+     162: ifnull        198
+     165: aload_2
+     166: invokeinterface #127,  1          // InterfaceMethod java/util/stream/Stream.close:()V
+     171: goto          198
+     174: astore_3
+     175: aload_2
+     176: ifnull        196
+     179: aload_2
+     180: invokeinterface #127,  1          // InterfaceMethod java/util/stream/Stream.close:()V
+     185: goto          196
+     188: astore        4
+     190: aload_3
+     191: aload         4
+     193: invokevirtual #132                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+     196: aload_3
+     197: athrow
+     198: goto          215
+     201: astore_2
+     202: getstatic     #99                 // Field LOGGER:Lorg/slf4j/Logger;
+     205: ldc           #136                // String Failed to read legacy shader directory {}
+     207: aload_0
+     208: aload_2
+     209: invokeinterface #105,  4          // InterfaceMethod org/slf4j/Logger.warn:(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+     214: return
+     215: aload_0
+     216: invokestatic  #138                // Method java/nio/file/Files.deleteIfExists:(Ljava/nio/file/Path;)Z
+     219: pop
+     220: goto          224
+     223: astore_2
+     224: return
+    Exception table:
+       from    to  target type
+          98   124   127   Class java/io/IOException
+          17   161   174   Class java/lang/Throwable
+         179   185   188   Class java/lang/Throwable
+          12   198   201   Class java/io/IOException
+         215   220   223   Class java/io/IOException
+
+  public static java.util.List<com.sulkan.shaders.pack.ShaderPackScanner$AvailableShaderPack> listAvailablePacks();
+    Code:
+       0: invokestatic  #142                // Method scan:()Lcom/sulkan/shaders/pack/ShaderPackScanner$ScanResult;
+       3: invokevirtual #146                // Method com/sulkan/shaders/pack/ShaderPackScanner$ScanResult.supportedPacks:()Ljava/util/List;
+       6: areturn
+
+  public static com.sulkan.shaders.pack.ShaderPackScanner$ScanResult scan();
+    Code:
+       0: invokestatic  #151                // Method ensureShaderPackDirectory:()V
+       3: invokestatic  #27                 // Method shaderPackDirectory:()Ljava/nio/file/Path;
+       6: invokestatic  #154                // Method scanDirectory:(Ljava/nio/file/Path;)Lcom/sulkan/shaders/pack/ShaderPackScanner$ScanResult;
+       9: areturn
+
+  static com.sulkan.shaders.pack.ShaderPackScanner$ScanResult scanDirectory(java.nio.file.Path);
+    Code:
+       0: new           #158                // class java/util/ArrayList
+       3: dup
+       4: invokespecial #160                // Method java/util/ArrayList."<init>":()V
+       7: astore_1
+       8: new           #158                // class java/util/ArrayList
+      11: dup
+      12: invokespecial #160                // Method java/util/ArrayList."<init>":()V
+      15: astore_2
+      16: aload_0
+      17: invokestatic  #63                 // Method java/nio/file/Files.list:(Ljava/nio/file/Path;)Ljava/util/stream/Stream;
+      20: astore_3
+      21: aload_3
+      22: invokedynamic #161,  0            // InvokeDynamic #0:apply:()Ljava/util/function/Function;
+      27: getstatic     #165                // Field java/lang/String.CASE_INSENSITIVE_ORDER:Ljava/util/Comparator;
+      30: invokestatic  #171                // InterfaceMethod java/util/Comparator.comparing:(Ljava/util/function/Function;Ljava/util/Comparator;)Ljava/util/Comparator;
+      33: invokeinterface #177,  2          // InterfaceMethod java/util/stream/Stream.sorted:(Ljava/util/Comparator;)Ljava/util/stream/Stream;
+      38: aload_1
+      39: aload_2
+      40: invokedynamic #181,  0            // InvokeDynamic #1:accept:(Ljava/util/List;Ljava/util/List;)Ljava/util/function/Consumer;
+      45: invokeinterface #185,  2          // InterfaceMethod java/util/stream/Stream.forEach:(Ljava/util/function/Consumer;)V
+      50: aload_3
+      51: ifnull        90
+      54: aload_3
+      55: invokeinterface #127,  1          // InterfaceMethod java/util/stream/Stream.close:()V
+      60: goto          90
+      63: astore        4
+      65: aload_3
+      66: ifnull        87
+      69: aload_3
+      70: invokeinterface #127,  1          // InterfaceMethod java/util/stream/Stream.close:()V
+      75: goto          87
+      78: astore        5
+      80: aload         4
+      82: aload         5
+      84: invokevirtual #132                // Method java/lang/Throwable.addSuppressed:(Ljava/lang/Throwable;)V
+      87: aload         4
+      89: athrow
+      90: goto          117
+      93: astore_3
+      94: aload_2
+      95: new           #189                // class com/sulkan/shaders/pack/ShaderPackScanner$UnsupportedShaderPack
+      98: dup
+      99: aload_0
+     100: invokeinterface #92,  1           // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+     105: ldc           #191                // String unreadable-folder
+     107: aload_0
+     108: invokespecial #193                // Method com/sulkan/shaders/pack/ShaderPackScanner$UnsupportedShaderPack."<init>":(Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;)V
+     111: invokeinterface #196,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     116: pop
+     117: new           #147                // class com/sulkan/shaders/pack/ShaderPackScanner$ScanResult
+     120: dup
+     121: aload_1
+     122: invokestatic  #200                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+     125: aload_2
+     126: invokestatic  #200                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+     129: invokespecial #204                // Method com/sulkan/shaders/pack/ShaderPackScanner$ScanResult."<init>":(Ljava/util/List;Ljava/util/List;)V
+     132: areturn
+    Exception table:
+       from    to  target type
+          21    50    63   Class java/lang/Throwable
+          69    75    78   Class java/lang/Throwable
+          16    90    93   Class java/io/IOException
+
+  public static boolean isKnownPackId(java.lang.String, java.util.List<com.sulkan.shaders.pack.ShaderPackScanner$AvailableShaderPack>);
+    Code:
+       0: ldc           #207                // String __builtin__
+       2: aload_0
+       3: invokevirtual #209                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+       6: ifeq          11
+       9: iconst_1
+      10: ireturn
+      11: aload_1
+      12: invokeinterface #73,  1           // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+      17: astore_2
+      18: aload_2
+      19: invokeinterface #79,  1           // InterfaceMethod java/util/Iterator.hasNext:()Z
+      24: ifeq          53
+      27: aload_2
+      28: invokeinterface #85,  1           // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      33: checkcast     #212                // class com/sulkan/shaders/pack/ShaderPackScanner$AvailableShaderPack
+      36: astore_3
+      37: aload_3
+      38: invokevirtual #214                // Method com/sulkan/shaders/pack/ShaderPackScanner$AvailableShaderPack.id:()Ljava/lang/String;
+      41: aload_0
+      42: invokevirtual #209                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      45: ifeq          50
+      48: iconst_1
+      49: ireturn
+      50: goto          18
+      53: iconst_0
+      54: ireturn
+
+  private static void classify(java.nio.file.Path, java.util.List<com.sulkan.shaders.pack.ShaderPackScanner$AvailableShaderPack>, java.util.List<com.sulkan.shaders.pack.ShaderPackScanner$UnsupportedShaderPack>);
+    Code:
+       0: aload_0
+       1: invokeinterface #89,  1           // InterfaceMethod java/nio/file/Path.getFileName:()Ljava/nio/file/Path;
+       6: invokeinterface #92,  1           // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      11: astore_3
+      12: aload_3
+      13: ldc           #217                // String .
+      15: invokevirtual #219                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+      18: ifne          67
+      21: aload_0
+      22: invokestatic  #223                // Method isCandidatePack:(Ljava/nio/file/Path;)Z
+      25: ifeq          67
+      28: aload_0
+      29: invokestatic  #226                // Method containsSupportedShaders:(Ljava/nio/file/Path;)Z
+      32: ifeq          49
+      35: aload_1
+      36: aload_0
+      37: invokestatic  #229                // Method toAvailablePack:(Ljava/nio/file/Path;)Lcom/sulkan/shaders/pack/ShaderPackScanner$AvailableShaderPack;
+      40: invokeinterface #196,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      45: pop
+      46: goto          67
+      49: aload_2
+      50: new           #189                // class com/sulkan/shaders/pack/ShaderPackScanner$UnsupportedShaderPack
+      53: dup
+      54: aload_3
+      55: ldc           #233                // String not-sulkan-compatible
+      57: aload_0
+      58: invokespecial #193                // Method com/sulkan/shaders/pack/ShaderPackScanner$UnsupportedShaderPack."<init>":(Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;)V
+      61: invokeinterface #196,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      66: pop
+      67: return
+
+  private static boolean isCandidatePack(java.nio.file.Path);
+    Code:
+       0: aload_0
+       1: iconst_0
+       2: anewarray     #57                 // class java/nio/file/LinkOption
+       5: invokestatic  #59                 // Method java/nio/file/Files.isDirectory:(Ljava/nio/file/Path;[Ljava/nio/file/LinkOption;)Z
+       8: ifeq          13
+      11: iconst_1
+      12: ireturn
+      13: aload_0
+      14: invokeinterface #89,  1           // InterfaceMethod java/nio/file/Path.getFileName:()Ljava/nio/file/Path;
+      19: invokeinterface #92,  1           // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      24: getstatic     #235                // Field java/util/Locale.ROOT:Ljava/util/Locale;
+      27: invokevirtual #241                // Method java/lang/String.toLowerCase:(Ljava/util/Locale;)Ljava/lang/String;
+      30: astore_1
+      31: aload_0
+      32: iconst_0
+      33: anewarray     #57                 // class java/nio/file/LinkOption
+      36: invokestatic  #245                // Method java/nio/file/Files.isRegularFile:(Ljava/nio/file/Path;[Ljava/nio/file/LinkOption;)Z
+      39: ifeq          55
+      42: aload_1
+      43: ldc           #248                // String .zip
+      45: invokevirtual #250                // Method java/lang/String.endsWith:(Ljava/lang/String;)Z
+      48: ifeq          55
+      51: iconst_1
+      52: goto          56
+      55: iconst_0
+      56: ireturn
+
+  private static com.sulkan.shaders.pack.ShaderPackScanner$AvailableShaderPack toAvailablePack(java.nio.file.Path);
+    Code:
+       0: aload_0
+       1: invokeinterface #89,  1           // InterfaceMethod java/nio/file/Path.getFileName:()Ljava/nio/file/Path;
+       6: invokeinterface #92,  1           // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      11: astore_1
+      12: aload_1
+      13: ldc           #248                // String .zip
+      15: invokevirtual #250                // Method java/lang/String.endsWith:(Ljava/lang/String;)Z
+      18: ifeq          35
+      21: aload_1
+      22: iconst_0
+      23: aload_1
+      24: invokevirtual #253                // Method java/lang/String.length:()I
+      27: iconst_4
+      28: isub
+      29: invokevirtual #257                // Method java/lang/String.substring:(II)Ljava/lang/String;
+      32: goto          36
+      35: aload_1
+      36: astore_2
+      37: new           #212                // class com/sulkan/shaders/pack/ShaderPackScanner$AvailableShaderPack
+      40: dup
+      41: aload_1
+      42: aload_2
+      43: aload_0
+      44: aload_0
+      45: iconst_0
+      46: anewarray     #57                 // class java/nio/file/LinkOption
+      49: invokestatic  #59                 // Method java/nio/file/Files.isDirectory:(Ljava/nio/file/Path;[Ljava/nio/file/LinkOption;)Z
+      52: invokespecial #261                // Method com/sulkan/shaders/pack/ShaderPackScanner$AvailableShaderPack."<init>":(Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Z)V
+      55: areturn
+
+  private static boolean containsSupportedShaders(java.nio.file.Path);
+    Code:
+       0: aload_0
+       1: invokestatic  #264                // Method com/sulkan/shaders/graph/NativePackRuntime.isNative:(Ljava/nio/file/Path;)Z
+       4: ifeq          25
+       7: aload_0
+       8: invokestatic  #269                // Method com/sulkan/shaders/graph/PackFiles.read:(Ljava/nio/file/Path;)Lcom/sulkan/shaders/graph/PackFiles;
+      11: astore_1
+      12: aload_1
+      13: ldc_w         #275                // String sulkan.json
+      16: invokevirtual #277                // Method com/sulkan/shaders/graph/PackFiles.text:(Ljava/lang/String;)Ljava/lang/String;
+      19: invokestatic  #281                // Method com/sulkan/shaders/graph/PackGraph.parse:(Ljava/lang/String;)Lcom/sulkan/shaders/graph/PackGraph;
+      22: pop
+      23: iconst_1
+      24: ireturn
+      25: iconst_0
+      26: ireturn
+      27: astore_1
+      28: iconst_0
+      29: ireturn
+    Exception table:
+       from    to  target type
+           0    24    27   Class java/io/IOException
+           0    24    27   Class java/lang/IllegalArgumentException
+          25    26    27   Class java/io/IOException
+          25    26    27   Class java/lang/IllegalArgumentException
+
+  private static void lambda$scanDirectory$1(java.util.List, java.util.List, java.nio.file.Path);
+    Code:
+       0: aload_2
+       1: aload_0
+       2: aload_1
+       3: invokestatic  #289                // Method classify:(Ljava/nio/file/Path;Ljava/util/List;Ljava/util/List;)V
+       6: return
+
+  private static java.lang.String lambda$scanDirectory$0(java.nio.file.Path);
+    Code:
+       0: aload_0
+       1: invokeinterface #89,  1           // InterfaceMethod java/nio/file/Path.getFileName:()Ljava/nio/file/Path;
+       6: invokeinterface #92,  1           // InterfaceMethod java/nio/file/Path.toString:()Ljava/lang/String;
+      11: areturn
+
+  static {};
+    Code:
+       0: invokestatic  #293                // Method com/mojang/logging/LogUtils.getLogger:()Lorg/slf4j/Logger;
+       3: putstatic     #99                 // Field LOGGER:Lorg/slf4j/Logger;
+       6: return
+}

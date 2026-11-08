@@ -1,0 +1,3379 @@
+Compiled from "PackGraph.java"
+public final class com.sulkan.shaders.graph.PackGraph extends java.lang.Record {
+  private final java.lang.String name;
+
+  private final java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Resource> resources;
+
+  private final java.util.List<com.sulkan.shaders.graph.PackGraph$Pass> passes;
+
+  private final java.lang.String present;
+
+  private final java.util.Map<java.lang.String, java.lang.Double> options;
+
+  private final java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Option> optionDefinitions;
+
+  private final java.util.List<com.sulkan.shaders.graph.PackGraph$SceneProgram> scenePrograms;
+
+  private final java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Texture> textures;
+
+  private final java.util.List<java.lang.String> sceneTargets;
+
+  private final java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Buffer> buffers;
+
+  private final java.util.Map<java.lang.String, java.lang.Integer> materials;
+
+  private final boolean shadows;
+
+  private final com.sulkan.shaders.graph.PackGraph$Environment environment;
+
+  private final long budgetBytes;
+
+  public com.sulkan.shaders.graph.PackGraph(java.lang.String, java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Resource>, java.util.List<com.sulkan.shaders.graph.PackGraph$Pass>, java.lang.String, java.util.Map<java.lang.String, java.lang.Double>, java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Option>, java.util.List<com.sulkan.shaders.graph.PackGraph$SceneProgram>, java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Texture>, java.util.List<java.lang.String>, java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Buffer>, java.util.Map<java.lang.String, java.lang.Integer>, boolean, com.sulkan.shaders.graph.PackGraph$Environment, long);
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Record."<init>":()V
+       4: aload_0
+       5: aload_1
+       6: putfield      #7                  // Field name:Ljava/lang/String;
+       9: aload_0
+      10: aload_2
+      11: putfield      #13                 // Field resources:Ljava/util/Map;
+      14: aload_0
+      15: aload_3
+      16: putfield      #17                 // Field passes:Ljava/util/List;
+      19: aload_0
+      20: aload         4
+      22: putfield      #21                 // Field present:Ljava/lang/String;
+      25: aload_0
+      26: aload         5
+      28: putfield      #24                 // Field options:Ljava/util/Map;
+      31: aload_0
+      32: aload         6
+      34: putfield      #27                 // Field optionDefinitions:Ljava/util/Map;
+      37: aload_0
+      38: aload         7
+      40: putfield      #30                 // Field scenePrograms:Ljava/util/List;
+      43: aload_0
+      44: aload         8
+      46: putfield      #33                 // Field textures:Ljava/util/Map;
+      49: aload_0
+      50: aload         9
+      52: putfield      #36                 // Field sceneTargets:Ljava/util/List;
+      55: aload_0
+      56: aload         10
+      58: putfield      #39                 // Field buffers:Ljava/util/Map;
+      61: aload_0
+      62: aload         11
+      64: putfield      #42                 // Field materials:Ljava/util/Map;
+      67: aload_0
+      68: iload         12
+      70: putfield      #45                 // Field shadows:Z
+      73: aload_0
+      74: aload         13
+      76: putfield      #49                 // Field environment:Lcom/sulkan/shaders/graph/PackGraph$Environment;
+      79: aload_0
+      80: lload         14
+      82: putfield      #53                 // Field budgetBytes:J
+      85: return
+
+  public int shadowQuality();
+    Code:
+       0: aload_0
+       1: getfield      #45                 // Field shadows:Z
+       4: ifeq          33
+       7: aload_0
+       8: getfield      #24                 // Field options:Ljava/util/Map;
+      11: ldc           #57                 // String SHADOW_QUALITY
+      13: ldc2_w        #59                 // double 2.0d
+      16: invokestatic  #61                 // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+      19: invokeinterface #67,  3           // InterfaceMethod java/util/Map.getOrDefault:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      24: checkcast     #62                 // class java/lang/Double
+      27: invokevirtual #73                 // Method java/lang/Double.intValue:()I
+      30: goto          34
+      33: iconst_0
+      34: ireturn
+
+  public int shadowDistance();
+    Code:
+       0: aload_0
+       1: getfield      #24                 // Field options:Ljava/util/Map;
+       4: ldc           #77                 // String SHADOW_DISTANCE
+       6: ldc2_w        #79                 // double 128.0d
+       9: invokestatic  #61                 // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+      12: invokeinterface #67,  3           // InterfaceMethod java/util/Map.getOrDefault:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      17: checkcast     #62                 // class java/lang/Double
+      20: invokevirtual #73                 // Method java/lang/Double.intValue:()I
+      23: ireturn
+
+  private static void applyPlatforms(com.google.gson.JsonObject, com.sulkan.shaders.runtime.GpuCapabilities);
+    Code:
+       0: aload_0
+       1: ldc           #81                 // String platforms
+       3: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+       6: ifne          10
+       9: return
+      10: aload_0
+      11: ldc           #81                 // String platforms
+      13: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+      16: astore_2
+      17: aload_2
+      18: iconst_3
+      19: anewarray     #93                 // class java/lang/String
+      22: dup
+      23: iconst_0
+      24: ldc           #95                 // String vulkan1.3
+      26: aastore
+      27: dup
+      28: iconst_1
+      29: ldc           #97                 // String vulkan1.4
+      31: aastore
+      32: dup
+      33: iconst_2
+      34: ldc           #99                 // String apple
+      36: aastore
+      37: invokestatic  #101                // Method keys:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+      40: new           #105                // class java/util/LinkedHashMap
+      43: dup
+      44: invokespecial #107                // Method java/util/LinkedHashMap."<init>":()V
+      47: astore_3
+      48: aload_3
+      49: ldc           #95                 // String vulkan1.3
+      51: aload_1
+      52: iconst_1
+      53: iconst_3
+      54: invokevirtual #108                // Method com/sulkan/shaders/runtime/GpuCapabilities.atLeast:(II)Z
+      57: invokestatic  #114                // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+      60: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      65: pop
+      66: aload_3
+      67: ldc           #97                 // String vulkan1.4
+      69: aload_1
+      70: iconst_1
+      71: iconst_4
+      72: invokevirtual #108                // Method com/sulkan/shaders/runtime/GpuCapabilities.atLeast:(II)Z
+      75: invokestatic  #114                // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+      78: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      83: pop
+      84: aload_3
+      85: ldc           #99                 // String apple
+      87: aload_1
+      88: invokevirtual #122                // Method com/sulkan/shaders/runtime/GpuCapabilities.apple:()Z
+      91: invokestatic  #114                // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+      94: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      99: pop
+     100: aload_3
+     101: aload_2
+     102: aload_0
+     103: invokedynamic #125,  0            // InvokeDynamic #0:accept:(Lcom/google/gson/JsonObject;Lcom/google/gson/JsonObject;)Ljava/util/function/BiConsumer;
+     108: invokeinterface #129,  2          // InterfaceMethod java/util/Map.forEach:(Ljava/util/function/BiConsumer;)V
+     113: return
+
+  public static com.sulkan.shaders.graph.PackGraph parse(java.lang.String);
+    Code:
+       0: aload_0
+       1: invokestatic  #133                // Method com/google/gson/JsonParser.parseString:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+       4: invokevirtual #139                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+       7: astore_1
+       8: aload_1
+       9: iconst_5
+      10: anewarray     #93                 // class java/lang/String
+      13: dup
+      14: iconst_0
+      15: ldc           #144                // String version
+      17: aastore
+      18: dup
+      19: iconst_1
+      20: ldc           #146                // String name
+      22: aastore
+      23: dup
+      24: iconst_2
+      25: ldc           #147                // String resources
+      27: aastore
+      28: dup
+      29: iconst_3
+      30: ldc           #148                // String passes
+      32: aastore
+      33: dup
+      34: iconst_4
+      35: ldc           #149                // String present
+      37: aastore
+      38: invokestatic  #150                // Method required:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+      41: aload_1
+      42: bipush        15
+      44: anewarray     #93                 // class java/lang/String
+      47: dup
+      48: iconst_0
+      49: ldc           #144                // String version
+      51: aastore
+      52: dup
+      53: iconst_1
+      54: ldc           #146                // String name
+      56: aastore
+      57: dup
+      58: iconst_2
+      59: ldc           #147                // String resources
+      61: aastore
+      62: dup
+      63: iconst_3
+      64: ldc           #148                // String passes
+      66: aastore
+      67: dup
+      68: iconst_4
+      69: ldc           #149                // String present
+      71: aastore
+      72: dup
+      73: iconst_5
+      74: ldc           #153                // String options
+      76: aastore
+      77: dup
+      78: bipush        6
+      80: ldc           #154                // String budgetMiB
+      82: aastore
+      83: dup
+      84: bipush        7
+      86: ldc           #156                // String scenePrograms
+      88: aastore
+      89: dup
+      90: bipush        8
+      92: ldc           #157                // String textures
+      94: aastore
+      95: dup
+      96: bipush        9
+      98: ldc           #158                // String sceneTargets
+     100: aastore
+     101: dup
+     102: bipush        10
+     104: ldc           #159                // String buffers
+     106: aastore
+     107: dup
+     108: bipush        11
+     110: ldc           #160                // String materials
+     112: aastore
+     113: dup
+     114: bipush        12
+     116: ldc           #161                // String shadows
+     118: aastore
+     119: dup
+     120: bipush        13
+     122: ldc           #162                // String environment
+     124: aastore
+     125: dup
+     126: bipush        14
+     128: ldc           #81                 // String platforms
+     130: aastore
+     131: invokestatic  #101                // Method keys:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+     134: aload_1
+     135: ldc           #144                // String version
+     137: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     140: ldc           #144                // String version
+     142: invokestatic  #166                // Method integer:(Lcom/google/gson/JsonElement;Ljava/lang/String;)I
+     145: iconst_1
+     146: if_icmpeq     159
+     149: new           #170                // class java/lang/IllegalArgumentException
+     152: dup
+     153: ldc           #172                // String Unsupported native pack version
+     155: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     158: athrow
+     159: aload_1
+     160: invokestatic  #177                // Method com/sulkan/shaders/runtime/GpuCapabilities.current:()Lcom/sulkan/shaders/runtime/GpuCapabilities;
+     163: invokestatic  #181                // Method applyPlatforms:(Lcom/google/gson/JsonObject;Lcom/sulkan/shaders/runtime/GpuCapabilities;)V
+     166: new           #185                // class java/util/TreeMap
+     169: dup
+     170: invokespecial #187                // Method java/util/TreeMap."<init>":()V
+     173: astore_2
+     174: new           #105                // class java/util/LinkedHashMap
+     177: dup
+     178: invokespecial #107                // Method java/util/LinkedHashMap."<init>":()V
+     181: astore_3
+     182: aload_1
+     183: ldc           #153                // String options
+     185: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     188: ifeq          212
+     191: aload_1
+     192: ldc           #153                // String options
+     194: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+     197: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+     200: aload_2
+     201: aload_3
+     202: invokedynamic #192,  0            // InvokeDynamic #1:accept:(Ljava/util/Map;Ljava/util/Map;)Ljava/util/function/Consumer;
+     207: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+     212: aload_1
+     213: ldc           #161                // String shadows
+     215: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     218: ifeq          245
+     221: aload_1
+     222: ldc           #161                // String shadows
+     224: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     227: invokevirtual #200                // Method com/google/gson/JsonElement.isJsonPrimitive:()Z
+     230: ifeq          2801
+     233: aload_1
+     234: ldc           #161                // String shadows
+     236: invokevirtual #203                // Method com/google/gson/JsonObject.getAsJsonPrimitive:(Ljava/lang/String;)Lcom/google/gson/JsonPrimitive;
+     239: invokevirtual #207                // Method com/google/gson/JsonPrimitive.isBoolean:()Z
+     242: ifeq          2801
+     245: aload_1
+     246: ldc           #161                // String shadows
+     248: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     251: ifeq          363
+     254: aload_1
+     255: ldc           #161                // String shadows
+     257: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     260: invokevirtual #212                // Method com/google/gson/JsonElement.getAsBoolean:()Z
+     263: ifeq          363
+     266: ldc           #57                 // String SHADOW_QUALITY
+     268: ldc           #77                 // String SHADOW_DISTANCE
+     270: invokestatic  #215                // InterfaceMethod java/util/List.of:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/List;
+     273: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     278: astore        4
+     280: aload         4
+     282: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     287: ifeq          363
+     290: aload         4
+     292: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     297: checkcast     #93                 // class java/lang/String
+     300: astore        5
+     302: aload_3
+     303: aload         5
+     305: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     310: checkcast     #237                // class com/sulkan/shaders/graph/PackGraph$Option
+     313: astore        6
+     315: aload         6
+     317: ifnull        360
+     320: aload         6
+     322: invokevirtual #239                // Method com/sulkan/shaders/graph/PackGraph$Option.values:()Ljava/util/List;
+     325: invokeinterface #243,  1          // InterfaceMethod java/util/List.stream:()Ljava/util/stream/Stream;
+     330: aload         5
+     332: invokedynamic #247,  0            // InvokeDynamic #2:test:(Ljava/lang/String;)Ljava/util/function/Predicate;
+     337: invokeinterface #251,  2          // InterfaceMethod java/util/stream/Stream.anyMatch:(Ljava/util/function/Predicate;)Z
+     342: ifeq          360
+     345: new           #170                // class java/lang/IllegalArgumentException
+     348: dup
+     349: aload         5
+     351: invokedynamic #257,  0            // InvokeDynamic #3:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     356: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     359: athrow
+     360: goto          280
+     363: new           #105                // class java/util/LinkedHashMap
+     366: dup
+     367: invokespecial #107                // Method java/util/LinkedHashMap."<init>":()V
+     370: astore        4
+     372: aload_1
+     373: ldc           #147                // String resources
+     375: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+     378: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+     381: aload         4
+     383: invokedynamic #261,  0            // InvokeDynamic #4:accept:(Ljava/util/Map;)Ljava/util/function/Consumer;
+     388: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+     393: new           #105                // class java/util/LinkedHashMap
+     396: dup
+     397: invokespecial #107                // Method java/util/LinkedHashMap."<init>":()V
+     400: astore        5
+     402: aload_1
+     403: ldc           #159                // String buffers
+     405: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     408: ifeq          432
+     411: aload_1
+     412: ldc           #159                // String buffers
+     414: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+     417: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+     420: aload         5
+     422: invokedynamic #264,  0            // InvokeDynamic #5:accept:(Ljava/util/Map;)Ljava/util/function/Consumer;
+     427: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+     432: aload         5
+     434: invokeinterface #265,  1          // InterfaceMethod java/util/Map.size:()I
+     439: bipush        64
+     441: if_icmple     455
+     444: new           #170                // class java/lang/IllegalArgumentException
+     447: dup
+     448: ldc_w         #268                // String Too many storage buffers
+     451: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     454: athrow
+     455: new           #270                // class java/util/ArrayList
+     458: dup
+     459: invokespecial #272                // Method java/util/ArrayList."<init>":()V
+     462: astore        6
+     464: new           #273                // class java/util/HashSet
+     467: dup
+     468: invokespecial #275                // Method java/util/HashSet."<init>":()V
+     471: astore        7
+     473: aload_1
+     474: ldc           #148                // String passes
+     476: invokevirtual #276                // Method com/google/gson/JsonObject.getAsJsonArray:(Ljava/lang/String;)Lcom/google/gson/JsonArray;
+     479: invokevirtual #280                // Method com/google/gson/JsonArray.iterator:()Ljava/util/Iterator;
+     482: astore        8
+     484: aload         8
+     486: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     491: ifeq          1420
+     494: aload         8
+     496: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     501: checkcast     #140                // class com/google/gson/JsonElement
+     504: astore        9
+     506: aload         9
+     508: invokevirtual #139                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+     511: astore        10
+     513: aload         10
+     515: bipush        10
+     517: anewarray     #93                 // class java/lang/String
+     520: dup
+     521: iconst_0
+     522: ldc           #146                // String name
+     524: aastore
+     525: dup
+     526: iconst_1
+     527: ldc_w         #283                // String fragment
+     530: aastore
+     531: dup
+     532: iconst_2
+     533: ldc_w         #285                // String compute
+     536: aastore
+     537: dup
+     538: iconst_3
+     539: ldc_w         #287                // String localSize
+     542: aastore
+     543: dup
+     544: iconst_4
+     545: ldc_w         #289                // String reads
+     548: aastore
+     549: dup
+     550: iconst_5
+     551: ldc_w         #291                // String writes
+     554: aastore
+     555: dup
+     556: bipush        6
+     558: ldc           #159                // String buffers
+     560: aastore
+     561: dup
+     562: bipush        7
+     564: ldc_w         #293                // String dispatch
+     567: aastore
+     568: dup
+     569: bipush        8
+     571: ldc_w         #295                // String readConditions
+     574: aastore
+     575: dup
+     576: bipush        9
+     578: ldc_w         #297                // String linearReads
+     581: aastore
+     582: invokestatic  #101                // Method keys:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+     585: aload         10
+     587: iconst_3
+     588: anewarray     #93                 // class java/lang/String
+     591: dup
+     592: iconst_0
+     593: ldc           #146                // String name
+     595: aastore
+     596: dup
+     597: iconst_1
+     598: ldc_w         #289                // String reads
+     601: aastore
+     602: dup
+     603: iconst_2
+     604: ldc_w         #291                // String writes
+     607: aastore
+     608: invokestatic  #150                // Method required:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+     611: aload         10
+     613: ldc           #146                // String name
+     615: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     618: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+     621: astore        11
+     623: aload         11
+     625: invokestatic  #303                // Method identifier:(Ljava/lang/String;)V
+     628: aload         7
+     630: aload         11
+     632: invokeinterface #306,  2          // InterfaceMethod java/util/Set.add:(Ljava/lang/Object;)Z
+     637: ifne          655
+     640: new           #170                // class java/lang/IllegalArgumentException
+     643: dup
+     644: aload         11
+     646: invokedynamic #310,  0            // InvokeDynamic #6:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     651: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     654: athrow
+     655: aload         10
+     657: ldc_w         #283                // String fragment
+     660: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     663: aload         10
+     665: ldc_w         #285                // String compute
+     668: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     671: if_icmpne     685
+     674: new           #170                // class java/lang/IllegalArgumentException
+     677: dup
+     678: ldc_w         #311                // String Pass must declare exactly one of fragment or compute
+     681: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     684: athrow
+     685: aload         10
+     687: ldc_w         #283                // String fragment
+     690: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     693: ifeq          710
+     696: aload         10
+     698: ldc_w         #283                // String fragment
+     701: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     704: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+     707: goto          711
+     710: aconst_null
+     711: astore        12
+     713: aload         10
+     715: ldc_w         #285                // String compute
+     718: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     721: ifeq          738
+     724: aload         10
+     726: ldc_w         #285                // String compute
+     729: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     732: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+     735: goto          739
+     738: aconst_null
+     739: astore        13
+     741: aload         12
+     743: ifnonnull     751
+     746: aload         13
+     748: goto          753
+     751: aload         12
+     753: invokestatic  #313                // Method com/sulkan/shaders/graph/PackFiles.safe:(Ljava/lang/String;)Z
+     756: ifne          770
+     759: new           #170                // class java/lang/IllegalArgumentException
+     762: dup
+     763: ldc_w         #318                // String Invalid shader path
+     766: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     769: athrow
+     770: new           #270                // class java/util/ArrayList
+     773: dup
+     774: bipush        8
+     776: invokestatic  #320                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     779: bipush        8
+     781: invokestatic  #320                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     784: iconst_1
+     785: invokestatic  #320                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     788: invokestatic  #325                // InterfaceMethod java/util/List.of:(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/List;
+     791: invokespecial #328                // Method java/util/ArrayList."<init>":(Ljava/util/Collection;)V
+     794: astore        14
+     796: aload         10
+     798: ldc_w         #287                // String localSize
+     801: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     804: ifeq          890
+     807: aload         13
+     809: ifnonnull     823
+     812: new           #170                // class java/lang/IllegalArgumentException
+     815: dup
+     816: ldc_w         #331                // String Only compute passes have localSize
+     819: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     822: athrow
+     823: aload         14
+     825: invokeinterface #333,  1          // InterfaceMethod java/util/List.clear:()V
+     830: aload         10
+     832: ldc_w         #287                // String localSize
+     835: invokevirtual #276                // Method com/google/gson/JsonObject.getAsJsonArray:(Ljava/lang/String;)Lcom/google/gson/JsonArray;
+     838: aload         14
+     840: invokedynamic #336,  0            // InvokeDynamic #7:accept:(Ljava/util/List;)Ljava/util/function/Consumer;
+     845: invokevirtual #339                // Method com/google/gson/JsonArray.forEach:(Ljava/util/function/Consumer;)V
+     848: aload         14
+     850: invokeinterface #340,  1          // InterfaceMethod java/util/List.size:()I
+     855: iconst_3
+     856: if_icmpne     879
+     859: aload         14
+     861: invokeinterface #243,  1          // InterfaceMethod java/util/List.stream:()Ljava/util/stream/Stream;
+     866: invokedynamic #341,  0            // InvokeDynamic #8:test:()Ljava/util/function/Predicate;
+     871: invokeinterface #251,  2          // InterfaceMethod java/util/stream/Stream.anyMatch:(Ljava/util/function/Predicate;)Z
+     876: ifeq          890
+     879: new           #170                // class java/lang/IllegalArgumentException
+     882: dup
+     883: ldc_w         #344                // String Compute localSize must be [x,y,z]
+     886: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     889: athrow
+     890: new           #105                // class java/util/LinkedHashMap
+     893: dup
+     894: invokespecial #107                // Method java/util/LinkedHashMap."<init>":()V
+     897: astore        15
+     899: aload         10
+     901: ldc_w         #289                // String reads
+     904: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+     907: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+     910: aload         15
+     912: invokedynamic #346,  0            // InvokeDynamic #9:accept:(Ljava/util/Map;)Ljava/util/function/Consumer;
+     917: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+     922: new           #270                // class java/util/ArrayList
+     925: dup
+     926: invokespecial #272                // Method java/util/ArrayList."<init>":()V
+     929: astore        16
+     931: aload         10
+     933: ldc_w         #291                // String writes
+     936: invokevirtual #276                // Method com/google/gson/JsonObject.getAsJsonArray:(Ljava/lang/String;)Lcom/google/gson/JsonArray;
+     939: aload         16
+     941: invokedynamic #347,  0            // InvokeDynamic #10:accept:(Ljava/util/List;)Ljava/util/function/Consumer;
+     946: invokevirtual #339                // Method com/google/gson/JsonArray.forEach:(Ljava/util/function/Consumer;)V
+     949: new           #105                // class java/util/LinkedHashMap
+     952: dup
+     953: invokespecial #107                // Method java/util/LinkedHashMap."<init>":()V
+     956: astore        17
+     958: aload         10
+     960: ldc           #159                // String buffers
+     962: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     965: ifeq          994
+     968: aload         10
+     970: ldc           #159                // String buffers
+     972: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+     975: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+     978: aload         13
+     980: aload         5
+     982: aload         17
+     984: invokedynamic #348,  0            // InvokeDynamic #11:accept:(Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;)Ljava/util/function/Consumer;
+     989: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+     994: new           #273                // class java/util/HashSet
+     997: dup
+     998: invokespecial #275                // Method java/util/HashSet."<init>":()V
+    1001: astore        18
+    1003: aload         18
+    1005: aload         15
+    1007: invokeinterface #351,  1          // InterfaceMethod java/util/Map.keySet:()Ljava/util/Set;
+    1012: invokeinterface #354,  2          // InterfaceMethod java/util/Set.addAll:(Ljava/util/Collection;)Z
+    1017: pop
+    1018: aload         17
+    1020: invokeinterface #351,  1          // InterfaceMethod java/util/Map.keySet:()Ljava/util/Set;
+    1025: invokeinterface #358,  1          // InterfaceMethod java/util/Set.iterator:()Ljava/util/Iterator;
+    1030: astore        19
+    1032: aload         19
+    1034: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+    1039: ifeq          1084
+    1042: aload         19
+    1044: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+    1049: checkcast     #93                 // class java/lang/String
+    1052: astore        20
+    1054: aload         18
+    1056: aload         20
+    1058: invokeinterface #306,  2          // InterfaceMethod java/util/Set.add:(Ljava/lang/Object;)Z
+    1063: ifne          1081
+    1066: new           #170                // class java/lang/IllegalArgumentException
+    1069: dup
+    1070: aload         20
+    1072: invokedynamic #359,  0            // InvokeDynamic #12:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+    1077: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    1080: athrow
+    1081: goto          1032
+    1084: aload         18
+    1086: invokeinterface #358,  1          // InterfaceMethod java/util/Set.iterator:()Ljava/util/Iterator;
+    1091: astore        19
+    1093: aload         19
+    1095: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+    1100: ifeq          1177
+    1103: aload         19
+    1105: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+    1110: checkcast     #93                 // class java/lang/String
+    1113: astore        20
+    1115: aload         20
+    1117: ldc_w         #360                // String [A-Za-z_][A-Za-z0-9_]*
+    1120: invokevirtual #362                // Method java/lang/String.matches:(Ljava/lang/String;)Z
+    1123: ifeq          1159
+    1126: aload         20
+    1128: ldc_w         #365                // String gl_
+    1131: invokevirtual #367                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+    1134: ifne          1159
+    1137: aload         20
+    1139: ldc_w         #370                // String Sulkan
+    1142: invokevirtual #367                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+    1145: ifne          1159
+    1148: aload         20
+    1150: ldc_w         #372                // String Output[0-9]+
+    1153: invokevirtual #362                // Method java/lang/String.matches:(Ljava/lang/String;)Z
+    1156: ifeq          1174
+    1159: new           #170                // class java/lang/IllegalArgumentException
+    1162: dup
+    1163: aload         20
+    1165: invokedynamic #374,  0            // InvokeDynamic #13:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+    1170: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    1173: athrow
+    1174: goto          1093
+    1177: new           #270                // class java/util/ArrayList
+    1180: dup
+    1181: invokespecial #272                // Method java/util/ArrayList."<init>":()V
+    1184: astore        19
+    1186: aload         10
+    1188: ldc_w         #293                // String dispatch
+    1191: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    1194: ifeq          1215
+    1197: aload         10
+    1199: ldc_w         #293                // String dispatch
+    1202: invokevirtual #276                // Method com/google/gson/JsonObject.getAsJsonArray:(Ljava/lang/String;)Lcom/google/gson/JsonArray;
+    1205: aload         19
+    1207: invokedynamic #375,  0            // InvokeDynamic #14:accept:(Ljava/util/List;)Ljava/util/function/Consumer;
+    1212: invokevirtual #339                // Method com/google/gson/JsonArray.forEach:(Ljava/util/function/Consumer;)V
+    1215: aload         19
+    1217: invokeinterface #376,  1          // InterfaceMethod java/util/List.isEmpty:()Z
+    1222: ifne          1261
+    1225: aload         13
+    1227: ifnull        1409
+    1230: aload         19
+    1232: invokeinterface #340,  1          // InterfaceMethod java/util/List.size:()I
+    1237: iconst_3
+    1238: if_icmpne     1409
+    1241: aload         19
+    1243: invokeinterface #243,  1          // InterfaceMethod java/util/List.stream:()Ljava/util/stream/Stream;
+    1248: invokedynamic #379,  0            // InvokeDynamic #15:test:()Ljava/util/function/Predicate;
+    1253: invokeinterface #251,  2          // InterfaceMethod java/util/stream/Stream.anyMatch:(Ljava/util/function/Predicate;)Z
+    1258: ifne          1409
+    1261: aload         16
+    1263: invokeinterface #340,  1          // InterfaceMethod java/util/List.size:()I
+    1268: bipush        8
+    1270: if_icmpgt     1394
+    1273: new           #273                // class java/util/HashSet
+    1276: dup
+    1277: aload         16
+    1279: invokespecial #380                // Method java/util/HashSet."<init>":(Ljava/util/Collection;)V
+    1282: invokevirtual #381                // Method java/util/HashSet.size:()I
+    1285: aload         16
+    1287: invokeinterface #340,  1          // InterfaceMethod java/util/List.size:()I
+    1292: if_icmpne     1394
+    1295: aload         16
+    1297: invokeinterface #376,  1          // InterfaceMethod java/util/List.isEmpty:()Z
+    1302: ifeq          1345
+    1305: aload         13
+    1307: ifnull        1394
+    1310: aload         19
+    1312: invokeinterface #376,  1          // InterfaceMethod java/util/List.isEmpty:()Z
+    1317: ifne          1394
+    1320: aload         17
+    1322: invokeinterface #382,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+    1327: invokeinterface #385,  1          // InterfaceMethod java/util/Collection.stream:()Ljava/util/stream/Stream;
+    1332: invokedynamic #388,  0            // InvokeDynamic #16:test:()Ljava/util/function/Predicate;
+    1337: invokeinterface #389,  2          // InterfaceMethod java/util/stream/Stream.noneMatch:(Ljava/util/function/Predicate;)Z
+    1342: ifne          1394
+    1345: aload         6
+    1347: new           #392                // class com/sulkan/shaders/graph/PackGraph$Pass
+    1350: dup
+    1351: aload         11
+    1353: aload         12
+    1355: aload         13
+    1357: aload         14
+    1359: invokestatic  #394                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+    1362: aload         15
+    1364: invokestatic  #398                // Method java/util/Collections.unmodifiableMap:(Ljava/util/Map;)Ljava/util/Map;
+    1367: aload         16
+    1369: invokestatic  #394                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+    1372: aload         17
+    1374: invokestatic  #398                // Method java/util/Collections.unmodifiableMap:(Ljava/util/Map;)Ljava/util/Map;
+    1377: aload         19
+    1379: invokestatic  #394                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+    1382: invokespecial #404                // Method com/sulkan/shaders/graph/PackGraph$Pass."<init>":(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/util/List;Ljava/util/Map;Ljava/util/List;)V
+    1385: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+    1390: pop
+    1391: goto          484
+    1394: new           #170                // class java/lang/IllegalArgumentException
+    1397: dup
+    1398: aload         11
+    1400: invokedynamic #408,  0            // InvokeDynamic #17:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+    1405: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    1408: athrow
+    1409: new           #170                // class java/lang/IllegalArgumentException
+    1412: dup
+    1413: ldc_w         #409                // String dispatch must specify three positive compute extents
+    1416: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    1419: athrow
+    1420: aload         6
+    1422: invokeinterface #376,  1          // InterfaceMethod java/util/List.isEmpty:()Z
+    1427: ifne          2790
+    1430: aload         6
+    1432: invokeinterface #340,  1          // InterfaceMethod java/util/List.size:()I
+    1437: sipush        128
+    1440: if_icmpgt     2790
+    1443: aload         4
+    1445: invokeinterface #265,  1          // InterfaceMethod java/util/Map.size:()I
+    1450: sipush        256
+    1453: if_icmpgt     2790
+    1456: aload_1
+    1457: ldc           #149                // String present
+    1459: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+    1462: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+    1465: astore        8
+    1467: new           #105                // class java/util/LinkedHashMap
+    1470: dup
+    1471: invokespecial #107                // Method java/util/LinkedHashMap."<init>":()V
+    1474: astore        9
+    1476: aload_1
+    1477: ldc           #157                // String textures
+    1479: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    1482: ifeq          1506
+    1485: aload_1
+    1486: ldc           #157                // String textures
+    1488: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+    1491: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+    1494: aload         9
+    1496: invokedynamic #411,  0            // InvokeDynamic #18:accept:(Ljava/util/Map;)Ljava/util/function/Consumer;
+    1501: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+    1506: new           #270                // class java/util/ArrayList
+    1509: dup
+    1510: invokespecial #272                // Method java/util/ArrayList."<init>":()V
+    1513: astore        10
+    1515: aload_1
+    1516: ldc           #158                // String sceneTargets
+    1518: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    1521: ifeq          1540
+    1524: aload_1
+    1525: ldc           #158                // String sceneTargets
+    1527: invokevirtual #276                // Method com/google/gson/JsonObject.getAsJsonArray:(Ljava/lang/String;)Lcom/google/gson/JsonArray;
+    1530: aload         10
+    1532: invokedynamic #412,  0            // InvokeDynamic #19:accept:(Ljava/util/List;)Ljava/util/function/Consumer;
+    1537: invokevirtual #339                // Method com/google/gson/JsonArray.forEach:(Ljava/util/function/Consumer;)V
+    1540: aload         10
+    1542: invokeinterface #340,  1          // InterfaceMethod java/util/List.size:()I
+    1547: bipush        7
+    1549: if_icmpgt     2779
+    1552: new           #273                // class java/util/HashSet
+    1555: dup
+    1556: aload         10
+    1558: invokespecial #380                // Method java/util/HashSet."<init>":(Ljava/util/Collection;)V
+    1561: invokevirtual #381                // Method java/util/HashSet.size:()I
+    1564: aload         10
+    1566: invokeinterface #340,  1          // InterfaceMethod java/util/List.size:()I
+    1571: if_icmpne     2779
+    1574: aload         10
+    1576: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+    1581: astore        11
+    1583: aload         11
+    1585: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+    1590: ifeq          1677
+    1593: aload         11
+    1595: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+    1600: checkcast     #93                 // class java/lang/String
+    1603: astore        12
+    1605: aload         4
+    1607: aload         12
+    1609: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+    1614: checkcast     #413                // class com/sulkan/shaders/graph/PackGraph$Resource
+    1617: astore        13
+    1619: aload         13
+    1621: ifnull        1659
+    1624: aload         13
+    1626: getfield      #415                // Field com/sulkan/shaders/graph/PackGraph$Resource.history:Z
+    1629: ifne          1659
+    1632: aload         13
+    1634: getfield      #418                // Field com/sulkan/shaders/graph/PackGraph$Resource.depth:I
+    1637: iconst_1
+    1638: if_icmpne     1659
+    1641: aload         13
+    1643: getfield      #422                // Field com/sulkan/shaders/graph/PackGraph$Resource.scale:D
+    1646: dconst_1
+    1647: dcmpl
+    1648: ifne          1659
+    1651: aload         13
+    1653: getfield      #426                // Field com/sulkan/shaders/graph/PackGraph$Resource.fixedWidth:I
+    1656: ifeq          1674
+    1659: new           #170                // class java/lang/IllegalArgumentException
+    1662: dup
+    1663: aload         12
+    1665: invokedynamic #429,  0            // InvokeDynamic #20:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+    1670: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    1673: athrow
+    1674: goto          1583
+    1677: new           #270                // class java/util/ArrayList
+    1680: dup
+    1681: invokespecial #272                // Method java/util/ArrayList."<init>":()V
+    1684: astore        11
+    1686: aload_1
+    1687: ldc           #156                // String scenePrograms
+    1689: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    1692: ifeq          2010
+    1695: aload_1
+    1696: ldc           #156                // String scenePrograms
+    1698: invokevirtual #276                // Method com/google/gson/JsonObject.getAsJsonArray:(Ljava/lang/String;)Lcom/google/gson/JsonArray;
+    1701: invokevirtual #280                // Method com/google/gson/JsonArray.iterator:()Ljava/util/Iterator;
+    1704: astore        12
+    1706: aload         12
+    1708: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+    1713: ifeq          2010
+    1716: aload         12
+    1718: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+    1723: checkcast     #140                // class com/google/gson/JsonElement
+    1726: astore        13
+    1728: aload         13
+    1730: invokevirtual #139                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+    1733: astore        14
+    1735: aload         14
+    1737: iconst_5
+    1738: anewarray     #93                 // class java/lang/String
+    1741: dup
+    1742: iconst_0
+    1743: ldc_w         #430                // String pipeline
+    1746: aastore
+    1747: dup
+    1748: iconst_1
+    1749: ldc_w         #432                // String vertex
+    1752: aastore
+    1753: dup
+    1754: iconst_2
+    1755: ldc_w         #283                // String fragment
+    1758: aastore
+    1759: dup
+    1760: iconst_3
+    1761: ldc_w         #291                // String writes
+    1764: aastore
+    1765: dup
+    1766: iconst_4
+    1767: ldc           #157                // String textures
+    1769: aastore
+    1770: invokestatic  #101                // Method keys:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+    1773: aload         14
+    1775: ldc_w         #430                // String pipeline
+    1778: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+    1781: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+    1784: astore        15
+    1786: aload         14
+    1788: ldc_w         #432                // String vertex
+    1791: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+    1794: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+    1797: astore        16
+    1799: aload         14
+    1801: ldc_w         #283                // String fragment
+    1804: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+    1807: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+    1810: astore        17
+    1812: aload         15
+    1814: ldc_w         #434                // String [a-z0-9_.-]+:[a-z0-9/_.-]+\\*?
+    1817: invokevirtual #362                // Method java/lang/String.matches:(Ljava/lang/String;)Z
+    1820: ifeq          1839
+    1823: aload         16
+    1825: invokestatic  #313                // Method com/sulkan/shaders/graph/PackFiles.safe:(Ljava/lang/String;)Z
+    1828: ifeq          1839
+    1831: aload         17
+    1833: invokestatic  #313                // Method com/sulkan/shaders/graph/PackFiles.safe:(Ljava/lang/String;)Z
+    1836: ifne          1850
+    1839: new           #170                // class java/lang/IllegalArgumentException
+    1842: dup
+    1843: ldc_w         #436                // String Invalid scene program selector or path
+    1846: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    1849: athrow
+    1850: new           #270                // class java/util/ArrayList
+    1853: dup
+    1854: invokespecial #272                // Method java/util/ArrayList."<init>":()V
+    1857: astore        18
+    1859: aload         14
+    1861: ldc_w         #291                // String writes
+    1864: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    1867: ifeq          1888
+    1870: aload         14
+    1872: ldc_w         #291                // String writes
+    1875: invokevirtual #276                // Method com/google/gson/JsonObject.getAsJsonArray:(Ljava/lang/String;)Lcom/google/gson/JsonArray;
+    1878: aload         18
+    1880: invokedynamic #438,  0            // InvokeDynamic #21:accept:(Ljava/util/List;)Ljava/util/function/Consumer;
+    1885: invokevirtual #339                // Method com/google/gson/JsonArray.forEach:(Ljava/util/function/Consumer;)V
+    1888: aload         10
+    1890: aload         18
+    1892: invokeinterface #439,  2          // InterfaceMethod java/util/List.containsAll:(Ljava/util/Collection;)Z
+    1897: ifeq          1922
+    1900: new           #273                // class java/util/HashSet
+    1903: dup
+    1904: aload         18
+    1906: invokespecial #380                // Method java/util/HashSet."<init>":(Ljava/util/Collection;)V
+    1909: invokevirtual #381                // Method java/util/HashSet.size:()I
+    1912: aload         18
+    1914: invokeinterface #340,  1          // InterfaceMethod java/util/List.size:()I
+    1919: if_icmpeq     1933
+    1922: new           #170                // class java/lang/IllegalArgumentException
+    1925: dup
+    1926: ldc_w         #442                // String Scene program writes must name distinct sceneTargets
+    1929: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    1932: athrow
+    1933: new           #105                // class java/util/LinkedHashMap
+    1936: dup
+    1937: invokespecial #107                // Method java/util/LinkedHashMap."<init>":()V
+    1940: astore        19
+    1942: aload         14
+    1944: ldc           #157                // String textures
+    1946: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    1949: ifeq          1976
+    1952: aload         14
+    1954: ldc           #157                // String textures
+    1956: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+    1959: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+    1962: aload         9
+    1964: aload         19
+    1966: invokedynamic #444,  0            // InvokeDynamic #22:accept:(Ljava/util/Map;Ljava/util/Map;)Ljava/util/function/Consumer;
+    1971: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+    1976: aload         11
+    1978: new           #445                // class com/sulkan/shaders/graph/PackGraph$SceneProgram
+    1981: dup
+    1982: aload         15
+    1984: aload         16
+    1986: aload         17
+    1988: aload         18
+    1990: invokestatic  #394                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+    1993: aload         19
+    1995: invokestatic  #398                // Method java/util/Collections.unmodifiableMap:(Ljava/util/Map;)Ljava/util/Map;
+    1998: invokespecial #447                // Method com/sulkan/shaders/graph/PackGraph$SceneProgram."<init>":(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)V
+    2001: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+    2006: pop
+    2007: goto          1706
+    2010: aload_1
+    2011: ldc           #154                // String budgetMiB
+    2013: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    2016: ifeq          2034
+    2019: aload_1
+    2020: ldc           #154                // String budgetMiB
+    2022: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+    2025: ldc           #154                // String budgetMiB
+    2027: invokestatic  #166                // Method integer:(Lcom/google/gson/JsonElement;Ljava/lang/String;)I
+    2030: i2l
+    2031: goto          2037
+    2034: ldc2_w        #450                // long 512l
+    2037: lstore        12
+    2039: new           #105                // class java/util/LinkedHashMap
+    2042: dup
+    2043: invokespecial #107                // Method java/util/LinkedHashMap."<init>":()V
+    2046: astore        14
+    2048: aload_1
+    2049: ldc           #160                // String materials
+    2051: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    2054: ifeq          2078
+    2057: aload_1
+    2058: ldc           #160                // String materials
+    2060: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+    2063: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+    2066: aload         14
+    2068: invokedynamic #452,  0            // InvokeDynamic #23:accept:(Ljava/util/Map;)Ljava/util/function/Consumer;
+    2073: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+    2078: aload         14
+    2080: invokeinterface #265,  1          // InterfaceMethod java/util/Map.size:()I
+    2085: sipush        16384
+    2088: if_icmple     2102
+    2091: new           #170                // class java/lang/IllegalArgumentException
+    2094: dup
+    2095: ldc_w         #453                // String Too many material selectors
+    2098: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    2101: athrow
+    2102: lload         12
+    2104: lconst_1
+    2105: lcmp
+    2106: iflt          2768
+    2109: lload         12
+    2111: ldc2_w        #455                // long 2048l
+    2114: lcmp
+    2115: ifgt          2768
+    2118: new           #457                // class com/sulkan/shaders/graph/PackGraph$Environment
+    2121: dup
+    2122: iconst_0
+    2123: iconst_0
+    2124: invokespecial #459                // Method com/sulkan/shaders/graph/PackGraph$Environment."<init>":(ZZ)V
+    2127: astore        15
+    2129: aload_1
+    2130: ldc           #162                // String environment
+    2132: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    2135: ifeq          2319
+    2138: aload_1
+    2139: ldc           #162                // String environment
+    2141: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+    2144: astore        16
+    2146: aload         16
+    2148: iconst_2
+    2149: anewarray     #93                 // class java/lang/String
+    2152: dup
+    2153: iconst_0
+    2154: ldc_w         #462                // String sky
+    2157: aastore
+    2158: dup
+    2159: iconst_1
+    2160: ldc_w         #464                // String clouds
+    2163: aastore
+    2164: invokestatic  #101                // Method keys:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+    2167: aload         16
+    2169: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+    2172: invokeinterface #358,  1          // InterfaceMethod java/util/Set.iterator:()Ljava/util/Iterator;
+    2177: astore        17
+    2179: aload         17
+    2181: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+    2186: ifeq          2250
+    2189: aload         17
+    2191: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+    2196: checkcast     #466                // class java/util/Map$Entry
+    2199: astore        18
+    2201: aload         18
+    2203: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+    2208: checkcast     #140                // class com/google/gson/JsonElement
+    2211: invokevirtual #200                // Method com/google/gson/JsonElement.isJsonPrimitive:()Z
+    2214: ifeq          2236
+    2217: aload         18
+    2219: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+    2224: checkcast     #140                // class com/google/gson/JsonElement
+    2227: invokevirtual #471                // Method com/google/gson/JsonElement.getAsJsonPrimitive:()Lcom/google/gson/JsonPrimitive;
+    2230: invokevirtual #207                // Method com/google/gson/JsonPrimitive.isBoolean:()Z
+    2233: ifne          2247
+    2236: new           #170                // class java/lang/IllegalArgumentException
+    2239: dup
+    2240: ldc_w         #474                // String Environment flags must be boolean
+    2243: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    2246: athrow
+    2247: goto          2179
+    2250: new           #457                // class com/sulkan/shaders/graph/PackGraph$Environment
+    2253: dup
+    2254: aload         16
+    2256: ldc_w         #462                // String sky
+    2259: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    2262: ifeq          2283
+    2265: aload         16
+    2267: ldc_w         #462                // String sky
+    2270: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+    2273: invokevirtual #212                // Method com/google/gson/JsonElement.getAsBoolean:()Z
+    2276: ifeq          2283
+    2279: iconst_1
+    2280: goto          2284
+    2283: iconst_0
+    2284: aload         16
+    2286: ldc_w         #464                // String clouds
+    2289: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    2292: ifeq          2313
+    2295: aload         16
+    2297: ldc_w         #464                // String clouds
+    2300: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+    2303: invokevirtual #212                // Method com/google/gson/JsonElement.getAsBoolean:()Z
+    2306: ifeq          2313
+    2309: iconst_1
+    2310: goto          2314
+    2313: iconst_0
+    2314: invokespecial #459                // Method com/sulkan/shaders/graph/PackGraph$Environment."<init>":(ZZ)V
+    2317: astore        15
+    2319: iconst_0
+    2320: istore        16
+    2322: iload         16
+    2324: aload         6
+    2326: invokeinterface #340,  1          // InterfaceMethod java/util/List.size:()I
+    2331: if_icmpge     2658
+    2334: aload_1
+    2335: ldc           #148                // String passes
+    2337: invokevirtual #276                // Method com/google/gson/JsonObject.getAsJsonArray:(Ljava/lang/String;)Lcom/google/gson/JsonArray;
+    2340: iload         16
+    2342: invokevirtual #476                // Method com/google/gson/JsonArray.get:(I)Lcom/google/gson/JsonElement;
+    2345: invokevirtual #139                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+    2348: astore        17
+    2350: aload         6
+    2352: iload         16
+    2354: invokeinterface #479,  2          // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+    2359: checkcast     #392                // class com/sulkan/shaders/graph/PackGraph$Pass
+    2362: astore        18
+    2364: new           #105                // class java/util/LinkedHashMap
+    2367: dup
+    2368: invokespecial #107                // Method java/util/LinkedHashMap."<init>":()V
+    2371: astore        19
+    2373: aload         17
+    2375: ldc_w         #295                // String readConditions
+    2378: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    2381: ifeq          2410
+    2384: aload         17
+    2386: ldc_w         #295                // String readConditions
+    2389: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+    2392: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+    2395: aload         18
+    2397: aload_2
+    2398: aload         19
+    2400: invokedynamic #482,  0            // InvokeDynamic #24:accept:(Lcom/sulkan/shaders/graph/PackGraph$Pass;Ljava/util/Map;Ljava/util/Map;)Ljava/util/function/Consumer;
+    2405: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+    2410: new           #273                // class java/util/HashSet
+    2413: dup
+    2414: invokespecial #275                // Method java/util/HashSet."<init>":()V
+    2417: astore        20
+    2419: aload         17
+    2421: ldc_w         #297                // String linearReads
+    2424: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    2427: ifeq          2585
+    2430: aload         17
+    2432: ldc_w         #297                // String linearReads
+    2435: invokevirtual #276                // Method com/google/gson/JsonObject.getAsJsonArray:(Ljava/lang/String;)Lcom/google/gson/JsonArray;
+    2438: invokevirtual #280                // Method com/google/gson/JsonArray.iterator:()Ljava/util/Iterator;
+    2441: astore        21
+    2443: aload         21
+    2445: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+    2450: ifeq          2585
+    2453: aload         21
+    2455: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+    2460: checkcast     #140                // class com/google/gson/JsonElement
+    2463: astore        22
+    2465: aload         22
+    2467: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+    2470: astore        23
+    2472: aload         18
+    2474: getfield      #485                // Field com/sulkan/shaders/graph/PackGraph$Pass.reads:Ljava/util/Map;
+    2477: aload         23
+    2479: invokeinterface #487,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+    2484: ifne          2502
+    2487: new           #170                // class java/lang/IllegalArgumentException
+    2490: dup
+    2491: aload         23
+    2493: invokedynamic #490,  0            // InvokeDynamic #25:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+    2498: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    2501: athrow
+    2502: aload         18
+    2504: getfield      #485                // Field com/sulkan/shaders/graph/PackGraph$Pass.reads:Ljava/util/Map;
+    2507: aload         23
+    2509: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+    2514: checkcast     #93                 // class java/lang/String
+    2517: invokestatic  #491                // Method current:(Ljava/lang/String;)Ljava/lang/String;
+    2520: astore        24
+    2522: aload         4
+    2524: aload         24
+    2526: invokeinterface #487,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+    2531: ifeq          2561
+    2534: aload         4
+    2536: aload         24
+    2538: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+    2543: checkcast     #413                // class com/sulkan/shaders/graph/PackGraph$Resource
+    2546: getfield      #493                // Field com/sulkan/shaders/graph/PackGraph$Resource.format:Lcom/mojang/renderpearl/api/GpuFormat;
+    2549: invokevirtual #497                // Method com/mojang/renderpearl/api/GpuFormat.name:()Ljava/lang/String;
+    2552: ldc_w         #501                // String _UINT
+    2555: invokevirtual #503                // Method java/lang/String.endsWith:(Ljava/lang/String;)Z
+    2558: ifeq          2572
+    2561: new           #170                // class java/lang/IllegalArgumentException
+    2564: dup
+    2565: ldc_w         #506                // String Linear reads require a filterable graph color resource
+    2568: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    2571: athrow
+    2572: aload         20
+    2574: aload         23
+    2576: invokeinterface #306,  2          // InterfaceMethod java/util/Set.add:(Ljava/lang/Object;)Z
+    2581: pop
+    2582: goto          2443
+    2585: aload         6
+    2587: iload         16
+    2589: new           #392                // class com/sulkan/shaders/graph/PackGraph$Pass
+    2592: dup
+    2593: aload         18
+    2595: getfield      #508                // Field com/sulkan/shaders/graph/PackGraph$Pass.name:Ljava/lang/String;
+    2598: aload         18
+    2600: getfield      #509                // Field com/sulkan/shaders/graph/PackGraph$Pass.fragment:Ljava/lang/String;
+    2603: aload         18
+    2605: getfield      #511                // Field com/sulkan/shaders/graph/PackGraph$Pass.compute:Ljava/lang/String;
+    2608: aload         18
+    2610: getfield      #513                // Field com/sulkan/shaders/graph/PackGraph$Pass.localSize:Ljava/util/List;
+    2613: aload         18
+    2615: getfield      #485                // Field com/sulkan/shaders/graph/PackGraph$Pass.reads:Ljava/util/Map;
+    2618: aload         18
+    2620: getfield      #515                // Field com/sulkan/shaders/graph/PackGraph$Pass.writes:Ljava/util/List;
+    2623: aload         18
+    2625: getfield      #517                // Field com/sulkan/shaders/graph/PackGraph$Pass.buffers:Ljava/util/Map;
+    2628: aload         18
+    2630: getfield      #518                // Field com/sulkan/shaders/graph/PackGraph$Pass.dispatch:Ljava/util/List;
+    2633: aload         19
+    2635: invokestatic  #520                // InterfaceMethod java/util/Map.copyOf:(Ljava/util/Map;)Ljava/util/Map;
+    2638: aload         20
+    2640: invokestatic  #522                // InterfaceMethod java/util/Set.copyOf:(Ljava/util/Collection;)Ljava/util/Set;
+    2643: invokespecial #525                // Method com/sulkan/shaders/graph/PackGraph$Pass."<init>":(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/util/List;Ljava/util/Map;Ljava/util/List;Ljava/util/Map;Ljava/util/Set;)V
+    2646: invokeinterface #528,  3          // InterfaceMethod java/util/List.set:(ILjava/lang/Object;)Ljava/lang/Object;
+    2651: pop
+    2652: iinc          16, 1
+    2655: goto          2322
+    2658: new           #8                  // class com/sulkan/shaders/graph/PackGraph
+    2661: dup
+    2662: aload_1
+    2663: ldc           #146                // String name
+    2665: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+    2668: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+    2671: aload         4
+    2673: invokestatic  #398                // Method java/util/Collections.unmodifiableMap:(Ljava/util/Map;)Ljava/util/Map;
+    2676: aload         6
+    2678: invokestatic  #394                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+    2681: aload         8
+    2683: aload_2
+    2684: invokestatic  #520                // InterfaceMethod java/util/Map.copyOf:(Ljava/util/Map;)Ljava/util/Map;
+    2687: aload_3
+    2688: invokestatic  #398                // Method java/util/Collections.unmodifiableMap:(Ljava/util/Map;)Ljava/util/Map;
+    2691: aload         11
+    2693: invokestatic  #394                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+    2696: aload         9
+    2698: invokestatic  #398                // Method java/util/Collections.unmodifiableMap:(Ljava/util/Map;)Ljava/util/Map;
+    2701: aload         10
+    2703: invokestatic  #394                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+    2706: aload         5
+    2708: invokestatic  #398                // Method java/util/Collections.unmodifiableMap:(Ljava/util/Map;)Ljava/util/Map;
+    2711: aload         14
+    2713: invokestatic  #398                // Method java/util/Collections.unmodifiableMap:(Ljava/util/Map;)Ljava/util/Map;
+    2716: aload_1
+    2717: ldc           #161                // String shadows
+    2719: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+    2722: ifeq          2741
+    2725: aload_1
+    2726: ldc           #161                // String shadows
+    2728: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+    2731: invokevirtual #212                // Method com/google/gson/JsonElement.getAsBoolean:()Z
+    2734: ifeq          2741
+    2737: iconst_1
+    2738: goto          2742
+    2741: iconst_0
+    2742: aload         15
+    2744: lload         12
+    2746: ldc2_w        #532                // long 1024l
+    2749: lmul
+    2750: ldc2_w        #532                // long 1024l
+    2753: lmul
+    2754: invokespecial #534                // Method "<init>":(Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/util/List;Ljava/util/Map;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;ZLcom/sulkan/shaders/graph/PackGraph$Environment;J)V
+    2757: astore        16
+    2759: aload         16
+    2761: invokevirtual #537                // Method schedule:()Ljava/util/List;
+    2764: pop
+    2765: aload         16
+    2767: areturn
+    2768: new           #170                // class java/lang/IllegalArgumentException
+    2771: dup
+    2772: ldc_w         #540                // String budgetMiB must be 1..2048
+    2775: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    2778: athrow
+    2779: new           #170                // class java/lang/IllegalArgumentException
+    2782: dup
+    2783: ldc_w         #542                // String sceneTargets must contain up to 7 distinct resources
+    2786: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    2789: athrow
+    2790: new           #170                // class java/lang/IllegalArgumentException
+    2793: dup
+    2794: ldc_w         #544                // String Graph exceeds resource/pass limits
+    2797: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    2800: athrow
+    2801: new           #170                // class java/lang/IllegalArgumentException
+    2804: dup
+    2805: ldc_w         #546                // String shadows must be boolean
+    2808: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+    2811: athrow
+
+  public com.sulkan.shaders.graph.PackGraph withOptions(java.util.Map<java.lang.String, java.lang.Double>);
+    Code:
+       0: new           #185                // class java/util/TreeMap
+       3: dup
+       4: aload_0
+       5: getfield      #24                 // Field options:Ljava/util/Map;
+       8: invokespecial #548                // Method java/util/TreeMap."<init>":(Ljava/util/Map;)V
+      11: astore_2
+      12: aload_1
+      13: aload_0
+      14: aload_2
+      15: invokedynamic #551,  0            // InvokeDynamic #26:accept:(Lcom/sulkan/shaders/graph/PackGraph;Ljava/util/Map;)Ljava/util/function/BiConsumer;
+      20: invokeinterface #129,  2          // InterfaceMethod java/util/Map.forEach:(Ljava/util/function/BiConsumer;)V
+      25: new           #8                  // class com/sulkan/shaders/graph/PackGraph
+      28: dup
+      29: aload_0
+      30: getfield      #7                  // Field name:Ljava/lang/String;
+      33: aload_0
+      34: getfield      #13                 // Field resources:Ljava/util/Map;
+      37: aload_0
+      38: getfield      #17                 // Field passes:Ljava/util/List;
+      41: aload_0
+      42: getfield      #21                 // Field present:Ljava/lang/String;
+      45: aload_2
+      46: invokestatic  #520                // InterfaceMethod java/util/Map.copyOf:(Ljava/util/Map;)Ljava/util/Map;
+      49: aload_0
+      50: getfield      #27                 // Field optionDefinitions:Ljava/util/Map;
+      53: aload_0
+      54: getfield      #30                 // Field scenePrograms:Ljava/util/List;
+      57: aload_0
+      58: getfield      #33                 // Field textures:Ljava/util/Map;
+      61: aload_0
+      62: getfield      #36                 // Field sceneTargets:Ljava/util/List;
+      65: aload_0
+      66: getfield      #39                 // Field buffers:Ljava/util/Map;
+      69: aload_0
+      70: getfield      #42                 // Field materials:Ljava/util/Map;
+      73: aload_0
+      74: getfield      #45                 // Field shadows:Z
+      77: aload_0
+      78: getfield      #49                 // Field environment:Lcom/sulkan/shaders/graph/PackGraph$Environment;
+      81: aload_0
+      82: getfield      #53                 // Field budgetBytes:J
+      85: invokespecial #534                // Method "<init>":(Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/util/List;Ljava/util/Map;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;ZLcom/sulkan/shaders/graph/PackGraph$Environment;J)V
+      88: areturn
+
+  public java.util.List<com.sulkan.shaders.graph.PackGraph$Pass> schedule();
+    Code:
+       0: new           #554                // class java/util/HashMap
+       3: dup
+       4: invokespecial #556                // Method java/util/HashMap."<init>":()V
+       7: astore_1
+       8: aload_0
+       9: getfield      #17                 // Field passes:Ljava/util/List;
+      12: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+      17: astore_2
+      18: aload_2
+      19: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      24: ifeq          312
+      27: aload_2
+      28: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      33: checkcast     #392                // class com/sulkan/shaders/graph/PackGraph$Pass
+      36: astore_3
+      37: aload_3
+      38: invokevirtual #557                // Method com/sulkan/shaders/graph/PackGraph$Pass.outputs:()Ljava/util/List;
+      41: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+      46: astore        4
+      48: aload         4
+      50: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      55: ifeq          111
+      58: aload         4
+      60: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      65: checkcast     #93                 // class java/lang/String
+      68: astore        5
+      70: aload         5
+      72: ldc_w         #560                // String $buffer/
+      75: invokevirtual #367                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+      78: ifeq          108
+      81: aload_1
+      82: aload         5
+      84: aload_3
+      85: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      90: ifnull        108
+      93: new           #170                // class java/lang/IllegalArgumentException
+      96: dup
+      97: aload         5
+      99: invokedynamic #562,  0            // InvokeDynamic #27:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     104: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     107: athrow
+     108: goto          48
+     111: aconst_null
+     112: astore        4
+     114: aload_3
+     115: getfield      #515                // Field com/sulkan/shaders/graph/PackGraph$Pass.writes:Ljava/util/List;
+     118: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     123: astore        5
+     125: aload         5
+     127: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     132: ifeq          309
+     135: aload         5
+     137: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     142: checkcast     #93                 // class java/lang/String
+     145: astore        6
+     147: aload_0
+     148: getfield      #36                 // Field sceneTargets:Ljava/util/List;
+     151: aload         6
+     153: invokeinterface #563,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+     158: ifeq          176
+     161: new           #170                // class java/lang/IllegalArgumentException
+     164: dup
+     165: aload         6
+     167: invokedynamic #566,  0            // InvokeDynamic #28:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     172: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     175: athrow
+     176: aload_0
+     177: getfield      #13                 // Field resources:Ljava/util/Map;
+     180: aload         6
+     182: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     187: checkcast     #413                // class com/sulkan/shaders/graph/PackGraph$Resource
+     190: astore        7
+     192: aload         7
+     194: ifnonnull     212
+     197: new           #170                // class java/lang/IllegalArgumentException
+     200: dup
+     201: aload         6
+     203: invokedynamic #567,  0            // InvokeDynamic #29:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     208: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     211: athrow
+     212: aload         4
+     214: ifnull        244
+     217: aload         4
+     219: aload         7
+     221: invokevirtual #568                // Method com/sulkan/shaders/graph/PackGraph$Resource.sameShape:(Lcom/sulkan/shaders/graph/PackGraph$Resource;)Z
+     224: ifne          244
+     227: new           #170                // class java/lang/IllegalArgumentException
+     230: dup
+     231: aload_3
+     232: getfield      #508                // Field com/sulkan/shaders/graph/PackGraph$Pass.name:Ljava/lang/String;
+     235: invokedynamic #572,  0            // InvokeDynamic #30:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     240: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     243: athrow
+     244: aload         7
+     246: astore        4
+     248: aload_3
+     249: invokevirtual #573                // Method com/sulkan/shaders/graph/PackGraph$Pass.isCompute:()Z
+     252: ifne          279
+     255: aload         7
+     257: getfield      #418                // Field com/sulkan/shaders/graph/PackGraph$Resource.depth:I
+     260: iconst_1
+     261: if_icmple     279
+     264: new           #170                // class java/lang/IllegalArgumentException
+     267: dup
+     268: aload         6
+     270: invokedynamic #576,  0            // InvokeDynamic #31:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     275: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     278: athrow
+     279: aload_1
+     280: aload         6
+     282: aload_3
+     283: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     288: ifnull        306
+     291: new           #170                // class java/lang/IllegalArgumentException
+     294: dup
+     295: aload         6
+     297: invokedynamic #577,  0            // InvokeDynamic #32:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     302: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     305: athrow
+     306: goto          125
+     309: goto          18
+     312: aload_1
+     313: aload_0
+     314: getfield      #21                 // Field present:Ljava/lang/String;
+     317: invokeinterface #487,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+     322: ifne          358
+     325: aload_0
+     326: getfield      #36                 // Field sceneTargets:Ljava/util/List;
+     329: aload_0
+     330: getfield      #21                 // Field present:Ljava/lang/String;
+     333: invokeinterface #563,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+     338: ifne          358
+     341: new           #170                // class java/lang/IllegalArgumentException
+     344: dup
+     345: aload_0
+     346: getfield      #21                 // Field present:Ljava/lang/String;
+     349: invokedynamic #578,  0            // InvokeDynamic #33:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     354: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     357: athrow
+     358: aload_0
+     359: getfield      #13                 // Field resources:Ljava/util/Map;
+     362: aload_0
+     363: getfield      #21                 // Field present:Ljava/lang/String;
+     366: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     371: checkcast     #413                // class com/sulkan/shaders/graph/PackGraph$Resource
+     374: getfield      #418                // Field com/sulkan/shaders/graph/PackGraph$Resource.depth:I
+     377: iconst_1
+     378: if_icmple     392
+     381: new           #170                // class java/lang/IllegalArgumentException
+     384: dup
+     385: ldc_w         #579                // String Cannot present a volume
+     388: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     391: athrow
+     392: aload_0
+     393: getfield      #13                 // Field resources:Ljava/util/Map;
+     396: aload_0
+     397: getfield      #21                 // Field present:Ljava/lang/String;
+     400: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     405: checkcast     #413                // class com/sulkan/shaders/graph/PackGraph$Resource
+     408: getfield      #493                // Field com/sulkan/shaders/graph/PackGraph$Resource.format:Lcom/mojang/renderpearl/api/GpuFormat;
+     411: invokevirtual #497                // Method com/mojang/renderpearl/api/GpuFormat.name:()Ljava/lang/String;
+     414: ldc_w         #501                // String _UINT
+     417: invokevirtual #503                // Method java/lang/String.endsWith:(Ljava/lang/String;)Z
+     420: ifne          974
+     423: aload_0
+     424: getfield      #13                 // Field resources:Ljava/util/Map;
+     427: aload_0
+     428: getfield      #21                 // Field present:Ljava/lang/String;
+     431: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     436: checkcast     #413                // class com/sulkan/shaders/graph/PackGraph$Resource
+     439: getfield      #493                // Field com/sulkan/shaders/graph/PackGraph$Resource.format:Lcom/mojang/renderpearl/api/GpuFormat;
+     442: invokevirtual #497                // Method com/mojang/renderpearl/api/GpuFormat.name:()Ljava/lang/String;
+     445: ldc_w         #581                // String _SINT
+     448: invokevirtual #503                // Method java/lang/String.endsWith:(Ljava/lang/String;)Z
+     451: ifne          974
+     454: aload_0
+     455: getfield      #17                 // Field passes:Ljava/util/List;
+     458: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     463: astore_2
+     464: aload_2
+     465: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     470: ifeq          772
+     473: aload_2
+     474: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     479: checkcast     #392                // class com/sulkan/shaders/graph/PackGraph$Pass
+     482: astore_3
+     483: aload_3
+     484: invokevirtual #583                // Method com/sulkan/shaders/graph/PackGraph$Pass.inputs:()Ljava/util/List;
+     487: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     492: astore        4
+     494: aload         4
+     496: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     501: ifeq          769
+     504: aload         4
+     506: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     511: checkcast     #93                 // class java/lang/String
+     514: astore        5
+     516: aload         5
+     518: ldc_w         #586                // String $scene
+     521: invokevirtual #588                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     524: ifne          766
+     527: aload         5
+     529: ldc_w         #591                // String $depth
+     532: invokevirtual #588                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     535: ifne          766
+     538: aload         5
+     540: ldc_w         #593                // String $handDepth
+     543: invokevirtual #588                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     546: ifne          766
+     549: aload         5
+     551: ldc_w         #595                // String $weather
+     554: invokevirtual #588                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     557: ifne          766
+     560: aload         5
+     562: invokestatic  #597                // Method com/sulkan/shaders/graph/GraphSceneCapture.isInput:(Ljava/lang/String;)Z
+     565: ifne          766
+     568: aload         5
+     570: ldc_w         #602                // String $texture/
+     573: invokevirtual #367                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+     576: ifeq          598
+     579: aload_0
+     580: getfield      #33                 // Field textures:Ljava/util/Map;
+     583: aload         5
+     585: bipush        9
+     587: invokevirtual #604                // Method java/lang/String.substring:(I)Ljava/lang/String;
+     590: invokeinterface #487,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+     595: ifne          766
+     598: aload         5
+     600: invokestatic  #491                // Method current:(Ljava/lang/String;)Ljava/lang/String;
+     603: astore        6
+     605: aload_1
+     606: aload         6
+     608: invokeinterface #487,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+     613: ifne          645
+     616: aload_0
+     617: getfield      #36                 // Field sceneTargets:Ljava/util/List;
+     620: aload         6
+     622: invokeinterface #563,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+     627: ifne          645
+     630: new           #170                // class java/lang/IllegalArgumentException
+     633: dup
+     634: aload         5
+     636: invokedynamic #608,  0            // InvokeDynamic #34:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     641: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     644: athrow
+     645: aload         5
+     647: invokestatic  #609                // Method previous:(Ljava/lang/String;)Z
+     650: ifeq          727
+     653: aload         6
+     655: ldc_w         #560                // String $buffer/
+     658: invokevirtual #367                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+     661: ifeq          692
+     664: aload_0
+     665: getfield      #39                 // Field buffers:Ljava/util/Map;
+     668: aload         6
+     670: bipush        8
+     672: invokevirtual #604                // Method java/lang/String.substring:(I)Ljava/lang/String;
+     675: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     680: checkcast     #612                // class com/sulkan/shaders/graph/PackGraph$Buffer
+     683: getfield      #614                // Field com/sulkan/shaders/graph/PackGraph$Buffer.history:Z
+     686: ifne          727
+     689: goto          712
+     692: aload_0
+     693: getfield      #13                 // Field resources:Ljava/util/Map;
+     696: aload         6
+     698: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     703: checkcast     #413                // class com/sulkan/shaders/graph/PackGraph$Resource
+     706: getfield      #415                // Field com/sulkan/shaders/graph/PackGraph$Resource.history:Z
+     709: ifne          727
+     712: new           #170                // class java/lang/IllegalArgumentException
+     715: dup
+     716: aload         5
+     718: invokedynamic #615,  0            // InvokeDynamic #35:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     723: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     726: athrow
+     727: aload         5
+     729: invokestatic  #609                // Method previous:(Ljava/lang/String;)Z
+     732: ifne          766
+     735: aload_3
+     736: invokevirtual #557                // Method com/sulkan/shaders/graph/PackGraph$Pass.outputs:()Ljava/util/List;
+     739: aload         5
+     741: invokeinterface #563,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+     746: ifeq          766
+     749: new           #170                // class java/lang/IllegalArgumentException
+     752: dup
+     753: aload_3
+     754: getfield      #508                // Field com/sulkan/shaders/graph/PackGraph$Pass.name:Ljava/lang/String;
+     757: invokedynamic #616,  0            // InvokeDynamic #36:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     762: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     765: athrow
+     766: goto          494
+     769: goto          464
+     772: new           #270                // class java/util/ArrayList
+     775: dup
+     776: invokespecial #272                // Method java/util/ArrayList."<init>":()V
+     779: astore_2
+     780: new           #554                // class java/util/HashMap
+     783: dup
+     784: invokespecial #556                // Method java/util/HashMap."<init>":()V
+     787: astore_3
+     788: aload_0
+     789: getfield      #17                 // Field passes:Ljava/util/List;
+     792: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     797: astore        4
+     799: aload         4
+     801: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     806: ifeq          838
+     809: aload         4
+     811: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     816: checkcast     #392                // class com/sulkan/shaders/graph/PackGraph$Pass
+     819: astore        5
+     821: aload         5
+     823: aload_1
+     824: aload_3
+     825: new           #270                // class java/util/ArrayList
+     828: dup
+     829: invokespecial #272                // Method java/util/ArrayList."<init>":()V
+     832: invokestatic  #617                // Method visit:(Lcom/sulkan/shaders/graph/PackGraph$Pass;Ljava/util/Map;Ljava/util/Map;Ljava/util/List;)V
+     835: goto          799
+     838: aload_3
+     839: invokeinterface #621,  1          // InterfaceMethod java/util/Map.clear:()V
+     844: aload_1
+     845: aload_0
+     846: invokedynamic #622,  0            // InvokeDynamic #37:apply:(Lcom/sulkan/shaders/graph/PackGraph;)Ljava/util/function/BiFunction;
+     851: invokeinterface #626,  2          // InterfaceMethod java/util/Map.replaceAll:(Ljava/util/function/BiFunction;)V
+     856: aload_1
+     857: aload_0
+     858: getfield      #21                 // Field present:Ljava/lang/String;
+     861: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     866: checkcast     #392                // class com/sulkan/shaders/graph/PackGraph$Pass
+     869: aload_1
+     870: aload_3
+     871: aload_2
+     872: invokestatic  #617                // Method visit:(Lcom/sulkan/shaders/graph/PackGraph$Pass;Ljava/util/Map;Ljava/util/Map;Ljava/util/List;)V
+     875: iconst_0
+     876: istore        4
+     878: iload         4
+     880: aload_2
+     881: invokeinterface #340,  1          // InterfaceMethod java/util/List.size:()I
+     886: if_icmpge     969
+     889: aload_2
+     890: iload         4
+     892: invokeinterface #479,  2          // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+     897: checkcast     #392                // class com/sulkan/shaders/graph/PackGraph$Pass
+     900: invokevirtual #583                // Method com/sulkan/shaders/graph/PackGraph$Pass.inputs:()Ljava/util/List;
+     903: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     908: astore        5
+     910: aload         5
+     912: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     917: ifeq          963
+     920: aload         5
+     922: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     927: checkcast     #93                 // class java/lang/String
+     930: astore        6
+     932: aload         6
+     934: invokestatic  #609                // Method previous:(Ljava/lang/String;)Z
+     937: ifeq          960
+     940: aload_1
+     941: aload         6
+     943: invokestatic  #491                // Method current:(Ljava/lang/String;)Ljava/lang/String;
+     946: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     951: checkcast     #392                // class com/sulkan/shaders/graph/PackGraph$Pass
+     954: aload_1
+     955: aload_3
+     956: aload_2
+     957: invokestatic  #617                // Method visit:(Lcom/sulkan/shaders/graph/PackGraph$Pass;Ljava/util/Map;Ljava/util/Map;Ljava/util/List;)V
+     960: goto          910
+     963: iinc          4, 1
+     966: goto          878
+     969: aload_2
+     970: invokestatic  #394                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+     973: areturn
+     974: new           #170                // class java/lang/IllegalArgumentException
+     977: dup
+     978: ldc_w         #630                // String Presented resource must use a normalized or floating-point format
+     981: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     984: athrow
+
+  private static void visit(com.sulkan.shaders.graph.PackGraph$Pass, java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Pass>, java.util.Map<com.sulkan.shaders.graph.PackGraph$Pass, java.lang.Integer>, java.util.List<com.sulkan.shaders.graph.PackGraph$Pass>);
+    Code:
+       0: aload_0
+       1: ifnull        167
+       4: aload_2
+       5: aload_0
+       6: iconst_0
+       7: invokestatic  #320                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+      10: invokeinterface #67,  3           // InterfaceMethod java/util/Map.getOrDefault:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      15: checkcast     #321                // class java/lang/Integer
+      18: invokevirtual #632                // Method java/lang/Integer.intValue:()I
+      21: istore        4
+      23: iload         4
+      25: iconst_1
+      26: if_icmpne     46
+      29: new           #170                // class java/lang/IllegalArgumentException
+      32: dup
+      33: aload_0
+      34: getfield      #508                // Field com/sulkan/shaders/graph/PackGraph$Pass.name:Ljava/lang/String;
+      37: invokedynamic #633,  0            // InvokeDynamic #38:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      42: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      45: athrow
+      46: iload         4
+      48: iconst_2
+      49: if_icmpeq     167
+      52: aload_2
+      53: aload_0
+      54: iconst_1
+      55: invokestatic  #320                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+      58: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      63: pop
+      64: aload_0
+      65: invokevirtual #583                // Method com/sulkan/shaders/graph/PackGraph$Pass.inputs:()Ljava/util/List;
+      68: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+      73: astore        5
+      75: aload         5
+      77: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      82: ifeq          147
+      85: aload         5
+      87: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      92: checkcast     #93                 // class java/lang/String
+      95: astore        6
+      97: aload         6
+      99: ldc_w         #634                // String $
+     102: invokevirtual #367                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+     105: ifeq          119
+     108: aload         6
+     110: ldc_w         #560                // String $buffer/
+     113: invokevirtual #367                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+     116: ifeq          144
+     119: aload         6
+     121: invokestatic  #609                // Method previous:(Ljava/lang/String;)Z
+     124: ifne          144
+     127: aload_1
+     128: aload         6
+     130: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     135: checkcast     #392                // class com/sulkan/shaders/graph/PackGraph$Pass
+     138: aload_1
+     139: aload_2
+     140: aload_3
+     141: invokestatic  #617                // Method visit:(Lcom/sulkan/shaders/graph/PackGraph$Pass;Ljava/util/Map;Ljava/util/Map;Ljava/util/List;)V
+     144: goto          75
+     147: aload_2
+     148: aload_0
+     149: iconst_2
+     150: invokestatic  #320                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     153: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     158: pop
+     159: aload_3
+     160: aload_0
+     161: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     166: pop
+     167: return
+
+  public long allocationBytes(int, int);
+    Code:
+       0: aload_0
+       1: invokevirtual #636                // Method bufferBytes:()J
+       4: lstore_3
+       5: aload_0
+       6: invokestatic  #640                // Method com/sulkan/shaders/graph/GraphAllocations.plan:(Lcom/sulkan/shaders/graph/PackGraph;)Lcom/sulkan/shaders/graph/GraphAllocations;
+       9: invokevirtual #646                // Method com/sulkan/shaders/graph/GraphAllocations.slots:()Ljava/util/List;
+      12: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+      17: astore        5
+      19: aload         5
+      21: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      26: ifeq          72
+      29: aload         5
+      31: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      36: checkcast     #413                // class com/sulkan/shaders/graph/PackGraph$Resource
+      39: astore        6
+      41: lload_3
+      42: aload         6
+      44: iload_1
+      45: iload_2
+      46: invokevirtual #649                // Method com/sulkan/shaders/graph/PackGraph$Resource.bytes:(II)J
+      49: aload         6
+      51: getfield      #415                // Field com/sulkan/shaders/graph/PackGraph$Resource.history:Z
+      54: ifeq          61
+      57: iconst_2
+      58: goto          62
+      61: iconst_1
+      62: invokestatic  #653                // Method java/lang/Math.multiplyExact:(JI)J
+      65: invokestatic  #659                // Method java/lang/Math.addExact:(JJ)J
+      68: lstore_3
+      69: goto          19
+      72: lload_3
+      73: aload_0
+      74: getfield      #53                 // Field budgetBytes:J
+      77: lcmp
+      78: ifle          107
+      81: new           #170                // class java/lang/IllegalArgumentException
+      84: dup
+      85: lload_3
+      86: ldc2_w        #663                // long 1048576l
+      89: ldiv
+      90: aload_0
+      91: getfield      #53                 // Field budgetBytes:J
+      94: ldc2_w        #663                // long 1048576l
+      97: ldiv
+      98: invokedynamic #665,  0            // InvokeDynamic #39:makeConcatWithConstants:(JJ)Ljava/lang/String;
+     103: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     106: athrow
+     107: lload_3
+     108: lreturn
+
+  public long bufferBytes();
+    Code:
+       0: new           #273                // class java/util/HashSet
+       3: dup
+       4: invokespecial #275                // Method java/util/HashSet."<init>":()V
+       7: astore_1
+       8: aload_0
+       9: invokevirtual #537                // Method schedule:()Ljava/util/List;
+      12: aload_1
+      13: invokedynamic #668,  0            // InvokeDynamic #40:accept:(Ljava/util/Set;)Ljava/util/function/Consumer;
+      18: invokeinterface #671,  2          // InterfaceMethod java/util/List.forEach:(Ljava/util/function/Consumer;)V
+      23: aload_1
+      24: invokeinterface #672,  1          // InterfaceMethod java/util/Set.stream:()Ljava/util/stream/Stream;
+      29: aload_0
+      30: invokedynamic #673,  0            // InvokeDynamic #41:applyAsLong:(Lcom/sulkan/shaders/graph/PackGraph;)Ljava/util/function/ToLongFunction;
+      35: invokeinterface #677,  2          // InterfaceMethod java/util/stream/Stream.mapToLong:(Ljava/util/function/ToLongFunction;)Ljava/util/stream/LongStream;
+      40: invokeinterface #681,  1          // InterfaceMethod java/util/stream/LongStream.sum:()J
+      45: lreturn
+
+  public static boolean previous(java.lang.String);
+    Code:
+       0: aload_0
+       1: ldc_w         #686                // String @previous
+       4: invokevirtual #503                // Method java/lang/String.endsWith:(Ljava/lang/String;)Z
+       7: ireturn
+
+  public static java.lang.String current(java.lang.String);
+    Code:
+       0: aload_0
+       1: invokestatic  #609                // Method previous:(Ljava/lang/String;)Z
+       4: ifeq          22
+       7: aload_0
+       8: iconst_0
+       9: aload_0
+      10: invokevirtual #688                // Method java/lang/String.length:()I
+      13: bipush        9
+      15: isub
+      16: invokevirtual #691                // Method java/lang/String.substring:(II)Ljava/lang/String;
+      19: goto          23
+      22: aload_0
+      23: areturn
+
+  private static void identifier(java.lang.String);
+    Code:
+       0: aload_0
+       1: ldc_w         #694                // String [a-z][a-z0-9_.-]*
+       4: invokevirtual #362                // Method java/lang/String.matches:(Ljava/lang/String;)Z
+       7: ifne          24
+      10: new           #170                // class java/lang/IllegalArgumentException
+      13: dup
+      14: aload_0
+      15: invokedynamic #696,  0            // InvokeDynamic #42:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      20: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      23: athrow
+      24: return
+
+  private static void keys(com.google.gson.JsonObject, java.lang.String...);
+    Code:
+       0: aload_0
+       1: ifnonnull     15
+       4: new           #170                // class java/lang/IllegalArgumentException
+       7: dup
+       8: ldc_w         #697                // String Missing native pack object
+      11: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      14: athrow
+      15: aload_1
+      16: invokestatic  #699                // InterfaceMethod java/util/Set.of:([Ljava/lang/Object;)Ljava/util/Set;
+      19: astore_2
+      20: aload_0
+      21: invokevirtual #702                // Method com/google/gson/JsonObject.keySet:()Ljava/util/Set;
+      24: invokeinterface #358,  1          // InterfaceMethod java/util/Set.iterator:()Ljava/util/Iterator;
+      29: astore_3
+      30: aload_3
+      31: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      36: ifeq          79
+      39: aload_3
+      40: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      45: checkcast     #93                 // class java/lang/String
+      48: astore        4
+      50: aload_2
+      51: aload         4
+      53: invokeinterface #703,  2          // InterfaceMethod java/util/Set.contains:(Ljava/lang/Object;)Z
+      58: ifne          76
+      61: new           #170                // class java/lang/IllegalArgumentException
+      64: dup
+      65: aload         4
+      67: invokedynamic #704,  0            // InvokeDynamic #43:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      72: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      75: athrow
+      76: goto          30
+      79: return
+
+  private static void required(com.google.gson.JsonObject, java.lang.String...);
+    Code:
+       0: aload_1
+       1: astore_2
+       2: aload_2
+       3: arraylength
+       4: istore_3
+       5: iconst_0
+       6: istore        4
+       8: iload         4
+      10: iload_3
+      11: if_icmpge     62
+      14: aload_2
+      15: iload         4
+      17: aaload
+      18: astore        5
+      20: aload_0
+      21: aload         5
+      23: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+      26: ifeq          41
+      29: aload_0
+      30: aload         5
+      32: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+      35: invokevirtual #705                // Method com/google/gson/JsonElement.isJsonNull:()Z
+      38: ifeq          56
+      41: new           #170                // class java/lang/IllegalArgumentException
+      44: dup
+      45: aload         5
+      47: invokedynamic #708,  0            // InvokeDynamic #44:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      52: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      55: athrow
+      56: iinc          4, 1
+      59: goto          8
+      62: return
+
+  private static int integer(com.google.gson.JsonElement, java.lang.String);
+    Code:
+       0: aload_0
+       1: ifnull        45
+       4: aload_0
+       5: invokevirtual #200                // Method com/google/gson/JsonElement.isJsonPrimitive:()Z
+       8: ifeq          45
+      11: aload_0
+      12: invokevirtual #471                // Method com/google/gson/JsonElement.getAsJsonPrimitive:()Lcom/google/gson/JsonPrimitive;
+      15: invokevirtual #709                // Method com/google/gson/JsonPrimitive.isNumber:()Z
+      18: ifeq          45
+      21: aload_0
+      22: invokevirtual #712                // Method com/google/gson/JsonElement.getAsBigDecimal:()Ljava/math/BigDecimal;
+      25: invokevirtual #716                // Method java/math/BigDecimal.intValueExact:()I
+      28: ireturn
+      29: astore_2
+      30: new           #170                // class java/lang/IllegalArgumentException
+      33: dup
+      34: aload_1
+      35: invokedynamic #723,  0            // InvokeDynamic #45:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      40: aload_2
+      41: invokespecial #724                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;Ljava/lang/Throwable;)V
+      44: athrow
+      45: new           #170                // class java/lang/IllegalArgumentException
+      48: dup
+      49: aload_1
+      50: invokedynamic #727,  0            // InvokeDynamic #46:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      55: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      58: athrow
+    Exception table:
+       from    to  target type
+          21    28    29   Class java/lang/ArithmeticException
+
+  public final java.lang.String toString();
+    Code:
+       0: aload_0
+       1: invokedynamic #728,  0            // InvokeDynamic #47:toString:(Lcom/sulkan/shaders/graph/PackGraph;)Ljava/lang/String;
+       6: areturn
+
+  public final int hashCode();
+    Code:
+       0: aload_0
+       1: invokedynamic #732,  0            // InvokeDynamic #47:hashCode:(Lcom/sulkan/shaders/graph/PackGraph;)I
+       6: ireturn
+
+  public final boolean equals(java.lang.Object);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokedynamic #736,  0            // InvokeDynamic #47:equals:(Lcom/sulkan/shaders/graph/PackGraph;Ljava/lang/Object;)Z
+       7: ireturn
+
+  public java.lang.String name();
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field name:Ljava/lang/String;
+       4: areturn
+
+  public java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Resource> resources();
+    Code:
+       0: aload_0
+       1: getfield      #13                 // Field resources:Ljava/util/Map;
+       4: areturn
+
+  public java.util.List<com.sulkan.shaders.graph.PackGraph$Pass> passes();
+    Code:
+       0: aload_0
+       1: getfield      #17                 // Field passes:Ljava/util/List;
+       4: areturn
+
+  public java.lang.String present();
+    Code:
+       0: aload_0
+       1: getfield      #21                 // Field present:Ljava/lang/String;
+       4: areturn
+
+  public java.util.Map<java.lang.String, java.lang.Double> options();
+    Code:
+       0: aload_0
+       1: getfield      #24                 // Field options:Ljava/util/Map;
+       4: areturn
+
+  public java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Option> optionDefinitions();
+    Code:
+       0: aload_0
+       1: getfield      #27                 // Field optionDefinitions:Ljava/util/Map;
+       4: areturn
+
+  public java.util.List<com.sulkan.shaders.graph.PackGraph$SceneProgram> scenePrograms();
+    Code:
+       0: aload_0
+       1: getfield      #30                 // Field scenePrograms:Ljava/util/List;
+       4: areturn
+
+  public java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Texture> textures();
+    Code:
+       0: aload_0
+       1: getfield      #33                 // Field textures:Ljava/util/Map;
+       4: areturn
+
+  public java.util.List<java.lang.String> sceneTargets();
+    Code:
+       0: aload_0
+       1: getfield      #36                 // Field sceneTargets:Ljava/util/List;
+       4: areturn
+
+  public java.util.Map<java.lang.String, com.sulkan.shaders.graph.PackGraph$Buffer> buffers();
+    Code:
+       0: aload_0
+       1: getfield      #39                 // Field buffers:Ljava/util/Map;
+       4: areturn
+
+  public java.util.Map<java.lang.String, java.lang.Integer> materials();
+    Code:
+       0: aload_0
+       1: getfield      #42                 // Field materials:Ljava/util/Map;
+       4: areturn
+
+  public boolean shadows();
+    Code:
+       0: aload_0
+       1: getfield      #45                 // Field shadows:Z
+       4: ireturn
+
+  public com.sulkan.shaders.graph.PackGraph$Environment environment();
+    Code:
+       0: aload_0
+       1: getfield      #49                 // Field environment:Lcom/sulkan/shaders/graph/PackGraph$Environment;
+       4: areturn
+
+  public long budgetBytes();
+    Code:
+       0: aload_0
+       1: getfield      #53                 // Field budgetBytes:J
+       4: lreturn
+
+  private long lambda$bufferBytes$2(java.lang.String);
+    Code:
+       0: aload_0
+       1: getfield      #39                 // Field buffers:Ljava/util/Map;
+       4: aload_1
+       5: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      10: checkcast     #612                // class com/sulkan/shaders/graph/PackGraph$Buffer
+      13: getfield      #739                // Field com/sulkan/shaders/graph/PackGraph$Buffer.bytes:J
+      16: aload_0
+      17: getfield      #39                 // Field buffers:Ljava/util/Map;
+      20: aload_1
+      21: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      26: checkcast     #612                // class com/sulkan/shaders/graph/PackGraph$Buffer
+      29: getfield      #614                // Field com/sulkan/shaders/graph/PackGraph$Buffer.history:Z
+      32: ifeq          39
+      35: iconst_2
+      36: goto          40
+      39: iconst_1
+      40: i2l
+      41: lmul
+      42: lreturn
+
+  private static void lambda$bufferBytes$0(java.util.Set, com.sulkan.shaders.graph.PackGraph$Pass);
+    Code:
+       0: aload_1
+       1: getfield      #517                // Field com/sulkan/shaders/graph/PackGraph$Pass.buffers:Ljava/util/Map;
+       4: invokeinterface #382,  1          // InterfaceMethod java/util/Map.values:()Ljava/util/Collection;
+       9: aload_0
+      10: invokedynamic #741,  0            // InvokeDynamic #48:accept:(Ljava/util/Set;)Ljava/util/function/Consumer;
+      15: invokeinterface #742,  2          // InterfaceMethod java/util/Collection.forEach:(Ljava/util/function/Consumer;)V
+      20: return
+
+  private static void lambda$bufferBytes$1(java.util.Set, com.sulkan.shaders.graph.PackGraph$BufferBinding);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: getfield      #743                // Field com/sulkan/shaders/graph/PackGraph$BufferBinding.resource:Ljava/lang/String;
+       5: invokestatic  #491                // Method current:(Ljava/lang/String;)Ljava/lang/String;
+       8: invokeinterface #306,  2          // InterfaceMethod java/util/Set.add:(Ljava/lang/Object;)Z
+      13: pop
+      14: return
+
+  private com.sulkan.shaders.graph.PackGraph$Pass lambda$schedule$0(java.lang.String, com.sulkan.shaders.graph.PackGraph$Pass);
+    Code:
+       0: aload_2
+       1: aload_0
+       2: getfield      #24                 // Field options:Ljava/util/Map;
+       5: invokevirtual #748                // Method com/sulkan/shaders/graph/PackGraph$Pass.selected:(Ljava/util/Map;)Lcom/sulkan/shaders/graph/PackGraph$Pass;
+       8: areturn
+
+  private void lambda$withOptions$0(java.util.Map, java.lang.String, java.lang.Double);
+    Code:
+       0: aload_0
+       1: getfield      #27                 // Field optionDefinitions:Ljava/util/Map;
+       4: aload_2
+       5: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+      10: checkcast     #237                // class com/sulkan/shaders/graph/PackGraph$Option
+      13: astore        4
+      15: aload         4
+      17: ifnull        46
+      20: aload         4
+      22: getfield      #752                // Field com/sulkan/shaders/graph/PackGraph$Option.values:Ljava/util/List;
+      25: aload_3
+      26: invokeinterface #563,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+      31: ifeq          46
+      34: aload_1
+      35: aload_2
+      36: aload_3
+      37: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      42: pop
+      43: goto          61
+      46: new           #170                // class java/lang/IllegalArgumentException
+      49: dup
+      50: aload_2
+      51: aload_3
+      52: invokedynamic #754,  0            // InvokeDynamic #49:makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/Double;)Ljava/lang/String;
+      57: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      60: athrow
+      61: return
+
+  private static void lambda$parse$18(com.sulkan.shaders.graph.PackGraph$Pass, java.util.Map, java.util.Map, java.util.Map$Entry);
+    Code:
+       0: aload_0
+       1: getfield      #485                // Field com/sulkan/shaders/graph/PackGraph$Pass.reads:Ljava/util/Map;
+       4: aload_3
+       5: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      10: invokeinterface #487,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+      15: ifne          40
+      18: new           #170                // class java/lang/IllegalArgumentException
+      21: dup
+      22: aload_3
+      23: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      28: checkcast     #93                 // class java/lang/String
+      31: invokedynamic #760,  0            // InvokeDynamic #50:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      36: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      39: athrow
+      40: new           #270                // class java/util/ArrayList
+      43: dup
+      44: invokespecial #272                // Method java/util/ArrayList."<init>":()V
+      47: astore        4
+      49: aload_3
+      50: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      55: checkcast     #140                // class com/google/gson/JsonElement
+      58: invokevirtual #761                // Method com/google/gson/JsonElement.getAsJsonArray:()Lcom/google/gson/JsonArray;
+      61: invokevirtual #280                // Method com/google/gson/JsonArray.iterator:()Ljava/util/Iterator;
+      64: astore        5
+      66: aload         5
+      68: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      73: ifeq          233
+      76: aload         5
+      78: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      83: checkcast     #140                // class com/google/gson/JsonElement
+      86: astore        6
+      88: new           #270                // class java/util/ArrayList
+      91: dup
+      92: invokespecial #272                // Method java/util/ArrayList."<init>":()V
+      95: astore        7
+      97: aload         6
+      99: invokevirtual #764                // Method com/google/gson/JsonElement.isJsonArray:()Z
+     102: ifeq          123
+     105: aload         6
+     107: invokevirtual #761                // Method com/google/gson/JsonElement.getAsJsonArray:()Lcom/google/gson/JsonArray;
+     110: aload         7
+     112: invokedynamic #767,  0            // InvokeDynamic #51:accept:(Ljava/util/List;)Ljava/util/function/Consumer;
+     117: invokevirtual #339                // Method com/google/gson/JsonArray.forEach:(Ljava/util/function/Consumer;)V
+     120: goto          136
+     123: aload         7
+     125: aload         6
+     127: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+     130: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     135: pop
+     136: aload         7
+     138: invokeinterface #376,  1          // InterfaceMethod java/util/List.isEmpty:()Z
+     143: ifeq          157
+     146: new           #170                // class java/lang/IllegalArgumentException
+     149: dup
+     150: ldc_w         #768                // String Empty read conjunction
+     153: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     156: athrow
+     157: aload         7
+     159: invokeinterface #221,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     164: astore        8
+     166: aload         8
+     168: invokeinterface #225,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+     173: ifeq          217
+     176: aload         8
+     178: invokeinterface #230,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     183: checkcast     #93                 // class java/lang/String
+     186: astore        9
+     188: aload_1
+     189: aload         9
+     191: invokeinterface #487,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+     196: ifne          214
+     199: new           #170                // class java/lang/IllegalArgumentException
+     202: dup
+     203: aload         9
+     205: invokedynamic #770,  0            // InvokeDynamic #52:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     210: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     213: athrow
+     214: goto          166
+     217: aload         4
+     219: aload         7
+     221: invokestatic  #394                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+     224: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     229: pop
+     230: goto          66
+     233: aload         4
+     235: invokeinterface #376,  1          // InterfaceMethod java/util/List.isEmpty:()Z
+     240: ifeq          254
+     243: new           #170                // class java/lang/IllegalArgumentException
+     246: dup
+     247: ldc_w         #771                // String Empty read condition
+     250: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     253: athrow
+     254: aload_2
+     255: aload_3
+     256: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     261: checkcast     #93                 // class java/lang/String
+     264: aload         4
+     266: invokestatic  #394                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+     269: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     274: pop
+     275: return
+
+  private static void lambda$parse$19(java.util.List, com.google.gson.JsonElement);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+       5: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      10: pop
+      11: return
+
+  private static void lambda$parse$17(java.util.Map, java.util.Map$Entry);
+    Code:
+       0: aload_1
+       1: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+       6: checkcast     #140                // class com/google/gson/JsonElement
+       9: ldc_w         #773                // String material ID
+      12: invokestatic  #166                // Method integer:(Lcom/google/gson/JsonElement;Ljava/lang/String;)I
+      15: istore_2
+      16: iload_2
+      17: iconst_1
+      18: if_icmplt     69
+      21: iload_2
+      22: ldc_w         #775                // int 65535
+      25: if_icmpgt     69
+      28: aload_1
+      29: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      34: checkcast     #93                 // class java/lang/String
+      37: ldc_w         #776                // String [a-z0-9_.-]+:[a-z0-9/_.-]+(\\[[a-z0-9_=,.-]+\\])?
+      40: invokevirtual #362                // Method java/lang/String.matches:(Ljava/lang/String;)Z
+      43: ifeq          69
+      46: aload_0
+      47: aload_1
+      48: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      53: checkcast     #93                 // class java/lang/String
+      56: iload_2
+      57: invokestatic  #320                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+      60: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      65: pop
+      66: goto          91
+      69: new           #170                // class java/lang/IllegalArgumentException
+      72: dup
+      73: aload_1
+      74: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      79: checkcast     #93                 // class java/lang/String
+      82: invokedynamic #778,  0            // InvokeDynamic #53:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      87: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      90: athrow
+      91: return
+
+  private static void lambda$parse$16(java.util.Map, java.util.Map, java.util.Map$Entry);
+    Code:
+       0: aload_2
+       1: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+       6: checkcast     #93                 // class java/lang/String
+       9: astore_3
+      10: aload_2
+      11: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      16: checkcast     #140                // class com/google/gson/JsonElement
+      19: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+      22: astore        4
+      24: aload_3
+      25: ldc_w         #360                // String [A-Za-z_][A-Za-z0-9_]*
+      28: invokevirtual #362                // Method java/lang/String.matches:(Ljava/lang/String;)Z
+      31: ifeq          86
+      34: aload_3
+      35: ldc_w         #365                // String gl_
+      38: invokevirtual #367                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+      41: ifne          86
+      44: aload_3
+      45: ldc_w         #370                // String Sulkan
+      48: invokevirtual #367                // Method java/lang/String.startsWith:(Ljava/lang/String;)Z
+      51: ifne          86
+      54: aload_0
+      55: aload         4
+      57: invokeinterface #487,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+      62: ifne          73
+      65: aload         4
+      67: invokestatic  #597                // Method com/sulkan/shaders/graph/GraphSceneCapture.isInput:(Ljava/lang/String;)Z
+      70: ifeq          86
+      73: aload_1
+      74: aload_3
+      75: aload         4
+      77: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      82: pop
+      83: goto          100
+      86: new           #170                // class java/lang/IllegalArgumentException
+      89: dup
+      90: aload_3
+      91: invokedynamic #779,  0            // InvokeDynamic #54:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      96: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      99: athrow
+     100: return
+
+  private static void lambda$parse$15(java.util.List, com.google.gson.JsonElement);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+       5: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      10: pop
+      11: return
+
+  private static void lambda$parse$14(java.util.List, com.google.gson.JsonElement);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+       5: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      10: pop
+      11: return
+
+  private static void lambda$parse$13(java.util.Map, java.util.Map$Entry);
+    Code:
+       0: aload_1
+       1: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+       6: checkcast     #93                 // class java/lang/String
+       9: invokestatic  #303                // Method identifier:(Ljava/lang/String;)V
+      12: aload_1
+      13: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      18: checkcast     #140                // class com/google/gson/JsonElement
+      21: invokevirtual #139                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+      24: astore_2
+      25: aload_2
+      26: iconst_3
+      27: anewarray     #93                 // class java/lang/String
+      30: dup
+      31: iconst_0
+      32: ldc_w         #780                // String source
+      35: aastore
+      36: dup
+      37: iconst_1
+      38: ldc_w         #782                // String filter
+      41: aastore
+      42: dup
+      43: iconst_2
+      44: ldc_w         #784                // String wrap
+      47: aastore
+      48: invokestatic  #101                // Method keys:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+      51: aload_2
+      52: ldc_w         #780                // String source
+      55: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+      58: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+      61: astore_3
+      62: aload_2
+      63: ldc_w         #782                // String filter
+      66: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+      69: ifeq          85
+      72: aload_2
+      73: ldc_w         #782                // String filter
+      76: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+      79: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+      82: goto          88
+      85: ldc_w         #786                // String nearest
+      88: astore        4
+      90: aload_2
+      91: ldc_w         #784                // String wrap
+      94: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+      97: ifeq          113
+     100: aload_2
+     101: ldc_w         #784                // String wrap
+     104: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     107: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+     110: goto          116
+     113: ldc_w         #788                // String clamp
+     116: astore        5
+     118: aload_3
+     119: ldc_w         #790                // String $minecraft/clouds
+     122: invokevirtual #588                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     125: ifne          135
+     128: aload_3
+     129: invokestatic  #313                // Method com/sulkan/shaders/graph/PackFiles.safe:(Ljava/lang/String;)Z
+     132: ifeq          216
+     135: ldc_w         #786                // String nearest
+     138: ldc_w         #792                // String linear
+     141: invokestatic  #215                // InterfaceMethod java/util/List.of:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/List;
+     144: aload         4
+     146: invokeinterface #563,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+     151: ifeq          216
+     154: ldc_w         #788                // String clamp
+     157: ldc_w         #794                // String repeat
+     160: invokestatic  #215                // InterfaceMethod java/util/List.of:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/List;
+     163: aload         5
+     165: invokeinterface #563,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+     170: ifeq          216
+     173: aload_0
+     174: aload_1
+     175: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     180: checkcast     #93                 // class java/lang/String
+     183: new           #796                // class com/sulkan/shaders/graph/PackGraph$Texture
+     186: dup
+     187: aload_3
+     188: aload         4
+     190: ldc_w         #792                // String linear
+     193: invokevirtual #588                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     196: aload         5
+     198: ldc_w         #794                // String repeat
+     201: invokevirtual #588                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     204: invokespecial #798                // Method com/sulkan/shaders/graph/PackGraph$Texture."<init>":(Ljava/lang/String;ZZ)V
+     207: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     212: pop
+     213: goto          238
+     216: new           #170                // class java/lang/IllegalArgumentException
+     219: dup
+     220: aload_1
+     221: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     226: checkcast     #93                 // class java/lang/String
+     229: invokedynamic #801,  0            // InvokeDynamic #55:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     234: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     237: athrow
+     238: return
+
+  private static boolean lambda$parse$12(java.lang.Integer);
+    Code:
+       0: aload_0
+       1: invokevirtual #632                // Method java/lang/Integer.intValue:()I
+       4: iconst_1
+       5: if_icmplt     18
+       8: aload_0
+       9: invokevirtual #632                // Method java/lang/Integer.intValue:()I
+      12: ldc_w         #802                // int 16777216
+      15: if_icmple     22
+      18: iconst_1
+      19: goto          23
+      22: iconst_0
+      23: ireturn
+
+  private static void lambda$parse$11(java.util.List, com.google.gson.JsonElement);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: ldc_w         #293                // String dispatch
+       5: invokestatic  #166                // Method integer:(Lcom/google/gson/JsonElement;Ljava/lang/String;)I
+       8: invokestatic  #320                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+      11: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      16: pop
+      17: return
+
+  private static void lambda$parse$10(java.lang.String, java.util.Map, java.util.Map, java.util.Map$Entry);
+    Code:
+       0: aload_0
+       1: ifnonnull     15
+       4: new           #170                // class java/lang/IllegalArgumentException
+       7: dup
+       8: ldc_w         #803                // String Storage buffers currently require compute
+      11: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      14: athrow
+      15: aload_3
+      16: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      21: checkcast     #140                // class com/google/gson/JsonElement
+      24: invokevirtual #139                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+      27: astore        4
+      29: aload         4
+      31: iconst_2
+      32: anewarray     #93                 // class java/lang/String
+      35: dup
+      36: iconst_0
+      37: ldc_w         #805                // String resource
+      40: aastore
+      41: dup
+      42: iconst_1
+      43: ldc_w         #806                // String access
+      46: aastore
+      47: invokestatic  #101                // Method keys:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+      50: aload         4
+      52: iconst_2
+      53: anewarray     #93                 // class java/lang/String
+      56: dup
+      57: iconst_0
+      58: ldc_w         #805                // String resource
+      61: aastore
+      62: dup
+      63: iconst_1
+      64: ldc_w         #806                // String access
+      67: aastore
+      68: invokestatic  #150                // Method required:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+      71: aload         4
+      73: ldc_w         #805                // String resource
+      76: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+      79: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+      82: astore        5
+      84: aload         4
+      86: ldc_w         #806                // String access
+      89: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+      92: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+      95: astore        6
+      97: ldc_w         #808                // String read
+     100: ldc_w         #810                // String write
+     103: invokestatic  #215                // InterfaceMethod java/util/List.of:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/List;
+     106: aload         6
+     108: invokeinterface #563,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+     113: ifeq          205
+     116: aload_1
+     117: aload         5
+     119: invokestatic  #491                // Method current:(Ljava/lang/String;)Ljava/lang/String;
+     122: invokeinterface #487,  2          // InterfaceMethod java/util/Map.containsKey:(Ljava/lang/Object;)Z
+     127: ifeq          205
+     130: aload         5
+     132: invokestatic  #609                // Method previous:(Ljava/lang/String;)Z
+     135: ifeq          169
+     138: aload         6
+     140: ldc_w         #810                // String write
+     143: invokevirtual #588                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     146: ifne          205
+     149: aload_1
+     150: aload         5
+     152: invokestatic  #491                // Method current:(Ljava/lang/String;)Ljava/lang/String;
+     155: invokeinterface #234,  2          // InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
+     160: checkcast     #612                // class com/sulkan/shaders/graph/PackGraph$Buffer
+     163: getfield      #614                // Field com/sulkan/shaders/graph/PackGraph$Buffer.history:Z
+     166: ifeq          205
+     169: aload_2
+     170: aload_3
+     171: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     176: checkcast     #93                 // class java/lang/String
+     179: new           #744                // class com/sulkan/shaders/graph/PackGraph$BufferBinding
+     182: dup
+     183: aload         5
+     185: aload         6
+     187: ldc_w         #810                // String write
+     190: invokevirtual #588                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+     193: invokespecial #812                // Method com/sulkan/shaders/graph/PackGraph$BufferBinding."<init>":(Ljava/lang/String;Z)V
+     196: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     201: pop
+     202: goto          227
+     205: new           #170                // class java/lang/IllegalArgumentException
+     208: dup
+     209: aload_3
+     210: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     215: checkcast     #93                 // class java/lang/String
+     218: invokedynamic #815,  0            // InvokeDynamic #56:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     223: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     226: athrow
+     227: return
+
+  private static void lambda$parse$9(java.util.List, com.google.gson.JsonElement);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+       5: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      10: pop
+      11: return
+
+  private static void lambda$parse$8(java.util.Map, java.util.Map$Entry);
+    Code:
+       0: aload_1
+       1: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+       6: checkcast     #93                 // class java/lang/String
+       9: ldc_w         #360                // String [A-Za-z_][A-Za-z0-9_]*
+      12: invokevirtual #362                // Method java/lang/String.matches:(Ljava/lang/String;)Z
+      15: ifne          40
+      18: new           #170                // class java/lang/IllegalArgumentException
+      21: dup
+      22: aload_1
+      23: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      28: checkcast     #93                 // class java/lang/String
+      31: invokedynamic #816,  0            // InvokeDynamic #57:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      36: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      39: athrow
+      40: aload_0
+      41: aload_1
+      42: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      47: checkcast     #93                 // class java/lang/String
+      50: aload_1
+      51: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      56: checkcast     #140                // class com/google/gson/JsonElement
+      59: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+      62: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+      67: pop
+      68: return
+
+  private static boolean lambda$parse$7(java.lang.Integer);
+    Code:
+       0: aload_0
+       1: invokevirtual #632                // Method java/lang/Integer.intValue:()I
+       4: iconst_1
+       5: if_icmplt     18
+       8: aload_0
+       9: invokevirtual #632                // Method java/lang/Integer.intValue:()I
+      12: sipush        1024
+      15: if_icmple     22
+      18: iconst_1
+      19: goto          23
+      22: iconst_0
+      23: ireturn
+
+  private static void lambda$parse$6(java.util.List, com.google.gson.JsonElement);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: ldc_w         #287                // String localSize
+       5: invokestatic  #166                // Method integer:(Lcom/google/gson/JsonElement;Ljava/lang/String;)I
+       8: invokestatic  #320                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+      11: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      16: pop
+      17: return
+
+  private static void lambda$parse$5(java.util.Map, java.util.Map$Entry);
+    Code:
+       0: aload_1
+       1: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+       6: checkcast     #93                 // class java/lang/String
+       9: invokestatic  #303                // Method identifier:(Ljava/lang/String;)V
+      12: aload_1
+      13: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      18: checkcast     #140                // class com/google/gson/JsonElement
+      21: invokevirtual #139                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+      24: astore_2
+      25: aload_2
+      26: iconst_2
+      27: anewarray     #93                 // class java/lang/String
+      30: dup
+      31: iconst_0
+      32: ldc_w         #817                // String bytes
+      35: aastore
+      36: dup
+      37: iconst_1
+      38: ldc_w         #818                // String history
+      41: aastore
+      42: invokestatic  #101                // Method keys:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+      45: aload_2
+      46: ldc_w         #817                // String bytes
+      49: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+      52: ldc_w         #817                // String bytes
+      55: invokestatic  #166                // Method integer:(Lcom/google/gson/JsonElement;Ljava/lang/String;)I
+      58: i2l
+      59: lstore_3
+      60: lload_3
+      61: ldc2_w        #819                // long 4l
+      64: lcmp
+      65: iflt          141
+      68: lload_3
+      69: ldc2_w        #819                // long 4l
+      72: lrem
+      73: lconst_0
+      74: lcmp
+      75: ifne          141
+      78: lload_3
+      79: ldc2_w        #821                // long 536870912l
+      82: lcmp
+      83: ifgt          141
+      86: aload_0
+      87: aload_1
+      88: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      93: checkcast     #93                 // class java/lang/String
+      96: new           #612                // class com/sulkan/shaders/graph/PackGraph$Buffer
+      99: dup
+     100: lload_3
+     101: aload_2
+     102: ldc_w         #818                // String history
+     105: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     108: ifeq          128
+     111: aload_2
+     112: ldc_w         #818                // String history
+     115: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     118: invokevirtual #212                // Method com/google/gson/JsonElement.getAsBoolean:()Z
+     121: ifeq          128
+     124: iconst_1
+     125: goto          129
+     128: iconst_0
+     129: invokespecial #823                // Method com/sulkan/shaders/graph/PackGraph$Buffer."<init>":(JZ)V
+     132: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     137: pop
+     138: goto          163
+     141: new           #170                // class java/lang/IllegalArgumentException
+     144: dup
+     145: aload_1
+     146: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     151: checkcast     #93                 // class java/lang/String
+     154: invokedynamic #826,  0            // InvokeDynamic #58:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     159: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     162: athrow
+     163: return
+
+  private static void lambda$parse$4(java.util.Map, java.util.Map$Entry);
+    Code:
+       0: aload_1
+       1: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+       6: checkcast     #93                 // class java/lang/String
+       9: invokestatic  #303                // Method identifier:(Ljava/lang/String;)V
+      12: aload_1
+      13: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      18: checkcast     #140                // class com/google/gson/JsonElement
+      21: invokevirtual #139                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+      24: astore_2
+      25: aload_2
+      26: iconst_5
+      27: anewarray     #93                 // class java/lang/String
+      30: dup
+      31: iconst_0
+      32: ldc_w         #827                // String format
+      35: aastore
+      36: dup
+      37: iconst_1
+      38: ldc_w         #828                // String scale
+      41: aastore
+      42: dup
+      43: iconst_2
+      44: ldc_w         #818                // String history
+      47: aastore
+      48: dup
+      49: iconst_3
+      50: ldc_w         #829                // String size
+      53: aastore
+      54: dup
+      55: iconst_4
+      56: ldc_w         #830                // String mipmaps
+      59: aastore
+      60: invokestatic  #101                // Method keys:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+      63: aload_2
+      64: iconst_1
+      65: anewarray     #93                 // class java/lang/String
+      68: dup
+      69: iconst_0
+      70: ldc_w         #827                // String format
+      73: aastore
+      74: invokestatic  #150                // Method required:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+      77: aload_2
+      78: ldc_w         #827                // String format
+      81: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+      84: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+      87: invokestatic  #832                // Method com/mojang/renderpearl/api/GpuFormat.valueOf:(Ljava/lang/String;)Lcom/mojang/renderpearl/api/GpuFormat;
+      90: astore_3
+      91: aload_3
+      92: invokevirtual #835                // Method com/mojang/renderpearl/api/GpuFormat.hasColorAspect:()Z
+      95: ifne          109
+      98: new           #170                // class java/lang/IllegalArgumentException
+     101: dup
+     102: ldc_w         #838                // String Graph output must be a color format
+     105: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     108: athrow
+     109: aload_2
+     110: ldc_w         #828                // String scale
+     113: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     116: ifeq          132
+     119: aload_2
+     120: ldc_w         #828                // String scale
+     123: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     126: invokevirtual #840                // Method com/google/gson/JsonElement.getAsDouble:()D
+     129: goto          133
+     132: dconst_1
+     133: dstore        4
+     135: dload         4
+     137: invokestatic  #844                // Method java/lang/Double.isFinite:(D)Z
+     140: ifeq          414
+     143: dload         4
+     145: dconst_0
+     146: dcmpg
+     147: ifle          414
+     150: dload         4
+     152: ldc2_w        #59                 // double 2.0d
+     155: dcmpl
+     156: ifgt          414
+     159: iconst_0
+     160: istore        6
+     162: iconst_0
+     163: istore        7
+     165: iconst_1
+     166: istore        8
+     168: aload_2
+     169: ldc_w         #829                // String size
+     172: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     175: ifeq          323
+     178: aload_2
+     179: ldc_w         #828                // String scale
+     182: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     185: ifeq          199
+     188: new           #170                // class java/lang/IllegalArgumentException
+     191: dup
+     192: ldc_w         #848                // String Use size or scale, not both
+     195: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     198: athrow
+     199: aload_2
+     200: ldc_w         #829                // String size
+     203: invokevirtual #276                // Method com/google/gson/JsonObject.getAsJsonArray:(Ljava/lang/String;)Lcom/google/gson/JsonArray;
+     206: astore        9
+     208: aload         9
+     210: invokevirtual #850                // Method com/google/gson/JsonArray.size:()I
+     213: iconst_3
+     214: if_icmpeq     228
+     217: new           #170                // class java/lang/IllegalArgumentException
+     220: dup
+     221: ldc_w         #851                // String Resource size must be [width,height,depth]
+     224: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     227: athrow
+     228: aload         9
+     230: iconst_0
+     231: invokevirtual #476                // Method com/google/gson/JsonArray.get:(I)Lcom/google/gson/JsonElement;
+     234: ldc_w         #853                // String width
+     237: invokestatic  #166                // Method integer:(Lcom/google/gson/JsonElement;Ljava/lang/String;)I
+     240: istore        6
+     242: aload         9
+     244: iconst_1
+     245: invokevirtual #476                // Method com/google/gson/JsonArray.get:(I)Lcom/google/gson/JsonElement;
+     248: ldc_w         #855                // String height
+     251: invokestatic  #166                // Method integer:(Lcom/google/gson/JsonElement;Ljava/lang/String;)I
+     254: istore        7
+     256: aload         9
+     258: iconst_2
+     259: invokevirtual #476                // Method com/google/gson/JsonArray.get:(I)Lcom/google/gson/JsonElement;
+     262: ldc_w         #857                // String depth
+     265: invokestatic  #166                // Method integer:(Lcom/google/gson/JsonElement;Ljava/lang/String;)I
+     268: istore        8
+     270: iload         6
+     272: iconst_1
+     273: if_icmplt     312
+     276: iload         7
+     278: iconst_1
+     279: if_icmplt     312
+     282: iload         8
+     284: iconst_1
+     285: if_icmplt     312
+     288: iload         6
+     290: sipush        16384
+     293: if_icmpgt     312
+     296: iload         7
+     298: sipush        16384
+     301: if_icmpgt     312
+     304: iload         8
+     306: sipush        2048
+     309: if_icmple     323
+     312: new           #170                // class java/lang/IllegalArgumentException
+     315: dup
+     316: ldc_w         #858                // String Invalid resource size
+     319: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     322: athrow
+     323: aload_0
+     324: aload_1
+     325: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     330: checkcast     #93                 // class java/lang/String
+     333: new           #413                // class com/sulkan/shaders/graph/PackGraph$Resource
+     336: dup
+     337: aload_3
+     338: dload         4
+     340: aload_2
+     341: ldc_w         #818                // String history
+     344: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     347: ifeq          367
+     350: aload_2
+     351: ldc_w         #818                // String history
+     354: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     357: invokevirtual #212                // Method com/google/gson/JsonElement.getAsBoolean:()Z
+     360: ifeq          367
+     363: iconst_1
+     364: goto          368
+     367: iconst_0
+     368: iload         6
+     370: iload         7
+     372: iload         8
+     374: aload_2
+     375: ldc_w         #830                // String mipmaps
+     378: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     381: ifeq          401
+     384: aload_2
+     385: ldc_w         #830                // String mipmaps
+     388: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     391: invokevirtual #212                // Method com/google/gson/JsonElement.getAsBoolean:()Z
+     394: ifeq          401
+     397: iconst_1
+     398: goto          402
+     401: iconst_0
+     402: invokespecial #860                // Method com/sulkan/shaders/graph/PackGraph$Resource."<init>":(Lcom/mojang/renderpearl/api/GpuFormat;DZIIIZ)V
+     405: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     410: pop
+     411: goto          425
+     414: new           #170                // class java/lang/IllegalArgumentException
+     417: dup
+     418: ldc_w         #863                // String Resource scale must be in (0, 2]
+     421: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     424: athrow
+     425: return
+
+  private static boolean lambda$parse$3(java.lang.String, java.lang.Double);
+    Code:
+       0: aload_1
+       1: invokevirtual #865                // Method java/lang/Double.doubleValue:()D
+       4: aload_1
+       5: invokevirtual #865                // Method java/lang/Double.doubleValue:()D
+       8: invokestatic  #868                // Method java/lang/Math.rint:(D)D
+      11: dcmpl
+      12: ifne          69
+      15: aload_0
+      16: ldc           #57                 // String SHADOW_QUALITY
+      18: invokevirtual #588                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+      21: ifeq          47
+      24: aload_1
+      25: invokevirtual #865                // Method java/lang/Double.doubleValue:()D
+      28: dconst_0
+      29: dcmpg
+      30: iflt          69
+      33: aload_1
+      34: invokevirtual #865                // Method java/lang/Double.doubleValue:()D
+      37: ldc2_w        #872                // double 4.0d
+      40: dcmpl
+      41: ifle          73
+      44: goto          69
+      47: aload_1
+      48: invokevirtual #865                // Method java/lang/Double.doubleValue:()D
+      51: ldc2_w        #874                // double 32.0d
+      54: dcmpg
+      55: iflt          69
+      58: aload_1
+      59: invokevirtual #865                // Method java/lang/Double.doubleValue:()D
+      62: ldc2_w        #876                // double 256.0d
+      65: dcmpl
+      66: ifle          73
+      69: iconst_1
+      70: goto          74
+      73: iconst_0
+      74: ireturn
+
+  private static void lambda$parse$0(java.util.Map, java.util.Map, java.util.Map$Entry);
+    Code:
+       0: aload_2
+       1: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+       6: checkcast     #93                 // class java/lang/String
+       9: ldc_w         #878                // String [A-Z][A-Z0-9_]*
+      12: invokevirtual #362                // Method java/lang/String.matches:(Ljava/lang/String;)Z
+      15: ifne          40
+      18: new           #170                // class java/lang/IllegalArgumentException
+      21: dup
+      22: aload_2
+      23: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      28: checkcast     #93                 // class java/lang/String
+      31: invokedynamic #880,  0            // InvokeDynamic #59:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+      36: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      39: athrow
+      40: aload_2
+      41: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      46: checkcast     #140                // class com/google/gson/JsonElement
+      49: astore_3
+      50: new           #270                // class java/util/ArrayList
+      53: dup
+      54: invokespecial #272                // Method java/util/ArrayList."<init>":()V
+      57: astore        4
+      59: aload_2
+      60: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      65: checkcast     #93                 // class java/lang/String
+      68: astore        5
+      70: aload_3
+      71: invokevirtual #881                // Method com/google/gson/JsonElement.isJsonObject:()Z
+      74: ifeq          274
+      77: aload_3
+      78: invokevirtual #139                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+      81: astore        8
+      83: aload         8
+      85: iconst_3
+      86: anewarray     #93                 // class java/lang/String
+      89: dup
+      90: iconst_0
+      91: ldc_w         #884                // String label
+      94: aastore
+      95: dup
+      96: iconst_1
+      97: ldc_w         #886                // String default
+     100: aastore
+     101: dup
+     102: iconst_2
+     103: ldc_w         #888                // String values
+     106: aastore
+     107: invokestatic  #101                // Method keys:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+     110: aload         8
+     112: iconst_2
+     113: anewarray     #93                 // class java/lang/String
+     116: dup
+     117: iconst_0
+     118: ldc_w         #886                // String default
+     121: aastore
+     122: dup
+     123: iconst_1
+     124: ldc_w         #888                // String values
+     127: aastore
+     128: invokestatic  #150                // Method required:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+     131: aload         8
+     133: ldc_w         #884                // String label
+     136: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     139: ifeq          156
+     142: aload         8
+     144: ldc_w         #884                // String label
+     147: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     150: invokevirtual #299                // Method com/google/gson/JsonElement.getAsString:()Ljava/lang/String;
+     153: goto          158
+     156: aload         5
+     158: astore        5
+     160: aload         8
+     162: ldc_w         #886                // String default
+     165: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     168: invokevirtual #840                // Method com/google/gson/JsonElement.getAsDouble:()D
+     171: dstore        6
+     173: aload         8
+     175: ldc_w         #888                // String values
+     178: invokevirtual #276                // Method com/google/gson/JsonObject.getAsJsonArray:(Ljava/lang/String;)Lcom/google/gson/JsonArray;
+     181: aload         4
+     183: invokedynamic #889,  0            // InvokeDynamic #60:accept:(Ljava/util/List;)Ljava/util/function/Consumer;
+     188: invokevirtual #339                // Method com/google/gson/JsonArray.forEach:(Ljava/util/function/Consumer;)V
+     191: aload         4
+     193: invokeinterface #376,  1          // InterfaceMethod java/util/List.isEmpty:()Z
+     198: ifne          249
+     201: aload         4
+     203: invokeinterface #340,  1          // InterfaceMethod java/util/List.size:()I
+     208: sipush        128
+     211: if_icmpgt     249
+     214: aload         4
+     216: dload         6
+     218: invokestatic  #61                 // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+     221: invokeinterface #563,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+     226: ifeq          249
+     229: aload         4
+     231: invokeinterface #243,  1          // InterfaceMethod java/util/List.stream:()Ljava/util/stream/Stream;
+     236: invokedynamic #890,  0            // InvokeDynamic #61:test:()Ljava/util/function/Predicate;
+     241: invokeinterface #251,  2          // InterfaceMethod java/util/stream/Stream.anyMatch:(Ljava/util/function/Predicate;)Z
+     246: ifeq          271
+     249: new           #170                // class java/lang/IllegalArgumentException
+     252: dup
+     253: aload_2
+     254: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     259: checkcast     #93                 // class java/lang/String
+     262: invokedynamic #891,  0            // InvokeDynamic #62:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     267: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     270: athrow
+     271: goto          293
+     274: aload_3
+     275: invokevirtual #840                // Method com/google/gson/JsonElement.getAsDouble:()D
+     278: dstore        6
+     280: aload         4
+     282: dload         6
+     284: invokestatic  #61                 // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+     287: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     292: pop
+     293: dload         6
+     295: invokestatic  #844                // Method java/lang/Double.isFinite:(D)Z
+     298: ifne          323
+     301: new           #170                // class java/lang/IllegalArgumentException
+     304: dup
+     305: aload_2
+     306: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     311: checkcast     #93                 // class java/lang/String
+     314: invokedynamic #892,  0            // InvokeDynamic #63:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     319: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     322: athrow
+     323: aload_0
+     324: aload_2
+     325: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     330: checkcast     #93                 // class java/lang/String
+     333: dload         6
+     335: invokestatic  #61                 // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+     338: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     343: pop
+     344: aload_1
+     345: aload_2
+     346: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+     351: checkcast     #93                 // class java/lang/String
+     354: new           #237                // class com/sulkan/shaders/graph/PackGraph$Option
+     357: dup
+     358: aload         5
+     360: dload         6
+     362: aload         4
+     364: invokestatic  #394                // InterfaceMethod java/util/List.copyOf:(Ljava/util/Collection;)Ljava/util/List;
+     367: invokespecial #893                // Method com/sulkan/shaders/graph/PackGraph$Option."<init>":(Ljava/lang/String;DLjava/util/List;)V
+     370: invokeinterface #119,  3          // InterfaceMethod java/util/Map.put:(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+     375: pop
+     376: return
+
+  private static boolean lambda$parse$2(java.lang.Double);
+    Code:
+       0: aload_0
+       1: invokevirtual #865                // Method java/lang/Double.doubleValue:()D
+       4: invokestatic  #844                // Method java/lang/Double.isFinite:(D)Z
+       7: ifne          14
+      10: iconst_1
+      11: goto          15
+      14: iconst_0
+      15: ireturn
+
+  private static void lambda$parse$1(java.util.List, com.google.gson.JsonElement);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #840                // Method com/google/gson/JsonElement.getAsDouble:()D
+       5: invokestatic  #61                 // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+       8: invokeinterface #407,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+      13: pop
+      14: return
+
+  private static void lambda$applyPlatforms$0(com.google.gson.JsonObject, com.google.gson.JsonObject, java.lang.String, java.lang.Boolean);
+    Code:
+       0: aload_0
+       1: aload_2
+       2: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+       5: ifne          9
+       8: return
+       9: aload_0
+      10: aload_2
+      11: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+      14: astore        4
+      16: aload         4
+      18: iconst_3
+      19: anewarray     #93                 // class java/lang/String
+      22: dup
+      23: iconst_0
+      24: ldc           #153                // String options
+      26: aastore
+      27: dup
+      28: iconst_1
+      29: ldc           #147                // String resources
+      31: aastore
+      32: dup
+      33: iconst_2
+      34: ldc           #154                // String budgetMiB
+      36: aastore
+      37: invokestatic  #101                // Method keys:(Lcom/google/gson/JsonObject;[Ljava/lang/String;)V
+      40: aload_3
+      41: invokevirtual #896                // Method java/lang/Boolean.booleanValue:()Z
+      44: ifne          48
+      47: return
+      48: aload         4
+      50: ldc           #153                // String options
+      52: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+      55: ifeq          108
+      58: aload_1
+      59: ldc           #153                // String options
+      61: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+      64: ifeq          76
+      67: aload_1
+      68: ldc           #153                // String options
+      70: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+      73: goto          83
+      76: new           #84                 // class com/google/gson/JsonObject
+      79: dup
+      80: invokespecial #899                // Method com/google/gson/JsonObject."<init>":()V
+      83: astore        5
+      85: aload         4
+      87: ldc           #153                // String options
+      89: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+      92: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+      95: aload         5
+      97: aload_2
+      98: invokedynamic #900,  0            // InvokeDynamic #64:accept:(Lcom/google/gson/JsonObject;Ljava/lang/String;)Ljava/util/function/Consumer;
+     103: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+     108: aload         4
+     110: ldc           #147                // String resources
+     112: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     115: ifeq          149
+     118: aload_1
+     119: ldc           #147                // String resources
+     121: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+     124: astore        5
+     126: aload         4
+     128: ldc           #147                // String resources
+     130: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+     133: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+     136: aload         5
+     138: aload_2
+     139: invokedynamic #903,  0            // InvokeDynamic #65:accept:(Lcom/google/gson/JsonObject;Ljava/lang/String;)Ljava/util/function/Consumer;
+     144: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+     149: aload         4
+     151: ldc           #154                // String budgetMiB
+     153: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+     156: ifeq          172
+     159: aload_1
+     160: ldc           #154                // String budgetMiB
+     162: aload         4
+     164: ldc           #154                // String budgetMiB
+     166: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+     169: invokevirtual #904                // Method com/google/gson/JsonObject.add:(Ljava/lang/String;Lcom/google/gson/JsonElement;)V
+     172: return
+
+  private static void lambda$applyPlatforms$2(com.google.gson.JsonObject, java.lang.String, java.util.Map$Entry);
+    Code:
+       0: aload_0
+       1: ifnull        20
+       4: aload_0
+       5: aload_2
+       6: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      11: checkcast     #93                 // class java/lang/String
+      14: invokevirtual #83                 // Method com/google/gson/JsonObject.has:(Ljava/lang/String;)Z
+      17: ifne          43
+      20: new           #170                // class java/lang/IllegalArgumentException
+      23: dup
+      24: aload_1
+      25: aload_2
+      26: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      31: checkcast     #93                 // class java/lang/String
+      34: invokedynamic #907,  0            // InvokeDynamic #66:makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+      39: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      42: athrow
+      43: aload_0
+      44: aload_2
+      45: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      50: checkcast     #93                 // class java/lang/String
+      53: invokevirtual #89                 // Method com/google/gson/JsonObject.getAsJsonObject:(Ljava/lang/String;)Lcom/google/gson/JsonObject;
+      56: astore_3
+      57: aload_2
+      58: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      63: checkcast     #140                // class com/google/gson/JsonElement
+      66: invokevirtual #139                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+      69: invokevirtual #188                // Method com/google/gson/JsonObject.entrySet:()Ljava/util/Set;
+      72: aload_3
+      73: invokedynamic #910,  0            // InvokeDynamic #67:accept:(Lcom/google/gson/JsonObject;)Ljava/util/function/Consumer;
+      78: invokeinterface #195,  2          // InterfaceMethod java/util/Set.forEach:(Ljava/util/function/Consumer;)V
+      83: return
+
+  private static void lambda$applyPlatforms$3(com.google.gson.JsonObject, java.util.Map$Entry);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+       7: checkcast     #93                 // class java/lang/String
+      10: aload_1
+      11: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      16: checkcast     #140                // class com/google/gson/JsonElement
+      19: invokevirtual #904                // Method com/google/gson/JsonObject.add:(Ljava/lang/String;Lcom/google/gson/JsonElement;)V
+      22: return
+
+  private static void lambda$applyPlatforms$1(com.google.gson.JsonObject, java.lang.String, java.util.Map$Entry);
+    Code:
+       0: aload_0
+       1: aload_2
+       2: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+       7: checkcast     #93                 // class java/lang/String
+      10: invokevirtual #163                // Method com/google/gson/JsonObject.get:(Ljava/lang/String;)Lcom/google/gson/JsonElement;
+      13: astore_3
+      14: aload_3
+      15: ifnonnull     41
+      18: new           #170                // class java/lang/IllegalArgumentException
+      21: dup
+      22: aload_1
+      23: aload_2
+      24: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      29: checkcast     #93                 // class java/lang/String
+      32: invokedynamic #913,  0            // InvokeDynamic #68:makeConcatWithConstants:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+      37: invokespecial #174                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      40: athrow
+      41: aload_3
+      42: invokevirtual #881                // Method com/google/gson/JsonElement.isJsonObject:()Z
+      45: ifeq          70
+      48: aload_3
+      49: invokevirtual #139                // Method com/google/gson/JsonElement.getAsJsonObject:()Lcom/google/gson/JsonObject;
+      52: ldc_w         #886                // String default
+      55: aload_2
+      56: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      61: checkcast     #140                // class com/google/gson/JsonElement
+      64: invokevirtual #904                // Method com/google/gson/JsonObject.add:(Ljava/lang/String;Lcom/google/gson/JsonElement;)V
+      67: goto          92
+      70: aload_0
+      71: aload_2
+      72: invokeinterface #757,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+      77: checkcast     #93                 // class java/lang/String
+      80: aload_2
+      81: invokeinterface #468,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+      86: checkcast     #140                // class com/google/gson/JsonElement
+      89: invokevirtual #904                // Method com/google/gson/JsonObject.add:(Ljava/lang/String;Lcom/google/gson/JsonElement;)V
+      92: return
+}
