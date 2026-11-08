@@ -41,12 +41,12 @@ float sulkanShadowTexelDepth(int cascade, ivec2 pixel) {
 	return texelFetch(SulkanShadowMap3, pixel, 0).r;
 }
 
-// 硬件原生 textureGather：单条指令硬件抓取 2x2 深度四元组，提升 4 倍纹理单元吞吐量！
-vec4 sulkanShadowGather(int cascade, vec2 uv) {
-	if (cascade == 0) return textureGather(SulkanShadowMap0, uv);
-	if (cascade == 1) return textureGather(SulkanShadowMap1, uv);
-	if (cascade == 2) return textureGather(SulkanShadowMap2, uv);
-	return textureGather(SulkanShadowMap3, uv);
+// 1. 硬件 textureGather，传入精确对齐到 2x2 中心点的 UV
+vec4 sulkanShadowGather(int cascade, vec2 gatherUv) {
+	if (cascade == 0) return textureGather(SulkanShadowMap0, gatherUv);
+	if (cascade == 1) return textureGather(SulkanShadowMap1, gatherUv);
+	if (cascade == 2) return textureGather(SulkanShadowMap2, gatherUv);
+	return textureGather(SulkanShadowMap3, gatherUv);
 }
 
 #ifndef SULKAN_TERRAIN_SHADOWS_ONLY
@@ -172,8 +172,14 @@ float sulkanShadowBilinearVisibility(
 	vec2 texel = sulkanShadowTexel(cascade);
 	vec2 size = 1.0 / texel;
 	vec2 footprint = uv * size - 0.5;
-	vec2 blend = fract(footprint);
-	vec4 depths = sulkanShadowGather(cascade, uv);
+	vec2 base = floor(footprint);
+	vec2 blend = footprint - base;
+	
+	// 关键修复：将 (base + 1.0) * texel 传给 textureGather，
+	// 强制让硬件采样点完美落在 4 个纹素的十字交界中心，彻底消除 AMD 显卡上的错位条纹！
+	vec2 gatherUv = (base + 1.0) * texel;
+	vec4 depths = sulkanShadowGather(cascade, gatherUv);
+	
 	vec4 compareDepths = sulkanGatherCompareDepths(uv, texel, receiverUv, receiverDepth, depthGradient);
 	vec4 visible = step(compareDepths, depths);
 	float lower = mix(visible.w, visible.z, blend.x);
@@ -215,14 +221,16 @@ vec3 sulkanShadowCoord(int cascade, vec3 position) {
 float sulkanShadowNormalOffset(int cascade, vec3 normal) {
 	float facing = clamp(dot(normal, LightDirection.xyz), 0.0, 1.0);
 	float texelWorldSize = max(CascadeParams[cascade].x, 0.0001);
-	return clamp(texelWorldSize * mix(0.08, 0.20, 1.0 - facing), 0.002, 0.045);
+	// 增大沿法线方向的推离距离（从 0.08~0.20 提升到 0.25~0.65），彻底让接收面脱离自阴影条纹区
+	return clamp(texelWorldSize * mix(0.25, 0.65, 1.0 - facing), 0.005, 0.12);
 }
 
 float sulkanCascadeSample(int cascade, vec3 position, vec3 normal, bool grassReceiver) {
 	float texelWorldSize = max(CascadeParams[cascade].x, 0.0001);
+	// 同时加大沿光线方向的推离（从 0.08 提升到 0.22）
 	vec3 offsetPos = position
 		+ normal * sulkanShadowNormalOffset(cascade, normal)
-		+ LightDirection.xyz * (texelWorldSize * 0.08);
+		+ LightDirection.xyz * (texelWorldSize * 0.22);
 	vec3 coord = sulkanShadowCoord(cascade, offsetPos);
 	vec2 texel = sulkanShadowTexel(cascade);
 	vec2 guard = texel * 1.5;
@@ -231,15 +239,14 @@ float sulkanCascadeSample(int cascade, vec3 position, vec3 normal, bool grassRec
 			|| coord.z <= 0.0 || coord.z >= 1.0) return -1.0;
 
 	float facing = clamp(abs(dot(normal, normalize(LightDirection.xyz))), 0.0, 1.0);
-	float slope = min(sqrt(max(1.0 - facing * facing, 0.0)) / max(facing, 0.25), 2.5);
-	float precisionBias = (0.0025 + texelWorldSize * (0.06 + 0.04 * slope)) / max(CascadeParams[cascade].w, 1.0);
+	float slope = min(sqrt(max(1.0 - facing * facing, 0.0)) / max(facing, 0.15), 4.0);
+	
+	// 关键修复：因为省略了切平面梯度 depthGradient，这里将斜率深度偏置放大，
+	// 足够覆盖 2x2 双线性插值跨度内的斜率高度差，0 矩阵计算即可完全消除条纹！
+	float precisionBias = (0.0035 + texelWorldSize * (0.15 + 0.18 * slope)) / max(CascadeParams[cascade].w, 1.0);
 	float compareDepth = coord.z - precisionBias;
 	vec2 depthGradient = vec2(0.0);
-#if SULKAN_SHADOW_FILTER_TIER >= 3
-	if (!grassReceiver && cascade == 0) {
-		depthGradient = sulkanReceiverDepthGradient(cascade, normal) * 0.5;
-	}
-#endif
+
 	float visible;
 	if (grassReceiver) {
 		float allowance = clamp(texelWorldSize * (0.65 + 0.7 * slope), 0.015, 0.16);

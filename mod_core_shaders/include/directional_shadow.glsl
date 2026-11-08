@@ -164,8 +164,10 @@ float sulkanShadowBilinearVisibility(
 	vec2 texel = sulkanShadowTexel(cascade);
 	vec2 size = 1.0 / texel;
 	vec2 footprint = uv * size - 0.5;
-	vec2 blend = fract(footprint);
-	vec4 depths = sulkanShadowGather(cascade, uv);
+	vec2 base = floor(footprint);
+	vec2 blend = footprint - base;
+	vec2 gatherUv = (base + 1.0) * texel;
+	vec4 depths = sulkanShadowGather(cascade, gatherUv);
 	vec4 compareDepths = sulkanGatherCompareDepths(uv, texel, receiverUv, receiverDepth, depthGradient);
 	vec4 visible = step(compareDepths, depths);
 	float lower = mix(visible.w, visible.z, blend.x);
