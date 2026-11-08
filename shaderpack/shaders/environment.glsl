@@ -15,7 +15,8 @@ vec3 sulkanSky(vec3 ray) {
     vec3 noonMiddle = skySqrt * vec3(0.85, 1.05, 1.35) * 0.72 + noonUp * 0.25; // 清澈的蔚蓝地平线
     vec3 sunsetUp = sky*vec3(0.72,0.522,0.47)*0.5;
     vec3 sunsetMiddle = sky*vec3(1.8,1.3,1.2)*0.65;
-    float dusk = pow(1.0-noon,2.0);
+    float d1 = 1.0 - noon;
+    float dusk = d1 * d1;
     vec3 night = 0.9*vec3(0.07,0.14,0.24)*(1.0-0.5*rain);
     vec3 nightUp = pow(night,vec3(0.9))*0.12;
     vec3 nightMiddle = sqrt(nightUp)*0.20;
@@ -23,7 +24,9 @@ vec3 sulkanSky(vec3 ray) {
     vec3 middle = mix(nightMiddle,mix(noonMiddle,sunsetMiddle,dusk),day);
     float horizon = pow(1.0-max(ray.y,0.0),2.3-0.8*pow(towardSun,4.0));
     vec3 color = mix(up,middle,horizon);
-    float sunset = pow(1.0-abs(ray.y),4.0) * dusk * day * (1.0-rain);
+    float rayY1 = 1.0 - abs(ray.y);
+    float rayY2 = rayY1 * rayY1;
+    float sunset = (rayY2 * rayY2) * dusk * day * (1.0 - rain);
     color = mix(color, vec3(1.45,0.86,0.5)*(0.48+0.25*towardSun*towardSun),sunset*0.8);
     float glareDot = max(dot(ray, day>0.5 ? SunDirectionAndRainBrightness.xyz : MoonDirectionAndPhase.xyz),0.0);
     float glare = 0.075/(1.0-0.925*pow(glareDot,6.0))-0.075;

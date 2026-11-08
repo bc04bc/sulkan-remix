@@ -25,7 +25,9 @@ layout(location=1) out uvec2 surfaceData;
 void main() {
     vec3 eyeDirection=normalize(sulkanCameraOffset()-relativePosition);
     // Derivatives precede every discard and nonuniform material branch.
-    vec3 crossNormal = cross(dFdx(relativePosition), dFdy(relativePosition));
+    vec3 dPosX = dFdx(relativePosition);
+    vec3 dPosY = dFdy(relativePosition);
+    vec3 crossNormal = cross(dPosX, dPosY);
     vec3 geomNormal = crossNormal * inversesqrt(max(dot(crossNormal,crossNormal), 1e-12));
     if (dot(geomNormal, eyeDirection) < 0.0) geomNormal = -geomNormal;
     vec3 normal = geomNormal;
@@ -34,6 +36,9 @@ void main() {
     if(ice) normal=sulkanIceDetail(relativePosition,normal,iceRoughness);
     bool enhancedWater=false;
     vec4 base = sulkanSampleTerrainMaterial(u_BlockTex, uv, terrainMaterial) * tint;
+    float texLuma = dot(base.rgb, vec3(0.299, 0.587, 0.114));
+    float dLumaX = dFdx(texLuma);
+    float dLumaY = dFdy(texLuma);
     vec3 albedo=toLinear(base.rgb);
     if(materialId==12u) {
         // Only clear ice replaces its atlas color with transmission tint.
@@ -53,9 +58,11 @@ void main() {
     vec3 sunDirection = daylight>0.5?SunDirectionAndRainBrightness.xyz:MoonDirectionAndPhase.xyz;
     bool plant = materialId >= 2u && materialId <= 5u;
     bool cutoutSurface = plant || sulkanMaterialAlphaCutoff(terrainMaterial)>0.0;
+    // 构建切线空间微扰动高光法线（树叶/草/剪影/冰面不加，防止噪点）
+    float bumpStrength = (!cutoutSurface && !ice && materialId != 1u) ? 0.08 * MATERIAL_SHEEN : 0.0;
+    vec3 specNormal = normalize(normal - (dPosX * dLumaX + dPosY * dLumaY) * bumpStrength / max(dot(dPosX, dPosX) + dot(dPosY, dPosY), 1e-6));
     // 提取贴图自身明暗构建绝对稳定、零闪烁的微表面立体遮蔽（Micro-Occlusion）：
     // 泥土/石砖的暗部凹槽自然加深立体感，亮部凸起自然受光，移动镜头时 0 闪烁！
-    float texLuma = dot(albedo, vec3(0.299, 0.587, 0.114));
     float microOccl = clamp(0.82 + (texLuma - 0.35) * 0.45, 0.72, 1.15);
     vec3 storedNormal = ice ? normal : geomNormal;
     float sunDot = dot(normal,normalize(sunDirection+vec3(0,1e-5,0)));
@@ -63,7 +70,7 @@ void main() {
     // 阴影偏移和接收平面斜率必须使用绝对平整的 geomNormal，彻底杜绝微凹凸法线引发的阴影条纹闪烁！
     vec3 shadowNormal = cutoutSurface && dot(geomNormal,sunDirection)<0.0 ? -geomNormal : geomNormal;
     bool grass = materialId>=2u && materialId<=4u;
-    float skyLight = pow(lightLevel.y,2.0);
+    float skyLight = lightLevel.y * lightLevel.y;
     // Sodium encodes sky light 0 as 1/30. A surface sealed from the sky at every
     // vertex cannot see the sun, so skip the cascade filter and use the fully
     // shadowed result the map reports for enclosed surfaces.
@@ -86,6 +93,9 @@ void main() {
     float hemiWeight = normal.y * 0.5 + 0.5;
     vec3 skyFill = mix(groundBounce * 0.45, zenithSky, hemiWeight);
     skyFill = mix(skyFill, vec3(dot(skyFill, vec3(0.299, 0.587, 0.114))), WorldTimeWeatherDimension.y * 0.65);
+    // 轴向立体感调制（Voxel Axis Shading）：赋予东西向与南北向墙体微弱明暗差异，强化建筑转角立体感
+    float axisShade = 1.0 - 0.12 * abs(geomNormal.x) - 0.06 * abs(geomNormal.z) - 0.18 * max(-geomNormal.y, 0.0);
+    skyFill *= axisShade;
 
     // 3. 在被直接照亮的表面附近，额外注入一抹温暖的间接反弹光能量
     vec3 giFill = groundBounce * (1.0 - hemiWeight * 0.6) * smoothstep(0.1, 0.9, lightLevel.y) * 0.28;
@@ -96,7 +106,8 @@ void main() {
         vec3 leafSky = skyFill * 0.42 * mix(0.40, 1.0, exposure) * skyFacing;
         // 叶片内部全向次表面散射（SSS）：即使顺光看，受光叶片内部也有柔和的透光感
         vec3 sun = normalize(SunDirectionAndRainBrightness.xyz + vec3(0, 1e-5, 0));
-        float forwardScatter = pow(max(dot(-eyeDirection, sun), 0.0), 3.0);
+        float fsDot = max(dot(-eyeDirection, sun), 0.0);
+        float forwardScatter = fsDot * fsDot * fsDot;
         float wrapScatter = clamp((sunDot + 0.6) / 1.6, 0.0, 1.0);
         float sss = (0.35 * wrapScatter + 0.65 * forwardScatter) * exposure * shadow
             * smoothstep(0.0, 0.15, sun.y) * (1.0 - WorldTimeWeatherDimension.y);
@@ -110,7 +121,9 @@ void main() {
     // Back-facing cutouts receive ambient skylight, not a second cast-shadow
     // darkening on top of their already absent direct sunlight.
     if(cutoutSurface) shadowContrast*=sunFacing;
-    lighting *= 1.0-0.28*shadowContrast*skyLight;
+    // 阴影蓝紫冷色调染色，替换死黑线性压暗，营造通透的室外天光空气感
+    vec3 shadowTint = mix(vec3(1.0), vec3(0.70, 0.78, 0.92), shadowContrast * skyLight * 0.35);
+    lighting *= shadowTint;
     // Physical inverse-square torch/blocklight falloff with Planckian color temperature shift
     float bl = lightLevel.x;
     float blockLight = bl * bl * bl * (bl * 1.8 + 0.2);
@@ -119,7 +132,10 @@ void main() {
     // 稳定的微明暗对比调制火把光，完全消除视线移动造成的 2x2 抖动黑斑
     lighting += warmBlock * blockLight * microOccl * 1.65;
     // 逆光菲涅尔轮廓金边（Rim Light）：当视线逆着阳光擦过方块或树叶边缘时，泛出温暖的金边
-    float rim = pow(1.0 - max(dot(normal, eyeDirection), 0.0), 4.0) * pow(max(dot(-eyeDirection, sunDirection), 0.0), 3.0) * (1.0 - max(normal.y, 0.0));
+    float rimBase = 1.0 - max(dot(normal, eyeDirection), 0.0);
+    float rim2 = rimBase * rimBase;
+    float rimSun = max(dot(-eyeDirection, sunDirection), 0.0);
+    float rim = (rim2 * rim2) * (rimSun * rimSun * rimSun) * (1.0 - max(normal.y, 0.0));
     lighting += portLightPalette() * (rim * shadow * skyLight * 0.35);
     // Keep the vanilla lightmap for dimension-specific lighting outside the Overworld.
     vec3 vanillaLight = texture(u_LightTex,lightLevel*(15.0/16.0)).rgb;
@@ -146,13 +162,21 @@ void main() {
         float reflectance=mix(0.035,0.18,materialId==6u?materialWeight:0.0);
         if(ice) { roughness=mix(0.24,0.46,iceRoughness); reflectance=0.025; }
         {
-            float highlight=sulkanSunSpecular(normal,eyeDirection,mix(roughness,0.22,wet),reflectance);
+            // 采用凹凸微法线 specNormal 计算太阳高光
+            float highlight=sulkanSunSpecular(specNormal,eyeDirection,mix(roughness,0.22,wet),reflectance);
             surface+=portLightPalette()*highlight*sunVisibility*skyLight;
         }
-        if(wet>0.0) {
-            // Analytic sky sheen stays visible under overcast skies. No reflection tracing.
-            float fresnel=0.02+0.18*pow(1.0-max(dot(normal,eyeDirection),0.0),5.0);
-            surface+=sulkanSky(reflect(-eyeDirection,normal))*wet*fresnel*skyLight;
+        // 天空环境反射：金属/宝石方块晴天自带微弱反射，雨天全方块湿润反光
+        float envReflectance = (materialId == 6u ? 0.16 : (materialId == 7u ? 0.03 : 0.0)) * MATERIAL_SHEEN;
+        float envMask = max(wet, envReflectance);
+        if (envMask > 0.001) {
+            float NoV = max(dot(specNormal, eyeDirection), 0.0);
+            float t = 1.0 - NoV;
+            float t2 = t * t;
+            float fresnel = 0.02 + 0.22 * (t2 * t2 * t);
+            vec3 envSky = sulkanSky(reflect(-eyeDirection, specNormal));
+            vec3 specTint = (materialId == 6u) ? mix(vec3(1.0), albedo * 1.2, 0.65) : vec3(1.0);
+            surface += envSky * specTint * envMask * fresnel * skyLight * (1.0 - roughness * 0.6);
         }
     }
     // Bright texture regions emit; unlit redstone and berry-free vines are unmapped.

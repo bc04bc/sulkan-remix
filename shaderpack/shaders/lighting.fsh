@@ -66,24 +66,25 @@ void main() {
         // Optimized 8-step volume march with spatial dither
         float stepLength=reach/8.0;
         vec3 origin=sulkanCloudOrigin();
-        float dither = fract(sin(dot(texCoord * ViewSizeAndInverse.xy, vec2(12.9898, 78.233))) * 43758.5453);
+        float dither = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
         for(int i=0;i<8;i++) {
             float distance=(float(i)+dither)*stepLength;
             vec3 relative=sulkanCameraOffset()+ray*distance;
             vec3 world=origin+relative;
             float visibility=sulkanVolumeShadow(relative);
 #if CLOUD_QUALITY > 0
-            float entry=max((cloudBottom()-world.y)/sun.y,0.0);
-            float exitDistance=max((cloudBottom()+4.0-world.y)/sun.y,0.0);
+            float entry=max((cloudBottom()-world.y)/max(sun.y, 1e-4),0.0);
+            float exitDistance=max((cloudBottom()+4.0-world.y)/max(sun.y, 1e-4),0.0);
             float span=max(exitDistance-entry,0.0);
-            float cloudDepth=0.0;
-            for(int c=0;c<2;c++) cloudDepth+=cloudDensity(world+sun*(entry+(float(c)+0.5)*span*0.5))*span*0.5;
+            float cloudDepth=cloudDensity(world+sun*(entry+span*0.5))*span;
             visibility*=exp(-cloudDepth);
 #endif
             float airDensity=exp(clamp((72.0-world.y)*0.018,-8.0,3.0));
             shafts+=visibility*airDensity*exp(-distance*0.012)*stepLength*0.006;
         }
-        float forward=0.08+0.92*pow(max(dot(ray,sun),0.0),8.0);
+        float fDot = max(dot(ray, sun), 0.0);
+        float f2 = fDot * fDot; float f4 = f2 * f2; float f8 = f4 * f4;
+        float forward = 0.08 + 0.92 * f8;
         shafts*=smoothstep(0.05,0.65,CloudOffsetAndGameTime.z)*forward*(1.0-WorldTimeWeatherDimension.y)*smoothstep(0.02,0.15,sun.y);
     }
 #endif

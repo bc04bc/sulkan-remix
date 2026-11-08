@@ -237,7 +237,12 @@ float sulkanCascadeSample(int cascade, vec3 position, vec3 normal, bool grassRec
 	
 	float precisionBias = (0.0005 + texelWorldSize * 0.015) / max(CascadeParams[cascade].w, 1.0);
 	float compareDepth = coord.z - precisionBias;
-	vec2 depthGradient = sulkanReceiverDepthGradient(cascade, normal);
+	vec2 depthGradient = vec2(0.0);
+#if SULKAN_SHADOW_FILTER_TIER >= 3
+	if (!grassReceiver && cascade == 0) {
+		depthGradient = sulkanReceiverDepthGradient(cascade, normal);
+	}
+#endif
 	float visible;
     
     

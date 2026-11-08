@@ -55,13 +55,18 @@ void main() {
     ivec2 origin=ivec2(floor(q));
     vec2 light=vec2(0.0); vec4 cloud=vec4(0.0); float total=0.0;
 #if _SULKAN_ENABLED_AMBIENT_OCCLUSION || _SULKAN_ENABLED_SUN_SHAFTS || CLOUD_QUALITY > 0
+    float projZ2 = InverseProjection[2][3];
+    float projZ3 = InverseProjection[3][3];
+    float centerDenom = depth * projZ2 + projZ3;
+    float centerLinZ = depth <= 1e-7 ? 60000.0 : abs(1.0 / (abs(centerDenom) < 1e-6 ? 1e-6 : centerDenom));
     for(int y=0;y<2;y++) for(int x=0;x<2;x++) {
         ivec2 pixel=clamp(origin+ivec2(x,y),ivec2(0),ivec2(size)-1);
         vec2 uv=(vec2(pixel)+0.5)/size;
         float d=texture(Depth,uv).r;
-        float dist=d<=1e-7?60000.0:length(viewPosition(uv,d));
+        float sampleDenom = d * projZ2 + projZ3;
+        float sampleLinZ = d <= 1e-7 ? 60000.0 : abs(1.0 / (abs(sampleDenom) < 1e-6 ? 1e-6 : sampleDenom));
         float weight=(x==0?1.0-f.x:f.x)*(y==0?1.0-f.y:f.y);
-        float separation=abs(dist-distanceToScene)/max(distanceToScene*0.02,0.3);
+        float separation=abs(sampleLinZ-centerLinZ)/max(centerLinZ*0.02,0.3);
         weight*=1.0/(1.0+separation*separation);
 #if _SULKAN_ENABLED_AMBIENT_OCCLUSION || _SULKAN_ENABLED_SUN_SHAFTS
         light+=texelFetch(Lighting,pixel,0).rg*weight;
@@ -118,7 +123,8 @@ void main() {
                 towardSun*towardSun*horizon);
             float distanceGrade=DISTANCE_COLOR*sulkanDay()*(1.0-WorldTimeWeatherDimension.y);
             // 加入强烈的阳光前向米氏散射（Mie Scattering），让空气充满温暖的丁达尔体积光感！
-            float mie = pow(towardSun, 5.0) * (1.0 - WorldTimeWeatherDimension.y) * sulkanDay();
+            float ts2 = towardSun * towardSun;
+            float mie = (ts2 * ts2 * towardSun) * (1.0 - WorldTimeWeatherDimension.y) * sulkanDay();
             vec3 mistColor = sulkanSky(normalize(vec3(ray.x, 0.25, ray.z))) * 0.70 + portLightPalette() * mie * 0.35;
             c=mix(c,mistColor*mix(vec3(1.0),distanceTint,distanceGrade*0.5),fog);
         }
