@@ -1,6 +1,7 @@
 // Native shadow ABI v1. Position and normal are camera-relative world axes.
 #ifndef SULKAN_NATIVE_SHADOWS
 #define SULKAN_NATIVE_SHADOWS
+#define SULKAN_TERRAIN_SHADOWS_ONLY
 #ifndef SHADOW_QUALITY
 #define SHADOW_QUALITY 2
 #endif
@@ -10,9 +11,11 @@ uniform sampler2D SulkanShadowMap0;
 uniform sampler2D SulkanShadowMap1;
 uniform sampler2D SulkanShadowMap2;
 uniform sampler2D SulkanShadowMap3;
+#ifndef SULKAN_TERRAIN_SHADOWS_ONLY
 // Legacy slots: map 0 aliases the composited cascade 0, map 1 is unused.
 uniform sampler2D SulkanEntityShadowMap0;
 uniform sampler2D SulkanEntityShadowMap1;
+#endif
 layout(std140) uniform SulkanShadowData {
     mat4 ShadowViewProjection[4];
     vec4 CascadeParams[4];

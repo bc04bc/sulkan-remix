@@ -105,10 +105,6 @@
       "pipeline": "sodium:pipeline/solid_terrain",
       "vertex": "shaders/terrain.vsh",
       "fragment": "shaders/terrain.fsh",
-      "textures": {
-        "Opaque": "$terrainOpaque",
-        "OpaqueDepth": "$terrainOpaqueDepth"
-      },
       "writes": [
         "surface.data"
       ]
@@ -117,10 +113,6 @@
       "pipeline": "sodium:pipeline/cutout_terrain",
       "vertex": "shaders/terrain.vsh",
       "fragment": "shaders/terrain.fsh",
-      "textures": {
-        "Opaque": "$terrainOpaque",
-        "OpaqueDepth": "$terrainOpaqueDepth"
-      },
       "writes": [
         "surface.data"
       ]
@@ -315,7 +307,7 @@
     },
     "SHADOW_DISTANCE": {
       "label": "Shadow distance (blocks)",
-      "default": 64,
+      "default": 128,
       "values": [
         64,
         96,

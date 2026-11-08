@@ -38,12 +38,11 @@ float sulkanShadowTexelDepth(int cascade, ivec2 pixel) {
 	return texelFetch(SulkanShadowMap3, pixel, 0).r;
 }
 
-vec4 sulkanShadowGather(int cascade, ivec2 base) {
-	return vec4(
-		sulkanShadowTexelDepth(cascade, base + ivec2(0, 1)),
-		sulkanShadowTexelDepth(cascade, base + ivec2(1, 1)),
-		sulkanShadowTexelDepth(cascade, base + ivec2(1, 0)),
-		sulkanShadowTexelDepth(cascade, base));
+vec4 sulkanShadowGather(int cascade, vec2 uv) {
+	if (cascade == 0) return textureGather(SulkanShadowMap0, uv);
+	if (cascade == 1) return textureGather(SulkanShadowMap1, uv);
+	if (cascade == 2) return textureGather(SulkanShadowMap2, uv);
+	return textureGather(SulkanShadowMap3, uv);
 }
 
 #ifndef SULKAN_TERRAIN_SHADOWS_ONLY
@@ -165,9 +164,8 @@ float sulkanShadowBilinearVisibility(
 	vec2 texel = sulkanShadowTexel(cascade);
 	vec2 size = 1.0 / texel;
 	vec2 footprint = uv * size - 0.5;
-	vec2 base = floor(footprint);
-	vec2 blend = footprint - base;
-	vec4 depths = sulkanShadowGather(cascade, clamp(ivec2(base), ivec2(0), ivec2(size) - 2));
+	vec2 blend = fract(footprint);
+	vec4 depths = sulkanShadowGather(cascade, uv);
 	vec4 compareDepths = sulkanGatherCompareDepths(uv, texel, receiverUv, receiverDepth, depthGradient);
 	vec4 visible = step(compareDepths, depths);
 	float lower = mix(visible.w, visible.z, blend.x);

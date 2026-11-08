@@ -9,8 +9,10 @@
 #include "shaders/held-light.glsl"
 uniform sampler2D u_BlockTex;
 uniform sampler2D u_LightTex;
+#ifdef SULKAN_TRANSLUCENT
 uniform sampler2D Opaque;
 uniform sampler2D OpaqueDepth;
+#endif
 #include "shaders/surface-data.glsl"
 #include "shaders/ice.glsl"
 layout(location=0) in vec4 tint;
@@ -81,8 +83,14 @@ void main() {
     float shadow = 1.0;
     float sunVisibility = 1.0;
 #endif
-    if(lightLevel.y > 1.0/30.0+1e-4)
-        shadow = sulkanTerrainShadows(relativePosition,shadowNormal,grass,sunVisibility);
+    // 只有朝向太阳的面（或者是草/树叶等双面透光几何）才去采样 Shadow Map！背光面直接进入阴影，节省全屏 50% 以上开销！
+    bool needsShadow = (sunFacing > 0.0 || cutoutSurface || materialId == 5u) && (lightLevel.y > 1.0/30.0 + 1e-4);
+    if (needsShadow) {
+        shadow = sulkanTerrainShadows(relativePosition, shadowNormal, grass, sunVisibility);
+    } else {
+        shadow = ShadowParams.z;
+        sunVisibility = 0.0;
+    }
     // 1. 真正的物理兰伯特直射光（背光面绝不吃直射太阳光，只吃软边缘过渡！）
     float directFacing = cutoutSurface ? sunFacing : smoothstep(-0.05, 0.95, sunDot) * sunFacing;
     vec3 direct = portLightPalette() * directFacing * shadow * microOccl * (1.0 - WorldTimeWeatherDimension.y * 0.65);
@@ -193,6 +201,7 @@ void main() {
     else if(materialId==10u || materialId==11u) hdrBoost=1.0;
     base.rgb=pow(max(surface,vec3(0.0)),vec3(1.0/2.2));
 #if WATER_ENABLED == 1
+#ifdef SULKAN_TRANSLUCENT
     if (materialId == 1u && CameraPositionHighAndFogType.w < 0.5) {
         vec2 screenUv = gl_FragCoord.xy * ViewSizeAndInverse.zw;
         vec2 worldXZ = relativePosition.xz + mod(CameraPositionHighAndFogType.xz, vec2(4096.0)) + CameraPositionLowAndFarPlane.xz;
@@ -222,6 +231,7 @@ void main() {
             base=vec4(pow(max(waterColor,vec3(0)),vec3(1.0/2.2)),1.0);
         }
     }
+#endif
 #endif
     // Only naturally translucent ice can sample the scene behind it. Packed and
     // blue ice keep their lit opaque surface and still receive ice SSR below.

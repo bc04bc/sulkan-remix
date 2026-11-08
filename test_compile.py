@@ -100,6 +100,7 @@ tests = [
     ('atmosphere.fsh', 1, os.path.join(base_dir, 'shaders', 'atmosphere.fsh'), ''),
     ('blur-y.fsh', 1, os.path.join(base_dir, 'shaders', 'blur-y.fsh'), ''),
     ('bloom-seed.fsh', 1, os.path.join(base_dir, 'shaders', 'bloom-seed.fsh'), ''),
+    ('water-reflections.fsh', 1, os.path.join(base_dir, 'shaders', 'water-reflections.fsh'), ''),
     ('final.fsh', 1, os.path.join(base_dir, 'shaders', 'final.fsh'), '')
 ]
 
