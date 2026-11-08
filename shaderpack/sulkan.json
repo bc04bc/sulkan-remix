@@ -113,9 +113,7 @@
       "pipeline": "sodium:pipeline/cutout_terrain",
       "vertex": "shaders/terrain.vsh",
       "fragment": "shaders/terrain.fsh",
-      "writes": [
-        "surface.data"
-      ]
+      "writes": []
     },
     {
       "pipeline": "sodium:pipeline/translucent_terrain",
