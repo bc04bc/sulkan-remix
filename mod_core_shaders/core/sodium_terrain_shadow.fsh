@@ -10,12 +10,11 @@ layout(binding = 3) uniform isamplerBuffer u_SectionTimeInfo;
 layout(location = 0) in vec2 v_TexCoord;
 layout(location = 1) flat in uint v_Material;
 layout(location = 2) in float v_Alpha;
+layout(location = 0) out vec4 fragColor;
 
 void main() {
 #ifdef ALPHA_CUTOUT
-	
-	
-	float alpha = sulkanSampleTerrainMaterial(u_BlockTex, v_TexCoord, v_Material).a * v_Alpha;
-	if (alpha < sulkanMaterialAlphaCutoff(v_Material)) discard;
+	if (textureLod(u_BlockTex, v_TexCoord, 0.0).a < 0.1) discard;
 #endif
+	fragColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

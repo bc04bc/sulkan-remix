@@ -5,6 +5,7 @@ float sulkanMaterialAlphaCutoff(uint material) {
 }
 
 vec4 sulkanSampleTerrainMaterial(sampler2D atlas, vec2 uv, uint material) {
-    vec2 dx = dFdx(uv), dy = dFdy(uv);
-    return (material & 1u) != 0u ? textureGrad(atlas, uv, dx, dy) : textureLod(atlas, uv, 0.0);
+    // 使用硬件原生 texture(..., bias) 代替手动求导的 textureGrad，
+    // 不仅省去两次屏幕偏导数寄存器占用，还能避免斜视角树叶触发极端各向异性采样阻塞！
+    return (material & 1u) != 0u ? texture(atlas, uv, -0.5) : textureLod(atlas, uv, 0.0);
 }

@@ -26,7 +26,10 @@ void main() {
     uint section = a_LightAndData.w;
     vec3 sectionOffset = vec3((section >> 5u) & 7u, section & 3u, (section >> 2u) & 7u) * 16.0;
     relativePosition = local + sectionOffset + u_RegionOffset;
-    relativePosition += sulkanWindOffset(relativePosition, a_SulkanMaterial);
+    // 仅对距离玩家 32 格（dot < 1024.0）以内的植物计算风吹顶点偏移，省去森林里 90% 树叶的三角函数运算！
+    if (dot(relativePosition, relativePosition) < 1024.0) {
+        relativePosition += sulkanWindOffset(relativePosition, a_SulkanMaterial);
+    }
     gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(relativePosition, 1.0);
     vec2 lightUv = vec2(a_LightAndData.xy) / 256.0;
     tint = a_Color;

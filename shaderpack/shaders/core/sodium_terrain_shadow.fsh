@@ -14,9 +14,7 @@ layout(location = 0) out vec4 fragColor;
 
 void main() {
 #ifdef ALPHA_CUTOUT
-	// Fast single-tap alpha lookup for shadow pass cutout test
-	float alpha = textureLod(u_BlockTex, v_TexCoord, 0.0).a * v_Alpha;
-	if (alpha < sulkanMaterialAlphaCutoff(v_Material)) discard;
+	if (textureLod(u_BlockTex, v_TexCoord, 0.0).a < 0.1) discard;
 #endif
 	fragColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

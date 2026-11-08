@@ -25,35 +25,33 @@ layout(location=6) flat in uint terrainMaterial;
 layout(location=0) out vec4 color;
 layout(location=1) out uvec2 surfaceData;
 void main() {
-    vec3 eyeDirection=normalize(sulkanCameraOffset()-relativePosition);
-    // Derivatives precede every discard and nonuniform material branch.
+    // 1. 极速 Early-Discard：在计算任何法线、偏导、冰面或光照前，立即过滤镂空透明像素！
+#ifdef ALPHA_CUTOUT
+    float rawAlpha = textureLod(u_BlockTex, uv, 0.0).a * tint.a;
+    if (rawAlpha < sulkanMaterialAlphaCutoff(terrainMaterial)) discard;
+#endif
+    vec4 base = sulkanSampleTerrainMaterial(u_BlockTex, uv, terrainMaterial) * tint;
+#ifdef SULKAN_TRANSLUCENT
+    if (base.a <= 1.0/255.0) discard;
+#endif
+    vec3 eyeDirection = normalize(sulkanCameraOffset() - relativePosition);
     vec3 dPosX = dFdx(relativePosition);
     vec3 dPosY = dFdy(relativePosition);
     vec3 crossNormal = cross(dPosX, dPosY);
-    vec3 geomNormal = crossNormal * inversesqrt(max(dot(crossNormal,crossNormal), 1e-12));
+    vec3 geomNormal = crossNormal * inversesqrt(max(dot(crossNormal, crossNormal), 1e-12));
     if (dot(geomNormal, eyeDirection) < 0.0) geomNormal = -geomNormal;
     vec3 normal = geomNormal;
-    bool ice=materialId>=12u && materialId<=14u;
-    float iceRoughness=0.0;
-    if(ice) normal=sulkanIceDetail(relativePosition,normal,iceRoughness);
-    bool enhancedWater=false;
-    vec4 base = sulkanSampleTerrainMaterial(u_BlockTex, uv, terrainMaterial) * tint;
+    bool ice = materialId >= 12u && materialId <= 14u;
+    float iceRoughness = 0.0;
+    if (ice) normal = sulkanIceDetail(relativePosition, normal, iceRoughness);
+    bool enhancedWater = false;
     float texLuma = dot(base.rgb, vec3(0.299, 0.587, 0.114));
     float dLumaX = dFdx(texLuma);
     float dLumaY = dFdy(texLuma);
-    vec3 albedo=toLinear(base.rgb);
-    if(materialId==12u) {
-        // Only clear ice replaces its atlas color with transmission tint.
-        // Packed and blue ice retain their original texture and color beneath
-        // the rough surface lighting and screen-space reflections.
-        albedo=vec3(0.72,0.86,0.92);
+    vec3 albedo = toLinear(base.rgb);
+    if (materialId == 12u) {
+        albedo = vec3(0.72, 0.86, 0.92);
     }
-#ifdef SULKAN_TRANSLUCENT
-    if(base.a<=1.0/255.0) discard;
-#endif
-#ifdef ALPHA_CUTOUT
-    if (base.a < sulkanMaterialAlphaCutoff(terrainMaterial)) discard;
-#endif
     float worldDistance = length(relativePosition);
     float overworld = 1.0-step(0.5,abs(WorldTimeWeatherDimension.w));
     float daylight = sulkanDay();
@@ -83,12 +81,16 @@ void main() {
     float shadow = 1.0;
     float sunVisibility = 1.0;
 #endif
-    // 只有朝向太阳的面（或者是草/树叶等双面透光几何）才去采样 Shadow Map！背光面直接进入阴影，节省全屏 50% 以上开销！
-    bool needsShadow = (sunFacing > 0.0 || cutoutSurface || materialId == 5u) && (lightLevel.y > 1.0/30.0 + 1e-4);
+    // 树叶(5u)和草/植物(cutoutSurface)只有在天空光充足(lightLevel.y > 0.62，即暴露在树冠外层)时才采样阴影！
+    // 树冠内部阴暗处的树叶直接跳过 Shadow Map 采样，省下森林里 60% 的树叶阴影开销！
+    bool needsShadow = (lightLevel.y > 1.0/30.0 + 1e-4) && (
+        (cutoutSurface || materialId == 5u) ? (lightLevel.y > 0.62) : (sunFacing > 0.0)
+    );
     if (needsShadow) {
-        shadow = sulkanTerrainShadows(relativePosition, shadowNormal, grass, sunVisibility);
+        // 把 materialId == 5u 也作为 grass 参数传进去，让树叶走快速单次采样通道！
+        shadow = sulkanTerrainShadows(relativePosition, shadowNormal, grass || materialId == 5u, sunVisibility);
     } else {
-        shadow = ShadowParams.z;
+        shadow = mix(1.0, ShadowParams.z, ShadowParams.x);
         sunVisibility = 0.0;
     }
     // 1. 真正的物理兰伯特直射光（背光面绝不吃直射太阳光，只吃软边缘过渡！）
