@@ -16,3 +16,15 @@ __pycache__/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Profiling and RenderDoc captures
+*.rdc
+*.cap
+*.xml
+*_chrome.json
+scratch/
+mc_*.txt
+test_*.txt
+extracted_*.txt
+duration*.txt
+launch_*.bat

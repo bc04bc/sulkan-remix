@@ -307,7 +307,7 @@
     },
     "SHADOW_DISTANCE": {
       "label": "Shadow distance (blocks)",
-      "default": 128,
+      "default": 96,
       "values": [
         64,
         96,
