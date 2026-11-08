@@ -48,7 +48,13 @@ void main() {
     if (dot(geomNormal, eyeDirection) < 0.0) geomNormal = -geomNormal;
     vec3 normal = geomNormal;
 
+    bool ice = (materialId >= 12u && materialId <= 14u);
+    float iceRoughness = 0.0;
+    if (ice) normal = sulkanIceDetail(relativePosition, normal, iceRoughness);
+
     vec3 albedo = toLinear(base.rgb);
+    if (materialId == 12u) albedo = vec3(0.72, 0.86, 0.92);
+
     float distSq = dot(relativePosition, relativePosition);
     float worldDistance = sqrt(distSq);
     float overworld = 1.0 - step(0.5, abs(WorldTimeWeatherDimension.w));
@@ -105,11 +111,6 @@ void main() {
 
 #else
     // ================= [固体与半透明地形通道：石头、木板、金属、冰、水] =================
-    bool ice = (materialId >= 12u && materialId <= 14u);
-    float iceRoughness = 0.0;
-    if (ice) normal = sulkanIceDetail(relativePosition, normal, iceRoughness);
-    if (materialId == 12u) albedo = vec3(0.72, 0.86, 0.92);
-
     float sunDot = dot(normal, sunDirection);
     float sunFacing = max(sunDot, 0.0);
 

@@ -93,6 +93,7 @@ tests = [
     ('terrain.fsh (solid)', 1, os.path.join(base_dir, 'shaders', 'terrain.fsh'), ''),
     ('terrain.fsh (cutout)', 1, os.path.join(base_dir, 'shaders', 'terrain.fsh'), '#define ALPHA_CUTOUT 1\n'),
     ('terrain.fsh (translucent)', 1, os.path.join(base_dir, 'shaders', 'terrain.fsh'), '#define SULKAN_TRANSLUCENT 1\n'),
+    ('terrain.fsh (cutout+translucent / pipeline 7)', 1, os.path.join(base_dir, 'shaders', 'terrain.fsh'), '#define ALPHA_CUTOUT 1\n#define SULKAN_TRANSLUCENT 1\n'),
     ('sodium_terrain_shadow.vsh (solid)', 0, os.path.join(base_dir, 'shaders', 'core', 'sodium_terrain_shadow.vsh'), ''),
     ('sodium_terrain_shadow.fsh (cutout)', 1, os.path.join(base_dir, 'shaders', 'core', 'sodium_terrain_shadow.fsh'), '#define ALPHA_CUTOUT 1\n'),
     ('directional_shadow.glsl', 1, os.path.join(base_dir, 'shaders', 'include', 'directional_shadow.glsl'), ''),
