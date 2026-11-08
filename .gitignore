@@ -18,11 +18,14 @@ __pycache__/
 Thumbs.db
 
 # Profiling and RenderDoc captures
+captures/
 *.rdc
 *.cap
 *.xml
 *_chrome.json
 scratch/
+tools/launch/
+worlds/
 mc_*.txt
 test_*.txt
 extracted_*.txt
