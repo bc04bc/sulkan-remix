@@ -123,6 +123,14 @@ def main():
         except Exception as e:
             print('       Could not clear cache (game may be running):', e)
 
+    # 5. Automatically keep SULKAN_SHADERS_ALL_IN_ONE.md synchronized
+    print('[5/5] Updating SULKAN_SHADERS_ALL_IN_ONE.md...')
+    try:
+        import update_all_in_one
+        update_all_in_one.main()
+    except Exception as e:
+        print('       Notice: Could not auto-update SULKAN_SHADERS_ALL_IN_ONE.md:', e)
+
     print('=== All Done! ===')
     print('1. Original "Sulkan Realistic" is completely preserved.')
     print('2. New "Sulkan RTX Remix" is registered as an independent shaderpack.')
