@@ -31,3 +31,4 @@ test_*.txt
 extracted_*.txt
 duration*.txt
 launch_*.bat
+logs/

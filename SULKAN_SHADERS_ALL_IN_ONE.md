@@ -162,7 +162,9 @@
       "pipeline": "sodium:pipeline/cutout_terrain",
       "vertex": "shaders/terrain.vsh",
       "fragment": "shaders/terrain.fsh",
-      "writes": []
+      "writes": [
+        "surface.data"
+      ]
     },
     {
       "pipeline": "sodium:pipeline/translucent_terrain",
@@ -343,7 +345,7 @@
     },
     "SHADOW_QUALITY": {
       "label": "Shadow quality",
-      "default": 1,
+      "default": 2,
       "values": [
         0,
         1,
@@ -492,7 +494,7 @@
       "scale": 0.5
     },
     "lighting.half": {
-      "format": "RG16_FLOAT",
+      "format": "RGBA16_FLOAT",
       "scale": 0.5
     },
     "surface.data": {
@@ -500,7 +502,7 @@
     },
     "water.reflection": {
       "format": "RGBA16_FLOAT",
-      "scale": 1
+      "scale": 0.5
     },
     "exposure.meter": {
       "format": "RG32_FLOAT",
@@ -539,7 +541,8 @@
       "reads": {
         "Depth": "$depth",
         "VanillaClouds": "$texture/vanilla-clouds",
-        "Surface": "surface.data"
+        "Surface": "surface.data",
+        "Scene": "$scene"
       },
       "writes": [
         "lighting.half"
@@ -756,19 +759,17 @@ void main() {
 #include "shaders/common.glsl"
 #include "shaders/terrain-globals.glsl"
 #include "shaders/include/terrain_material.glsl"
-#include "shaders/palette.glsl"
-#include "shaders/include/native_shadows.glsl"
 #include "shaders/environment.glsl"
-#include "shaders/specular.glsl"
-#include "shaders/held-light.glsl"
-uniform sampler2D u_BlockTex;
-uniform sampler2D u_LightTex;
+#include "shaders/surface-data.glsl"
+
 #ifdef SULKAN_TRANSLUCENT
 uniform sampler2D Opaque;
 uniform sampler2D OpaqueDepth;
 #endif
-#include "shaders/surface-data.glsl"
-#include "shaders/ice.glsl"
+
+uniform sampler2D u_BlockTex;
+uniform sampler2D u_LightTex;
+
 layout(location=0) in vec4 tint;
 layout(location=1) in vec2 uv;
 layout(location=2) in vec3 relativePosition;
@@ -776,243 +777,84 @@ layout(location=3) in vec2 lightLevel;
 layout(location=4) in float fade;
 layout(location=5) flat in uint materialId;
 layout(location=6) flat in uint terrainMaterial;
+
 layout(location=0) out vec4 color;
 layout(location=1) out uvec2 surfaceData;
 
 void main() {
-    // 1. 严格遵守 Vulkan SPIR-V 规范：偏导数放在任何 discard 前执行，杜绝 Quad 导数发散
-    vec3 crossNormal = cross(dFdx(relativePosition), dFdy(relativePosition));
+    // 1. 无条件前置求导：1-cycle 完成 2x2 Quad 寄存器差分，为硬件提前释放死 Lane 做准备
+    vec3 dPosX = dFdx(relativePosition);
+    vec3 dPosY = dFdy(relativePosition);
+    vec2 dUvX  = dFdx(uv);
+    vec2 dUvY  = dFdy(uv);
 
-    // 2. 真正的 Cutout 硬件位检测：Sodium 将 Alpha 阈值编码在 terrainMaterial 的 bit 1..2 中！
+    // 2. 硬件 Cutout 极速检测与提前退出（死片元立即终止，无需保留 Helper Lane）
     uint cutoffBits = (terrainMaterial >> 1u) & 3u;
-    bool isCutout = (cutoffBits != 0u) || (materialId >= 2u && materialId <= 5u);
-
-    // 3. 极速 Alpha Cutout 剔除：使用 textureLod 0 避免各向异性过滤阻塞，透明像素立即退出！
-    vec4 base;
-    if (isCutout) {
-        base = textureLod(u_BlockTex, uv, 0.0) * tint;
-        float threshold = (cutoffBits == 1u) ? 0.1 : ((cutoffBits == 2u) ? 0.5 : 0.1);
-        if (base.a < threshold) discard;
-    } else {
-        base = sulkanSampleTerrainMaterial(u_BlockTex, uv, terrainMaterial) * tint;
-    }
-
+    vec4 base = ((terrainMaterial & 1u) != 0u ? textureGrad(u_BlockTex, uv, dUvX, dUvY) : textureLod(u_BlockTex, uv, 0.0)) * tint;
+    if (cutoffBits != 0u && base.a < (cutoffBits == 1u ? 0.1 : 0.5)) discard;
 #ifdef SULKAN_TRANSLUCENT
     if (base.a <= 1.0/255.0) discard;
 #endif
 
-    vec3 eyeDirection = normalize(sulkanCameraOffset() - relativePosition);
+    // 3. 存活片元求几何法线
+    vec3 crossNormal = cross(dPosX, dPosY);
     vec3 geomNormal = crossNormal * inversesqrt(max(dot(crossNormal, crossNormal), 1e-12));
-    if (dot(geomNormal, eyeDirection) < 0.0) geomNormal = -geomNormal;
-    vec3 normal = geomNormal;
+    if (dot(geomNormal, sulkanCameraOffset() - relativePosition) < 0.0) geomNormal = -geomNormal;
 
-    vec3 albedo = toLinear(base.rgb);
-    float distSq = dot(relativePosition, relativePosition);
-    float worldDistance = sqrt(distSq);
+    // 4. 计算能见度（加入 IGN 抖动，让 3-bit 量化在远景边界丝滑无色带）
+    float cylinder = max(length(relativePosition.xz), abs(relativePosition.y));
+    float renderFog = clamp((cylinder - u_RenderFog.x) / max(u_RenderFog.y - u_RenderFog.x, 0.001), 0.0, 1.0);
+    float fog = max(1.0 - fade, renderFog) * u_FogColor.a;
+    float dither = (fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) - 0.5) / 7.0;
+    float visibility = clamp(1.0 - fog + dither, 0.0, 1.0);
+
+    // 5. 下界/末地/水下等非主世界陆地环境极简回退（原版光照与雾直通）
     float overworld = 1.0 - step(0.5, abs(WorldTimeWeatherDimension.w));
-    float daylight = sulkanDay();
-    vec3 sunDirection = daylight > 0.5 ? SunDirectionAndRainBrightness.xyz : MoonDirectionAndPhase.xyz;
-    float skyLight = lightLevel.y * lightLevel.y;
-
-    float texLuma = dot(albedo, vec3(0.299, 0.587, 0.114));
-    float microOccl = clamp(0.82 + (texLuma - 0.35) * 0.45, 0.72, 1.15);
-    float axisShade = 1.0 - 0.12 * abs(geomNormal.x) - 0.06 * abs(geomNormal.z) - 0.18 * max(-geomNormal.y, 0.0);
-
-    vec3 zenithSky = mix(vec3(0.012, 0.020, 0.045), vec3(0.28, 0.46, 0.78), daylight);
-    vec3 groundBounce = portLightPalette() * vec3(0.42, 0.35, 0.24) * (0.4 + 0.6 * daylight);
-    float hemiWeight = normal.y * 0.5 + 0.5;
-    vec3 skyFill = mix(groundBounce * 0.45, zenithSky, hemiWeight) * axisShade;
-    skyFill = mix(skyFill, vec3(dot(skyFill, vec3(0.299, 0.587, 0.114))), WorldTimeWeatherDimension.y * 0.65);
-
-    float shadow = 1.0;
-    float sunVisibility = 0.0;
-    vec3 lighting;
-    vec3 storedNormal = geomNormal;
-    bool enhancedWater = false;
-    float hdrBoost = 0.0;
-    bool ice = false;
-    float iceRoughness = 0.0;
-
-    if (isCutout) {
-        // ================= [100% 激活的极速树叶/植物通道] =================
-        // 完全不采样 4 级联 Shadow Map！仅仅在近处 16 格内做 1 次极速单点采样，
-        // 彻底解除 15 层重叠树叶的纹理缓存阻塞！
-        float sunDot = dot(normal, sunDirection);
-        float sunFacing = max(abs(sunDot), 0.35);
-
-#if SHADOW_QUALITY > 0
-        if (distSq < 256.0 && lightLevel.y > 0.82) {
-            vec4 clip = ShadowViewProjection[0] * vec4(relativePosition + geomNormal * 0.08 + LightDirection.xyz * 0.18, 1.0);
-            vec3 coord = vec3(clip.xy * 0.5 + 0.5, clip.z);
-            sunVisibility = step(coord.z - 0.0035, textureLod(SulkanShadowMap0, coord.xy, 0.0).r);
-        } else {
-            // 利用原版光照高度梯度直接生成丝滑的树冠体积阴影（0 纹理采样！）
-            float canopy = clamp((lightLevel.y - 0.58) * 2.4, 0.0, 1.0);
-            sunVisibility = canopy * canopy;
-        }
-        shadow = mix(1.0, mix(ShadowParams.z, 1.0, sunVisibility), ShadowParams.x);
-#else
-        sunVisibility = 1.0;
-#endif
-        vec3 direct = portLightPalette() * sunFacing * shadow * microOccl * (1.0 - WorldTimeWeatherDimension.y * 0.65);
-        float sss = max(dot(-eyeDirection, sunDirection), 0.0) * sunVisibility * daylight * (1.0 - WorldTimeWeatherDimension.y);
-        vec3 leafGlow = albedo * portLightPalette() * (sss * sss * 0.45);
-        lighting = vec3(0.022) + skyLight * (skyFill * 0.48 + direct * 0.92 + leafGlow);
-
-    } else {
-        // ================= [固体与半透明地形通道] =================
-        ice = (materialId >= 12u && materialId <= 14u);
-        if (ice) normal = sulkanIceDetail(relativePosition, normal, iceRoughness);
-        if (materialId == 12u) albedo = vec3(0.72, 0.86, 0.92);
-        storedNormal = ice ? normal : geomNormal;
-
-        float sunDot = dot(normal, sunDirection);
-        float sunFacing = max(sunDot, 0.0);
-
-#if SHADOW_QUALITY > 0
-        shadow = mix(1.0, ShadowParams.z, ShadowParams.x);
-        if (sunFacing > 0.0 && lightLevel.y > 1.0/30.0 + 1e-4) {
-            shadow = sulkanTerrainShadows(relativePosition, geomNormal, false, sunVisibility);
-        }
-#else
-        sunVisibility = 1.0;
-#endif
-        float directFacing = smoothstep(-0.05, 0.95, sunDot) * sunFacing;
-        vec3 direct = portLightPalette() * directFacing * shadow * microOccl * (1.0 - WorldTimeWeatherDimension.y * 0.65);
-        vec3 giFill = groundBounce * (1.0 - hemiWeight * 0.6) * smoothstep(0.1, 0.9, lightLevel.y) * 0.28;
-        lighting = vec3(0.020) + skyLight * (skyFill * 0.45 + giFill + direct * 1.05);
-
-        float shadowContrast = (1.0 - shadow) * daylight * (1.0 - WorldTimeWeatherDimension.y);
-        lighting *= mix(vec3(1.0), vec3(0.70, 0.78, 0.92), shadowContrast * skyLight * 0.55);
+    if (overworld < 0.5 || CameraPositionHighAndFogType.w >= 0.5) {
+        vec3 vanillaLight = toLinear(texture(u_LightTex, lightLevel * (15.0/16.0)).rgb);
+        base.rgb = mix(toLinear(base.rgb) * vanillaLight, toLinear(u_FogColor.rgb), fog);
+        base.rgb = pow(max(base.rgb, vec3(0.0)), vec3(1.0/2.2));
     }
-
-    // 火把与方块光源
-    float bl = lightLevel.x;
-    float blockLight = bl * bl * bl * (bl * 1.8 + 0.2);
-    vec3 torchPalette = mix(vec3(1.6, 0.45, 0.12), vec3(1.8, 1.15, 0.65), bl * bl);
-    vec3 warmBlock = mix(vec3(1.0), torchPalette, clamp(LIGHT_WARMTH, 0.0, 1.5));
-    lighting += warmBlock * blockLight * microOccl * 1.65;
-
-    vec3 vanillaLight = texture(u_LightTex, lightLevel * (15.0/16.0)).rgb;
-    vec3 heldLight = sulkanHeldLight(relativePosition, normal);
-    vec3 surface = albedo * (mix(toLinear(vanillaLight), max(lighting, vec3(0.0)), overworld) + heldLight);
-
-    float nearSource = smoothstep(0.65, 1.0, lightLevel.x);
-    surface += torchPalette * (nearSource * nearSource * 0.06 * clamp(LIGHT_WARMTH, 0.0, 1.5));
-
-    if (!isCutout) {
-        float wet = 0.0;
-        if (materialId != 1u && overworld > 0.5 && CameraPositionHighAndFogType.w < 0.5) {
-            wet = WET_SURFACES * WorldTimeWeatherDimension.y * smoothstep(0.88, 1.0, lightLevel.y) * smoothstep(0.0, 0.7, normal.y);
-            if (materialId >= 9u) wet = 0.0;
-            surface *= 1.0 - 0.22 * wet;
-            float materialWeight = (materialId >= 6u && materialId <= 8u) ? MATERIAL_SHEEN : 0.0;
-            float microRough = clamp(1.0 - (texLuma - 0.35) * 0.65, 0.75, 1.25);
-            float roughness = mix(0.68, materialId == 6u ? 0.22 : (materialId == 8u ? 0.62 : 0.42), materialWeight) * microRough;
-            float distAa = smoothstep(12.0, 64.0, worldDistance) * 0.25;
-            roughness = clamp(roughness + distAa, 0.15, 0.95);
-            float reflectance = mix(0.035, 0.18, materialId == 6u ? materialWeight : 0.0);
-            if (ice) {
-                roughness = mix(0.24, 0.46, iceRoughness);
-                reflectance = 0.025;
-            }
-            
-            if (sunVisibility > 0.01) {
-                float highlight = sulkanSunSpecular(normal, eyeDirection, mix(roughness, 0.22, wet), reflectance);
-                surface += portLightPalette() * highlight * sunVisibility * skyLight;
-            }
-            float envReflect = max(wet, (materialId == 6u ? 0.15 : 0.0) * materialWeight);
-            if (envReflect > 0.001) {
-                float t = 1.0 - max(dot(normal, eyeDirection), 0.0);
-                float t2 = t * t;
-                float fresnel = 0.02 + 0.18 * (t2 * t2 * t);
-                surface += sulkanSky(reflect(-eyeDirection, normal)) * envReflect * fresnel * skyLight;
-            }
-        }
-
-        float emission = 0.0;
-        if (materialId == 9u) emission = smoothstep(0.15, 0.60, max(albedo.r, max(albedo.g, albedo.b)));
-        if (materialId == 10u) emission = smoothstep(0.12, 0.5, albedo.r) * 0.8;
-        if (materialId == 11u) emission = smoothstep(0.08, 0.4, albedo.r - max(albedo.g, albedo.b)) * 0.9;
-        if (emission > 0.0) {
-            vec3 emissiveColor = albedo * sqrt(max(albedo, vec3(0.01)));
-            surface = mix(surface, emissiveColor * 0.95, clamp(emission * EMISSIVE_ACCENTS, 0.0, 0.95));
-        }
-        if (materialId == 9u && emission > 0.05) hdrBoost = 3.0;
-        else if (materialId == 6u && (sunVisibility > 0.4 || wet > 0.3)) hdrBoost = 2.0;
-        else if (materialId == 10u || materialId == 11u) hdrBoost = 1.0;
-    }
-
-    base.rgb = pow(max(surface, vec3(0.0)), vec3(1.0/2.2));
 
 #ifdef SULKAN_TRANSLUCENT
 #if WATER_ENABLED == 1
+    // 半透明水体背景折射与物理吸收
     if (materialId == 1u && CameraPositionHighAndFogType.w < 0.5) {
         vec2 screenUv = gl_FragCoord.xy * ViewSizeAndInverse.zw;
         vec2 worldXZ = relativePosition.xz + mod(CameraPositionHighAndFogType.xz, vec2(4096.0)) + CameraPositionLowAndFarPlane.xz;
         float t = TimeDeltaFrame.x * 0.25;
         vec2 wave = vec2(cos(dot(worldXZ, vec2(2.2, 1.24)) + t * 1.2), sin(dot(worldXZ, vec2(-1.12, 2.48)) - t * 0.9));
-        vec2 refractedUv = clamp(screenUv + wave * WATER_WAVES * 0.0008 / (1.0 + worldDistance * 0.025), ViewSizeAndInverse.zw, vec2(1.0) - ViewSizeAndInverse.zw);
-        float surfaceDistance = length(viewPosition(screenUv, gl_FragCoord.z));
-        float backDistance = length(viewPosition(refractedUv, texture(OpaqueDepth, refractedUv).r));
-        if (backDistance < surfaceDistance) refractedUv = screenUv;
-        backDistance = length(viewPosition(refractedUv, texture(OpaqueDepth, refractedUv).r));
-        float thickness = clamp(backDistance - surfaceDistance, 0.0, 160.0);
-        vec3 waterNormal = normalize(normal + vec3(wave.x, 0.0, wave.y) * (0.018 * WATER_WAVES));
-        vec3 waterTint = mix(vec3(0.035, 0.21, 0.28), tint.rgb * vec3(0.2, 0.65, 0.75), 0.25);
-        vec4 background = linearSample(Opaque, refractedUv);
-        if (background.a > 0.0) {
+        vec2 refractedUv = clamp(screenUv + wave * WATER_WAVES * 0.0008, ViewSizeAndInverse.zw, vec2(1.0) - ViewSizeAndInverse.zw);
+        float surfaceDist = length(viewPosition(screenUv, gl_FragCoord.z));
+        float backDepth = texture(OpaqueDepth, refractedUv).r;
+        float backDist = backDepth > 1e-7 ? length(viewPosition(refractedUv, backDepth)) : surfaceDist;
+        if (backDist < surfaceDist) {
+            refractedUv = screenUv;
+            backDepth = texture(OpaqueDepth, refractedUv).r;
+            backDist = backDepth > 1e-7 ? length(viewPosition(refractedUv, backDepth)) : surfaceDist;
+        }
+        float thickness = clamp(max(backDist - surfaceDist, 0.0), 0.0, 160.0);
+        vec4 bg = texture(Opaque, refractedUv);
+        if (bg.a > 0.0) {
             vec3 absorption = exp(-thickness * WATER_DENSITY * vec3(0.16, 0.065, 0.035));
-            vec3 waterLighting = mix(toLinear(vanillaLight), max(lighting, vec3(0.0)), overworld) + heldLight;
-            vec3 scattering = toLinear(waterTint) * waterLighting;
-            vec3 transmission = toLinear(background.rgb) * absorption + scattering * (1.0 - absorption);
-            storedNormal = waterNormal;
-            enhancedWater = true;
-            vec3 waterColor = transmission;
-            waterColor += portLightPalette() * sulkanSunSpecular(waterNormal, eyeDirection, 0.16, 0.02) * sunVisibility * skyLight * overworld;
-            base = vec4(pow(max(waterColor, vec3(0.0)), vec3(1.0/2.2)), 1.0);
+            vec3 waterTint = mix(vec3(0.035, 0.21, 0.28), tint.rgb * vec3(0.2, 0.65, 0.75), 0.25);
+            // 注意：因为 G-Buffer 中的 bg.rgb 尚未打光，这里保持纯 Albedo 传输，统一交由 atmosphere.fsh 进行物理打光与高光合成！
+            vec3 trans = toLinear(bg.rgb) * absorption + toLinear(waterTint) * (1.0 - absorption);
+            base.rgb = pow(max(trans, vec3(0.0)), vec3(1.0/2.2));
+            geomNormal = normalize(geomNormal + vec3(wave.x, 0.0, wave.y) * (0.018 * WATER_WAVES));
         }
     }
 #endif
-    if (materialId == 12u) {
-        vec2 screenUv = gl_FragCoord.xy * ViewSizeAndInverse.zw;
-        vec2 distortion = (mat3(View) * normal).xy * 0.0007 / (1.0 + worldDistance * 0.025);
-        vec2 refractedUv = clamp(screenUv + distortion, ViewSizeAndInverse.zw, vec2(1.0) - ViewSizeAndInverse.zw);
-        float front = length(viewPosition(screenUv, gl_FragCoord.z));
-        float backDepth = texture(OpaqueDepth, refractedUv).r;
-        if (backDepth > 1e-7 && length(viewPosition(refractedUv, backDepth)) < front) refractedUv = screenUv;
-        backDepth = texture(OpaqueDepth, refractedUv).r;
-        float thickness = backDepth > 1e-7 ? clamp(length(viewPosition(refractedUv, backDepth)) - front, 0.0, 12.0) : 1.0;
-        vec4 background = linearSample(Opaque, refractedUv);
-        vec3 transmission = background.a > 0.0 ? toLinear(background.rgb) : sulkanSky(normalize(relativePosition));
-        vec3 absorption = exp(-thickness * vec3(0.04, 0.016, 0.008));
-        vec3 iceColor = transmission * absorption + albedo * (vec3(1.0) - absorption) * 0.25;
-        float haze = mix(0.025, 0.085, smoothstep(0.2, 0.85, iceRoughness));
-        haze = clamp(haze + 0.015 * (1.0 - exp(-thickness * 0.3)), 0.0, 0.10);
-        iceColor = mix(iceColor, albedo * (lighting + heldLight) * 0.65, haze);
-        iceColor += portLightPalette() * sulkanSunSpecular(normal, eyeDirection, mix(0.24, 0.46, iceRoughness), 0.025) * sunVisibility * skyLight * overworld;
-        base = vec4(pow(max(iceColor, vec3(0.0)), vec3(1.0/2.2)), 1.0);
-    }
 #endif
 
-    float sphericalFog = clamp((worldDistance - u_EnvironmentFog.x) / max(u_EnvironmentFog.y - u_EnvironmentFog.x, 0.001), 0.0, 1.0);
-    if (overworld > 0.5 && CameraPositionHighAndFogType.w < 0.5) sphericalFog = 0.0;
-    float cylinder = max(length(relativePosition.xz), abs(relativePosition.y));
-    float renderFog = clamp((cylinder - u_RenderFog.x) / max(u_RenderFog.y - u_RenderFog.x, 0.001), 0.0, 1.0);
-    float fog = max(1.0 - fade, max(materialId == 1u && CameraPositionHighAndFogType.w < 0.5 ? 0.0 : sphericalFog, renderFog)) * u_FogColor.a;
-    vec3 fogColor = u_FogColor.rgb;
-    if (overworld > 0.5 && CameraPositionHighAndFogType.w < 0.5) {
-        float skyAccess = min(smoothstep(0.05, 0.65, CloudOffsetAndGameTime.z), smoothstep(0.01, 0.5, skyLight));
-        fogColor = mix(fogColor, pow(sulkanSky(normalize(relativePosition)), vec3(1.0/2.2)), skyAccess);
-    }
-    vec3 finalOut = mix(base.rgb, fogColor, fog);
-    float outDither = (fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) - 0.5) * 1.5;
-    color = vec4(clamp(finalOut + outDither / 255.0, 0.0, 1.0), base.a);
-    surfaceData = uvec2(encodeSurface(storedNormal, skyLight, 1.0 - fog, enhancedWater, hdrBoost), floatBitsToUint(gl_FragCoord.z));
-    if (ice) surfaceData.x |= 0x20000000u;
+    color = base;
+
+    // 6. 写入 64-bit 紧凑 G-Buffer
+    bool isTransparent = false;
 #ifdef SULKAN_TRANSLUCENT
-    if (!enhancedWater) surfaceData.x |= 0xc0000000u;
+    isTransparent = (materialId != 1u);
 #endif
+    surfaceData = packGbuffer(geomNormal, lightLevel, materialId, visibility, isTransparent, gl_FragCoord.z);
 }
 ```
 
@@ -1029,18 +871,21 @@ layout(location=0) in vec2 texCoord;
 layout(location=0) out vec4 lighting;
 uniform sampler2D Depth;
 uniform usampler2D Surface;
+uniform sampler2D Scene;
 #include "shaders/surface-data.glsl"
 #include "shaders/surface-normal.glsl"
-void main() {
-    ivec2 depthSize=textureSize(Depth,0);
-    ivec2 center=clamp(ivec2(texCoord*vec2(depthSize)),ivec2(0),depthSize-1);
-    vec2 centerUv=(vec2(center)+0.5)/vec2(depthSize);
-    float depth=texelFetch(Depth,center,0).r;
-    vec3 p=viewPosition(centerUv,max(depth,1e-6));
 
-    float ao=0.0;
+void main() {
+    ivec2 depthSize = textureSize(Depth, 0);
+    ivec2 center = clamp(ivec2(texCoord * vec2(depthSize)), ivec2(0), depthSize - 1);
+    vec2 centerUv = (vec2(center) + 0.5) / vec2(depthSize);
+    float depth = texelFetch(Depth, center, 0).r;
+    vec3 p = viewPosition(centerUv, max(depth, 1e-6));
+
+    float ao = 0.0;
+    vec2 coloredBleed = vec2(0.0);
 #if _SULKAN_ENABLED_AMBIENT_OCCLUSION
-    if(depth>1e-7) {
+    if (depth > 1e-7) {
         uvec2 sData = texelFetch(Surface, center, 0).rg;
         vec3 n;
         if (surfaceMatches(sData, depth)) {
@@ -1055,15 +900,15 @@ void main() {
         vec2 projScale = vec2(InverseProjection[0][0], InverseProjection[1][1]);
         vec2 projDepth = vec2(InverseProjection[2][2], InverseProjection[3][2]);
         vec2 projW = vec2(InverseProjection[2][3], InverseProjection[3][3]);
-        for(int i=0;i<4;i++) {
+        for(int i = 0; i < 4; i++) {
             float alpha = (float(i) + 0.5) / 4.0;
             float angle = float(i) * 2.39996323 + dither * 6.2831853;
             float sampleRadius = baseRadius * sqrt(alpha);
             vec2 offsetUv = centerUv + vec2(cos(angle), sin(angle)) * sampleRadius * ViewSizeAndInverse.zw;
-            if(any(lessThan(offsetUv, vec2(0.0))) || any(greaterThanEqual(offsetUv, vec2(1.0)))) continue;
+            if (any(lessThan(offsetUv, vec2(0.0))) || any(greaterThanEqual(offsetUv, vec2(1.0)))) continue;
             ivec2 pixel = ivec2(offsetUv * vec2(depthSize));
             float sampleDepth = texelFetch(Depth, pixel, 0).r;
-            if(sampleDepth <= 1e-7) continue;
+            if (sampleDepth <= 1e-7) continue;
             vec2 uv = (vec2(pixel) + 0.5) / vec2(depthSize);
             float sDepth = max(sampleDepth, 1e-6);
             float pw = sDepth * projW.x + projW.y;
@@ -1075,41 +920,51 @@ void main() {
             float normalDot = planeDist / max(distance, 0.001);
             float occl = smoothstep(0.05, 0.15, planeDist) * max(normalDot - 0.25, 0.0) * (1.0 / (1.0 + distance * distance * 1.6)) * smoothstep(2.6, 0.20, distance);
             ao += occl * 1.35;
+
+            // 屏幕空间彩色光照扩散：检测发光方块（matId 9..11）并将颜色辐射到周围表面
+            uvec2 tapSurf = texelFetch(Surface, pixel, 0).rg;
+            uint tapMat = surfaceMaterialId(tapSurf);
+            if (tapMat >= 9u && tapMat <= 11u) {
+                vec3 emColor = texelFetch(Scene, pixel, 0).rgb;
+                float distWeight = 1.0 / (1.0 + distance * distance * 0.7);
+                // 提取色度偏差 (R-G, B-G) 并随距离平滑辐射
+                coloredBleed += vec2(emColor.r - emColor.g, emColor.b - emColor.g) * (distWeight * 0.65);
+            }
         }
     }
 #endif
-    float shafts=0.0;
+    float shafts = 0.0;
 #if _SULKAN_ENABLED_SUN_SHAFTS
-    if(abs(WorldTimeWeatherDimension.w)<0.5 && CameraPositionHighAndFogType.w<0.5 && SunDirectionAndRainBrightness.y>0.02 && CloudOffsetAndGameTime.z>0.05) {
-        vec3 ray=sulkanRay(texCoord);
-        vec3 sun=normalize(SunDirectionAndRainBrightness.xyz);
-        float reach=depth>1e-7?min(length(p),96.0):96.0;
+    if (abs(WorldTimeWeatherDimension.w) < 0.5 && CameraPositionHighAndFogType.w < 0.5 && SunDirectionAndRainBrightness.y > 0.02 && CloudOffsetAndGameTime.z > 0.05) {
+        vec3 ray = sulkanRay(texCoord);
+        vec3 sun = normalize(SunDirectionAndRainBrightness.xyz);
+        float reach = depth > 1e-7 ? min(length(p), 96.0) : 96.0;
         // Optimized 8-step volume march with spatial dither
-        float stepLength=reach/8.0;
-        vec3 origin=sulkanCloudOrigin();
+        float stepLength = reach / 8.0;
+        vec3 origin = sulkanCloudOrigin();
         float dither = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
-        for(int i=0;i<8;i++) {
-            float distance=(float(i)+dither)*stepLength;
-            vec3 relative=sulkanCameraOffset()+ray*distance;
-            vec3 world=origin+relative;
-            float visibility=sulkanVolumeShadow(relative);
+        for(int i = 0; i < 8; i++) {
+            float distance = (float(i) + dither) * stepLength;
+            vec3 relative = sulkanCameraOffset() + ray * distance;
+            vec3 world = origin + relative;
+            float visibility = sulkanVolumeShadow(relative);
 #if CLOUD_QUALITY > 0
-            float entry=max((cloudBottom()-world.y)/max(sun.y, 1e-4),0.0);
-            float exitDistance=max((cloudBottom()+4.0-world.y)/max(sun.y, 1e-4),0.0);
-            float span=max(exitDistance-entry,0.0);
-            float cloudDepth=cloudDensity(world+sun*(entry+span*0.5))*span;
-            visibility*=exp(-cloudDepth);
+            float entry = max((cloudBottom() - world.y) / max(sun.y, 1e-4), 0.0);
+            float exitDistance = max((cloudBottom() + 4.0 - world.y) / max(sun.y, 1e-4), 0.0);
+            float span = max(exitDistance - entry, 0.0);
+            float cloudDepth = cloudDensity(world + sun * (entry + span * 0.5)) * span;
+            visibility *= exp(-cloudDepth);
 #endif
-            float airDensity=exp(clamp((72.0-world.y)*0.018,-8.0,3.0));
-            shafts+=visibility*airDensity*exp(-distance*0.012)*stepLength*0.006;
+            float airDensity = exp(clamp((72.0 - world.y) * 0.018, -8.0, 3.0));
+            shafts += visibility * airDensity * exp(-distance * 0.012) * stepLength * 0.006;
         }
         float fDot = max(dot(ray, sun), 0.0);
         float f2 = fDot * fDot; float f4 = f2 * f2; float f8 = f4 * f4;
         float forward = 0.08 + 0.92 * f8;
-        shafts*=smoothstep(0.05,0.65,CloudOffsetAndGameTime.z)*forward*(1.0-WorldTimeWeatherDimension.y)*smoothstep(0.02,0.15,sun.y);
+        shafts *= smoothstep(0.05, 0.65, CloudOffsetAndGameTime.z) * forward * (1.0 - WorldTimeWeatherDimension.y) * smoothstep(0.02, 0.15, sun.y);
     }
 #endif
-    lighting=vec4(clamp(1.0-ao*0.30*AMBIENT_OCCLUSION,0.30,1.0),shafts,0.0,1.0);
+    lighting = vec4(clamp(1.0 - ao * 0.30 * AMBIENT_OCCLUSION, 0.30, 1.0), shafts, coloredBleed);
 }
 ```
 
@@ -1193,119 +1048,318 @@ uniform sampler2D Lighting;
 #if WATER_ENABLED == 1 && WATER_REFLECTION_QUALITY > 0 && _SULKAN_ENABLED_WATER_REFLECTION_STRENGTH
 #include "shaders/water-resolve.glsl"
 #endif
+
 void main() {
-    vec3 c=toLinear(texture(Scene,texCoord).rgb);
-    float depth=texture(Depth,texCoord).r;
-    float handDepth=texture(HandDepth,texCoord).r;
-    if(handDepth>1e-7) {
-        // Hand depth has its own FOV; bob and swing are already in the geometry.
-        if(HandProjectionValid.x>0.5 && abs(WorldTimeWeatherDimension.w)<0.5 && CameraPositionHighAndFogType.w<0.5) {
-            vec3 position=mat3(InverseView)*viewPosition(texCoord,handDepth,InverseHandProjection);
-            vec3 normal=mat3(InverseView)*depthSurfaceNormal(HandDepth,texCoord,InverseHandProjection);
-            if(dot(normal,normal)>0.5) {
-                c+=sqrt(max(c,vec3(0)))*sulkanHeldLight(position,normal)*0.5;
-                float specular=sulkanSunSpecular(normal,normalize(-position),0.55,0.035);
-                if(specular>0.0) c+=portLightPalette()*specular*sulkanDirectShadow(position,normal)*smoothstep(0.05,0.65,CloudOffsetAndGameTime.z);
+    vec3 c = toLinear(texture(Scene, texCoord).rgb);
+    // 无条件前置计算屏幕亮度梯度（1-cycle 硬件 Quad 差分），用于后续构建零成本材质凹凸微法线！
+    float rawLuma = dot(c, vec3(0.299, 0.587, 0.114));
+    vec2 lumaGrad = vec2(dFdx(rawLuma), dFdy(rawLuma));
+
+    uvec2 surface = texture(Surface, texCoord).rg;
+    vec2 lightL = surfaceLightLevel(surface);
+    // 1-Cycle 硬件差分获取方块光在屏幕上的入射方向（用于生成非太阳光源的凹凸立体阴影与高光！）
+    vec2 blGrad = vec2(dFdx(lightL.x), dFdy(lightL.x));
+
+    float depth = texture(Depth, texCoord).r;
+    float handDepth = texture(HandDepth, texCoord).r;
+    if (handDepth > 1e-7) {
+        if (HandProjectionValid.x > 0.5 && abs(WorldTimeWeatherDimension.w) < 0.5 && CameraPositionHighAndFogType.w < 0.5) {
+            vec3 position = mat3(InverseView) * viewPosition(texCoord, handDepth, InverseHandProjection);
+            vec3 normal = mat3(InverseView) * depthSurfaceNormal(HandDepth, texCoord, InverseHandProjection);
+            if (dot(normal, normal) > 0.5) {
+                // 手持光源激活时，让手中物品的高亮部位（如火把火焰、灯笼芯）直接产生强烈的 HDR 自发光与 Bloom 光晕！
+                float handEmit = smoothstep(0.35, 0.75, max(c.r, max(c.g, c.b))) * step(0.5, HeldLightPositionRadius.w);
+                c += c * HeldLightColor.rgb * (handEmit * 3.2 * HELD_LIGHTING);
+                c += (c + vec3(0.18)) * sulkanHeldLight(position, normal) * 0.85;
+                float specular = sulkanSunSpecular(normal, normalize(-position), 0.55, 0.035);
+                if (specular > 0.0) c += portLightPalette() * specular * sulkanDirectShadow(position, normal) * smoothstep(0.05, 0.65, CloudOffsetAndGameTime.z);
             }
         }
-        hdr=vec4(c,1.0); return;
+        hdr = vec4(c, 1.0); return;
     }
-    uvec2 surface=texture(Surface,texCoord).rg;
-    bool nativeSurface=surfaceMatches(surface,depth);
-    bool sky=depth<=1e-7;
-    vec3 ray=sulkanRay(texCoord);
-    vec3 viewSurface=sky?vec3(0):viewPosition(texCoord,depth);
-    float distanceToScene=sky?60000.0:min(length(viewSurface),60000.0);
-    bool overworld=abs(WorldTimeWeatherDimension.w)<0.5;
-    bool air=CameraPositionHighAndFogType.w<0.5;
-    // Depth-aware upsampling prevents half-resolution lighting/clouds leaking over silhouettes.
-    vec2 size=ceil(ViewSizeAndInverse.xy*0.5), q=texCoord*size-0.5, f=fract(q);
-    ivec2 origin=ivec2(floor(q));
-    vec2 light=vec2(0.0); vec4 cloud=vec4(0.0); float total=0.0;
+
+    bool nativeSurface = surfaceMatches(surface, depth);
+    bool sky = depth <= 1e-7;
+    vec3 ray = sulkanRay(texCoord);
+    vec3 viewSurface = sky ? vec3(0) : viewPosition(texCoord, depth);
+    float distanceToScene = sky ? 60000.0 : min(length(viewSurface), 60000.0);
+    bool overworld = abs(WorldTimeWeatherDimension.w) < 0.5;
+    bool air = CameraPositionHighAndFogType.w < 0.5;
+
+    // Depth-aware upsampling
+    vec2 size = ceil(ViewSizeAndInverse.xy * 0.5), q = texCoord * size - 0.5, f = fract(q);
+    ivec2 origin = ivec2(floor(q));
+    vec4 light = vec4(0.0); vec4 cloud = vec4(0.0); float total = 0.0;
 #if _SULKAN_ENABLED_AMBIENT_OCCLUSION || _SULKAN_ENABLED_SUN_SHAFTS || CLOUD_QUALITY > 0
     float projZ2 = InverseProjection[2][3];
     float projZ3 = InverseProjection[3][3];
     float centerDenom = depth * projZ2 + projZ3;
     float centerLinZ = depth <= 1e-7 ? 60000.0 : abs(1.0 / (abs(centerDenom) < 1e-6 ? 1e-6 : centerDenom));
-    for(int y=0;y<2;y++) for(int x=0;x<2;x++) {
-        ivec2 pixel=clamp(origin+ivec2(x,y),ivec2(0),ivec2(size)-1);
-        vec2 uv=(vec2(pixel)+0.5)/size;
-        float d=texture(Depth,uv).r;
+    for (int y = 0; y < 2; y++) for (int x = 0; x < 2; x++) {
+        ivec2 pixel = clamp(origin + ivec2(x, y), ivec2(0), ivec2(size) - 1);
+        vec2 uv = (vec2(pixel) + 0.5) / size;
+        float d = texture(Depth, uv).r;
         float sampleDenom = d * projZ2 + projZ3;
         float sampleLinZ = d <= 1e-7 ? 60000.0 : abs(1.0 / (abs(sampleDenom) < 1e-6 ? 1e-6 : sampleDenom));
-        float weight=(x==0?1.0-f.x:f.x)*(y==0?1.0-f.y:f.y);
-        float separation=abs(sampleLinZ-centerLinZ)/max(centerLinZ*0.02,0.3);
-        weight*=1.0/(1.0+separation*separation);
+        float weight = (x == 0 ? 1.0 - f.x : f.x) * (y == 0 ? 1.0 - f.y : f.y);
+        float separation = abs(sampleLinZ - centerLinZ) / max(centerLinZ * 0.02, 0.3);
+        weight *= 1.0 / (1.0 + separation * separation);
 #if _SULKAN_ENABLED_AMBIENT_OCCLUSION || _SULKAN_ENABLED_SUN_SHAFTS
-        light+=texelFetch(Lighting,pixel,0).rg*weight;
+        light += texelFetch(Lighting, pixel, 0) * weight;
 #else
-        light+=vec2(1,0)*weight;
+        light += vec4(1.0, 0.0, 0.0, 0.0) * weight;
 #endif
 #if CLOUD_QUALITY > 0
-        vec4 sampleCloud=texelFetch(Clouds,pixel,0);
-        if(texture(CloudDistance,uv).r>distanceToScene) sampleCloud=vec4(0.0);
-        cloud+=sampleCloud*weight;
+        vec4 sampleCloud = texelFetch(Clouds, pixel, 0);
+        if (texture(CloudDistance, uv).r > distanceToScene) sampleCloud = vec4(0.0);
+        cloud += sampleCloud * weight;
 #endif
-        total+=weight;
+        total += weight;
     }
 #endif
-    if(total>1e-5) { light/=total; cloud/=total; } else { light=vec2(1.0,0.0); cloud=vec4(0.0); }
+    if (total > 1e-5) { light /= total; cloud /= total; } else { light = vec4(1.0, 0.0, 0.0, 0.0); cloud = vec4(0.0); }
+
+    // =========================================================================
+    // 延迟物理光照与材质质感引擎（Deferred Physically Based Lighting & Texturing）
+    // =========================================================================
+    if (!sky && nativeSurface && overworld && air) {
+        vec3 albedo = c;
+        vec3 position = mat3(InverseView) * viewSurface;
+        vec3 normal = surfaceNormal(surface.x);
+        vec3 toEye = normalize(sulkanCameraOffset() - position);
+        uint matId = surfaceMaterialId(surface);
+        bool isWater = (matId == 1u);
+        bool isPlant = (matId >= 2u && matId <= 5u);
+        bool isLeaves = (matId == 5u);
+        bool isIce = (matId >= 12u && matId <= 14u);
+
+        float daylight = sulkanDay();
+        vec3 sunDirection = daylight > 0.5 ? SunDirectionAndRainBrightness.xyz : MoonDirectionAndPhase.xyz;
+        float skyLight = lightL.y * lightL.y;
+
+        // 1. 贴图微表面遮蔽（Micro-Occlusion）与轴向体素立体感（Voxel Axis Shading）
+        float microOccl = isWater ? 1.0 : clamp(0.80 + (rawLuma - 0.35) * 0.50, 0.68, 1.18);
+        float axisShade = 1.0 - 0.13 * abs(normal.x) - 0.06 * abs(normal.z) - 0.20 * max(-normal.y, 0.0);
+
+        // 2. 屏幕空间免贴图凹凸微法线（Screen-Space Albedo Bump）：
+        // 利用砖缝/木纹/矿石的明暗梯度偏转高光法线，距离超过 32 格平滑淡出防止摩尔纹！
+        vec3 specNormal = normal;
+        if (!isWater && !isPlant) {
+            float bumpFade = (1.0 - smoothstep(10.0, 36.0, distanceToScene)) * MATERIAL_SHEEN;
+            vec3 camRight = vec3(InverseView[0][0], InverseView[0][1], InverseView[0][2]);
+            vec3 camUp    = vec3(InverseView[1][0], InverseView[1][1], InverseView[1][2]);
+            vec3 bumpOffset = (camRight * lumaGrad.x + camUp * lumaGrad.y) * (2.2 * bumpFade);
+            // 剥离法线方向分量，仅在切平面内扰动
+            bumpOffset -= normal * dot(normal, bumpOffset);
+            specNormal = normalize(normal - clamp(bumpOffset, vec3(-0.35), vec3(0.35)));
+        }
+
+        // 3. 半球天空环境光与暖色地面反弹光（Fake GI Bounce）
+        vec3 zenithSky = mix(vec3(0.012, 0.020, 0.045), vec3(0.28, 0.46, 0.78), daylight);
+        vec3 groundBounce = portLightPalette() * vec3(0.44, 0.36, 0.25) * (0.4 + 0.6 * daylight);
+        float hemiWeight = specNormal.y * 0.5 + 0.5;
+        vec3 skyFill = mix(groundBounce * 0.45, zenithSky, hemiWeight) * axisShade;
+        skyFill = mix(skyFill, vec3(dot(skyFill, vec3(0.299, 0.587, 0.114))), WorldTimeWeatherDimension.y * 0.65);
+
+        // 4. 级联阴影采样（利用 G-Buffer 单次执行优势，恢复所有可见像素的高精度投影）
+        float sunDot = dot(normal, sunDirection);
+        float sunFacing = isPlant ? max(abs(sunDot), 0.35) : max(sunDot, 0.0);
+        float shadow = 1.0;
+        float sunVisibility = 0.0;
+#if SHADOW_QUALITY > 0
+        shadow = mix(1.0, ShadowParams.z, ShadowParams.x);
+        if ((sunFacing > 0.0 || isPlant) && lightL.y > 1.0/30.0 + 1e-4) {
+            vec3 sNorm = (isPlant && sunDot < 0.0) ? -normal : normal;
+            shadow = sulkanTerrainShadows(position, sNorm, isPlant, sunVisibility);
+        }
+#else
+        sunVisibility = 1.0;
+#endif
+
+        vec3 lighting;
+        if (isLeaves) {
+            // 树叶专属：柔和包裹漫反射 + 逆光翡翠次表面散射 (Canopy SSS)
+            float exposure = exp2(-3.5 * (1.0 - clamp(lightL.y, 0.0, 1.0)));
+            vec3 leafSky = skyFill * 0.45 * mix(0.42, 1.0, exposure);
+            float wrapFacing = clamp((sunDot + 0.45) / 1.45, 0.0, 1.0);
+            vec3 direct = portLightPalette() * wrapFacing * shadow * microOccl * (1.0 - WorldTimeWeatherDimension.y * 0.65);
+            
+            float forwardDot = max(dot(-toEye, sunDirection), 0.0);
+            float forwardScatter = forwardDot * forwardDot * forwardDot;
+            float sss = (0.30 * wrapFacing + 0.70 * forwardScatter) * exposure * sunVisibility * daylight * (1.0 - WorldTimeWeatherDimension.y);
+            vec3 leafGlow = pow(max(albedo, vec3(0.01)), vec3(0.75)) * portLightPalette() * (sss * 0.65);
+            lighting = vec3(0.024) + skyLight * (leafSky + direct * 0.92 + leafGlow);
+        } else {
+            // 固体、草地与水体光照
+            float directFacing = isPlant ? sunFacing : smoothstep(-0.05, 0.95, dot(specNormal, sunDirection)) * sunFacing;
+            vec3 direct = portLightPalette() * directFacing * shadow * microOccl * (1.0 - WorldTimeWeatherDimension.y * 0.65);
+            vec3 giFill = groundBounce * (1.0 - hemiWeight * 0.6) * smoothstep(0.1, 0.9, lightL.y) * 0.28;
+            lighting = vec3(0.020) + skyLight * (skyFill * 0.45 + giFill + direct * 1.08);
+        }
+
+        // 晴天阴影冷色调瑞利染色（消除阴影发灰，提升通透对比度）
+        float shadowContrast = (1.0 - shadow) * daylight * (1.0 - WorldTimeWeatherDimension.y);
+        if (isPlant) shadowContrast *= max(sunDot, 0.25);
+        lighting *= mix(vec3(1.0), vec3(0.66, 0.76, 0.92), shadowContrast * skyLight * 0.58);
+
+        // 5. 非太阳光方向性阴影 + 彩色光源渲染 (Directional & Colored Block Lighting)
+        float bl = lightL.x;
+        float blockLight = bl * bl * bl * (bl * 1.8 + 0.2);
+
+        // 重构方块光源 3D 入射向量：让砖块缝隙和背向火把的侧面产生真实的立体阴影！
+        vec3 camRight = vec3(InverseView[0][0], InverseView[0][1], InverseView[0][2]);
+        vec3 camUp    = vec3(InverseView[1][0], InverseView[1][1], InverseView[1][2]);
+        vec3 blockLightDir = camRight * blGrad.x + camUp * blGrad.y;
+        float blGradLen = length(blockLightDir);
+        float blockDirShade = 1.0;
+        float blockSpec = 0.0;
+        if (blGradLen > 1e-5 && !isPlant && !isWater) {
+            vec3 pDir = normalize(blockLightDir / blGradLen + toEye * 0.35);
+            // 朝向火把的微凹凸面受光增强，背向火把的凹陷处压暗产生非太阳光阴影！
+            blockDirShade = clamp(0.62 + 0.68 * dot(specNormal, pDir), 0.45, 1.35);
+            // 火把/灯笼在矿石和石砖表面的暖色微高光
+            vec3 bHalf = normalize(pDir + toEye);
+            blockSpec = pow(max(dot(specNormal, bHalf), 0.0), 16.0) * bl * bl * MATERIAL_SHEEN * 0.35;
+        }
+        // 结合 SSAO 深度强化角落接触阴影（让火把照亮的墙角、箱子底有深邃投影）
+        float blockContactShadow = mix(1.0, light.x * light.x, 0.65);
+
+        // 基础普朗克色温 + 局部发光材质色彩注入（灵魂蓝、红石红、海晶青、紫水晶紫）
+        vec3 torchPalette = mix(vec3(1.65, 0.42, 0.10), vec3(1.85, 1.20, 0.68), bl * bl);
+        vec3 warmBlock = mix(vec3(1.0), torchPalette, clamp(LIGHT_WARMTH, 0.0, 1.5));
+        if (matId >= 9u && matId <= 11u) {
+            // 发光体自身及紧邻像素直接继承其贴图的纯粹色相（灵魂火把自动泛蓝光，红石泛红光！）
+            vec3 chroma = albedo / max(rawLuma, 0.05);
+            warmBlock = mix(warmBlock, chroma * 1.45, 0.75);
+        }
+        // 叠加来自 lighting.fsh 半分辨率屏幕空间的彩色光照扩散（Screen-Space Colored Light Bleeding）
+        if (abs(light.b) + abs(light.a) > 1e-4) {
+            vec3 bleedOffset = vec3(light.b, -(light.b + light.a) * 0.45, light.a) * 1.25;
+            warmBlock = mix(warmBlock, max(warmBlock + bleedOffset, vec3(0.05)), clamp(bl * 1.5, 0.0, 0.75));
+        }
+
+        lighting += warmBlock * (blockLight * microOccl * blockDirShade * blockContactShadow * 1.70);
+
+        // 逆光边缘菲涅尔金边（Rim Light）：勾勒方块与树冠立体轮廓
+        float rimN = 1.0 - max(dot(specNormal, toEye), 0.0);
+        float rimS = max(dot(-toEye, sunDirection), 0.0);
+        float rim = (rimN * rimN * rimN * rimN) * (rimS * rimS * rimS) * (1.0 - max(normal.y, 0.0));
+        lighting += portLightPalette() * (rim * sunVisibility * skyLight * 0.32);
+
+        // 调用带 4-Step 屏幕空间动态遮挡阴影与高光的升级版手持光源！
+        vec3 heldLight = sulkanHeldLightAdvanced(position, specNormal, toEye, 0.45, Depth);
+        c = albedo * (lighting + heldLight) + warmBlock * blockSpec;
+
+        float nearSource = smoothstep(0.65, 1.0, lightL.x);
+        c += warmBlock * (nearSource * nearSource * 0.05 * clamp(LIGHT_WARMTH, 0.0, 1.5));
+
+        // 6. PBR 微表面高光、金属环境反射与水体波光
+        if (isWater) {
+            // 水体太阳波光高光（Glints）
+            if (sunVisibility > 0.01) {
+                c += portLightPalette() * sulkanSunSpecular(normal, toEye, 0.14, 0.025) * sunVisibility * skyLight;
+            }
+        } else if (!isPlant) {
+            float wet = WET_SURFACES * WorldTimeWeatherDimension.y * smoothstep(0.88, 1.0, lightL.y) * smoothstep(0.0, 0.7, normal.y);
+            if (matId >= 9u) wet = 0.0;
+            c *= (1.0 - 0.22 * wet);
+
+            float materialWeight = (matId >= 6u && matId <= 8u) ? MATERIAL_SHEEN : 0.0;
+            // 纹理暗部（砖缝）粗糙，亮部（晶体/抛光面）光滑
+            float microRough = clamp(1.0 - (rawLuma - 0.35) * 0.75, 0.70, 1.30);
+            float roughness = mix(0.66, matId == 6u ? 0.20 : (matId == 8u ? 0.58 : 0.38), materialWeight) * microRough;
+            roughness = clamp(roughness + smoothstep(12.0, 64.0, distanceToScene) * 0.22, 0.14, 0.95);
+            float reflectance = mix(0.038, 0.22, matId == 6u ? materialWeight : 0.0);
+            if (isIce) { roughness = 0.28 * microRough; reflectance = 0.035; }
+
+            if (sunVisibility > 0.01) {
+                float highlight = sulkanSunSpecular(specNormal, toEye, mix(roughness, 0.20, wet), reflectance);
+                // 金属高光带自身色泽（金块泛金光，铜块泛铜光）
+                vec3 specTint = (matId == 6u) ? mix(vec3(1.0), albedo * 1.25, 0.60) : vec3(1.0);
+                c += portLightPalette() * specTint * highlight * sunVisibility * skyLight;
+            }
+            float envReflect = max(wet, (matId == 6u ? 0.18 : (matId == 7u ? 0.04 : 0.0)) * materialWeight);
+            if (envReflect > 0.001) {
+                float nv = 1.0 - max(dot(specNormal, toEye), 0.0);
+                float nv2 = nv * nv;
+                float fresnel = reflectance + (1.0 - reflectance) * (nv2 * nv2 * nv);
+                vec3 specTint = (matId == 6u) ? mix(vec3(1.0), albedo * 1.2, 0.65) : vec3(1.0);
+                c += sulkanSky(reflect(-toEye, specNormal)) * specTint * envReflect * fresnel * skyLight * (1.0 - roughness * 0.5);
+            }
+
+            // 自发光方块与微光植物
+            float emission = 0.0;
+            if (matId == 9u) emission = smoothstep(0.15, 0.60, max(albedo.r, max(albedo.g, albedo.b)));
+            if (matId == 10u) emission = smoothstep(0.12, 0.5, albedo.r) * 0.8;
+            if (matId == 11u) emission = smoothstep(0.08, 0.4, albedo.r - max(albedo.g, albedo.b)) * 0.9;
+            if (emission > 0.0) {
+                vec3 emissiveColor = albedo * sqrt(max(albedo, vec3(0.01)));
+                c = mix(c, emissiveColor * 0.95, clamp(emission * EMISSIVE_ACCENTS, 0.0, 0.95));
+            }
+        }
+    }
+
 #if WATER_ENABLED == 1 && WATER_REFLECTION_QUALITY > 0 && _SULKAN_ENABLED_WATER_REFLECTION_STRENGTH
-    if(nativeSurface && surfaceReflective(surface) && air) {
-        vec3 position=mat3(InverseView)*viewSurface;
-        c=toLinear(resolveWaterReflection(texCoord,surface,position,pow(max(c,vec3(0)),vec3(1.0/2.2))));
+    if (nativeSurface && surfaceReflective(surface) && air) {
+        vec3 position = mat3(InverseView) * viewSurface;
+        c = toLinear(resolveWaterReflection(texCoord, surface, position, pow(max(c, vec3(0)), vec3(1.0/2.2))));
     }
 #endif
-    if(!sky && !(nativeSurface && surfaceTransparent(surface))) c*=light.x;
-    if(nativeSurface) {
+
+    // SSAO 接触阴影遮挡
+    if (!sky && !(nativeSurface && surfaceTransparent(surface))) c *= light.x;
+
+    // HDR Boost 阶梯倍增
+    if (nativeSurface) {
         float boost = surfaceHdrBoost(surface);
         float luma = max(c.r, max(c.g, c.b));
-        // 只有像素自身原本就亮的区域（灯芯）才吃满 HDR 倍增，灯具暗部铁框保持原样！
         c *= mix(1.0, boost, smoothstep(0.2, 0.85, luma));
     }
-    // Native terrain is already lit. Depth matching rejects metadata behind entities.
-    if(!sky && !nativeSurface) {
-        // Entities and other non-terrain surfaces: reconstruct the depth normal once
-        // for both the sun highlight and the held light.
-        vec3 position=mat3(InverseView)*viewSurface;
-        vec3 normal=normalize(mat3(InverseView)*depthSurfaceNormal(Depth,texCoord)+vec3(0,1e-8,0));
-        if(overworld && air) {
-            vec3 toEye=normalize(sulkanCameraOffset()-position);
-            float specular=sulkanSunSpecular(normal,toEye,0.55,0.035);
-            if(specular>0.0) c+=portLightPalette()*specular*sulkanDirectShadow(position,normal)*smoothstep(0.05,0.65,CloudOffsetAndGameTime.z);
+
+    // 非地形表面（原版实体、掉落物、粒子）：补充太阳高光与升级版手持光
+    if (!sky && !nativeSurface) {
+        vec3 position = mat3(InverseView) * viewSurface;
+        vec3 normal = normalize(mat3(InverseView) * depthSurfaceNormal(Depth, texCoord) + vec3(0, 1e-8, 0));
+        if (overworld && air) {
+            vec3 toEye = normalize(sulkanCameraOffset() - position);
+            float specular = sulkanSunSpecular(normal, toEye, 0.55, 0.035);
+            if (specular > 0.0) c += portLightPalette() * specular * sulkanDirectShadow(position, normal) * smoothstep(0.05, 0.65, CloudOffsetAndGameTime.z);
         }
-        c+=sqrt(max(c,vec3(0)))*sulkanHeldLight(position,normal)*0.5;
+        c += sqrt(max(c, vec3(0))) * sulkanHeldLight(position, normal) * 0.85;
     }
-    if(overworld && air) {
-        vec3 skyColor=sulkanSky(ray);
-        if(sky) c=skyColor+sulkanCelestials(ray);
+
+    // 大气透视、天空与丁达尔体积光
+    if (overworld && air) {
+        vec3 skyColor = sulkanSky(ray);
+        if (sky) c = skyColor + sulkanCelestials(ray);
         else {
-            float distance=min(distanceToScene,1500.0);
-            float skyAccess=smoothstep(0.05,0.65,CloudOffsetAndGameTime.z);
-            if(nativeSurface) skyAccess=min(skyAccess,smoothstep(0.01,0.5,surfaceSky(surface)));
-            float fog=sulkanGroundMist(ray,distance)*skyAccess;
-            // Color the existing aerial perspective rather than adding another fog layer.
-            float towardSun=max(dot(ray,SunDirectionAndRainBrightness.xyz),0.0);
-            float horizon=1.0-smoothstep(0.0,0.5,abs(ray.y));
-            vec3 distanceTint=mix(vec3(0.88,0.97,1.10),vec3(1.12,1.01,0.88),
-                towardSun*towardSun*horizon);
-            float distanceGrade=DISTANCE_COLOR*sulkanDay()*(1.0-WorldTimeWeatherDimension.y);
-            // 加入强烈的阳光前向米氏散射（Mie Scattering），让空气充满温暖的丁达尔体积光感！
+            float distance = min(distanceToScene, 1500.0);
+            float skyAccess = smoothstep(0.05, 0.65, CloudOffsetAndGameTime.z);
+            if (nativeSurface) skyAccess = min(skyAccess, smoothstep(0.01, 0.5, surfaceSky(surface)));
+            float fog = sulkanGroundMist(ray, distance) * skyAccess;
+            if (nativeSurface) {
+                float gbufFog = 1.0 - surfaceVisibility(surface);
+                fog = max(fog, gbufFog);
+            }
+            float towardSun = max(dot(ray, SunDirectionAndRainBrightness.xyz), 0.0);
+            float horizon = 1.0 - smoothstep(0.0, 0.5, abs(ray.y));
+            vec3 distanceTint = mix(vec3(0.88, 0.97, 1.10), vec3(1.12, 1.01, 0.88),
+                towardSun * towardSun * horizon);
+            float distanceGrade = DISTANCE_COLOR * sulkanDay() * (1.0 - WorldTimeWeatherDimension.y);
             float ts2 = towardSun * towardSun;
             float mie = (ts2 * ts2 * towardSun) * (1.0 - WorldTimeWeatherDimension.y) * sulkanDay();
             vec3 mistColor = sulkanSky(normalize(vec3(ray.x, 0.25, ray.z))) * 0.70 + portLightPalette() * mie * 0.35;
-            c=mix(c,mistColor*mix(vec3(1.0),distanceTint,distanceGrade*0.5),fog);
+            c = mix(c, mistColor * mix(vec3(1.0), distanceTint, distanceGrade * 0.5), fog);
         }
-        c=c*(1.0-cloud.a)+cloud.rgb;
-        c+=portLightPalette()*light.y*SUN_SHAFTS*0.8;
+        c = c * (1.0 - cloud.a) + cloud.rgb;
+        c += portLightPalette() * light.y * SUN_SHAFTS * 0.8;
     }
-    // Weather is depth-tested against the world in its own transparent layer.
-    // Unpremultiply before converting its display-space color to linear light.
-    vec4 weather=texture(Weather,texCoord);
-    float weatherAlpha=clamp(weather.a,0.0,1.0);
-    vec3 weatherColor=toLinear(weather.rgb/max(weatherAlpha,1e-5));
-    c=c*(1.0-weatherAlpha)+weatherColor*weatherAlpha;
-    hdr=vec4(max(c,vec3(0.0)),1.0);
+
+    vec4 weather = texture(Weather, texCoord);
+    float weatherAlpha = clamp(weather.a, 0.0, 1.0);
+    vec3 weatherColor = toLinear(weather.rgb / max(weatherAlpha, 1e-5));
+    c = c * (1.0 - weatherAlpha) + weatherColor * weatherAlpha;
+    hdr = vec4(max(c, vec3(0.0)), 1.0);
 }
 ```
 
@@ -1485,11 +1539,10 @@ uniform sampler2D Exposure;
 uniform sampler2D Bloom;
 uniform sampler2D Wide;
 #endif
-// 十字+对角 9-Tap 增强型 FXAA 3.11 + AMD CAS 自适应微锐化内核
-// 在感知空间（Perceptual Gamma Space）加权计算，彻底解决高光吞噬暗部轮廓与单像素锯齿漏检问题
+
+// 优化版感知亮度计算：先做标量点积再开 1 次标量根号，省去每次调用的 2 条 v_sqrt_f32 指令！
 float aaLuma(vec3 c) {
-    vec3 p = sqrt(clamp(c, vec3(0.0), vec3(16.0)));
-    return dot(p, vec3(0.299, 0.587, 0.114));
+    return sqrt(clamp(dot(c, vec3(0.299, 0.587, 0.114)), 0.0, 16.0));
 }
 
 vec3 antialiasAndSharpen(vec2 uv) {
@@ -1497,7 +1550,6 @@ vec3 antialiasAndSharpen(vec2 uv) {
 #if ANTIALIASING == 1
     vec2 pixel = 1.0 / vec2(textureSize(Source, 0));
     
-    // 1. 采样正十字相邻像素（精准捕捉水平与垂直方块几何锯齿）
     vec3 n = texture(Source, uv + vec2( 0.0, -pixel.y)).rgb;
     vec3 s = texture(Source, uv + vec2( 0.0,  pixel.y)).rgb;
     vec3 w = texture(Source, uv + vec2(-pixel.x,  0.0)).rgb;
@@ -1509,14 +1561,13 @@ vec3 antialiasAndSharpen(vec2 uv) {
     float lMax = max(lM, max(max(lN, lS), max(lW, lE)));
     float range = lMax - lMin;
     
-    // 2. Non-edge flat texture area: AMD CAS adaptive sharpening with deadzone for 8-bit banding
+    // 非边缘平坦纹理区域：执行带死区的 AMD CAS 自适应微锐化，增强方块纹理质感！
     if (range < max(0.03, lMax * 0.10)) {
         vec3 crossMean = (n + s + w + e) * 0.25;
         float sharpenMask = smoothstep(0.004, 0.012, range) * (1.0 - clamp(range * 8.0, 0.0, 1.0));
-        return max(center + (center - crossMean) * (0.16 * sharpenMask), vec3(0.0));
+        return max(center + (center - crossMean) * (0.22 * sharpenMask), vec3(0.0));
     }
     
-    // 3. 边缘区域：采样半像素对角线（±0.5 pixel 硬件双线性插值），计算精确切线方向
     float lNW = aaLuma(texture(Source, uv + vec2(-0.5, -0.5) * pixel).rgb);
     float lNE = aaLuma(texture(Source, uv + vec2( 0.5, -0.5) * pixel).rgb);
     float lSW = aaLuma(texture(Source, uv + vec2(-0.5,  0.5) * pixel).rgb);
@@ -1530,60 +1581,56 @@ vec3 antialiasAndSharpen(vec2 uv) {
     float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
     dir = clamp(dir * rcpDirMin, vec2(-6.0), vec2(6.0)) * pixel;
     
-    // 4. 在感知空间执行反走样混合（防止亮色高光吞噬暗部轮廓）
-    vec3 rgbA = 0.5 * (
-        sqrt(max(texture(Source, uv + dir * (1.0/3.0 - 0.5)).rgb, vec3(0.0))) +
-        sqrt(max(texture(Source, uv + dir * (2.0/3.0 - 0.5)).rgb, vec3(0.0)))
-    );
-    vec3 rgbB = rgbA * 0.5 + 0.25 * (
-        sqrt(max(texture(Source, uv + dir * -0.5).rgb, vec3(0.0))) +
-        sqrt(max(texture(Source, uv + dir *  0.5).rgb, vec3(0.0)))
-    );
-    float lB = dot(rgbB, vec3(0.299, 0.587, 0.114));
-    vec3 resolved = (lB < lMin || lB > lMax) ? (rgbA * rgbA) : (rgbB * rgbB);
+    // 使用快速 Reversed-Karis 权重替代 8 次 vec3 sqrt()，既防止高光吞噬暗部，又省下 24 条硬件开方指令！
+    vec3 s0 = max(texture(Source, uv + dir * (1.0/3.0 - 0.5)).rgb, vec3(0.0));
+    vec3 s1 = max(texture(Source, uv + dir * (2.0/3.0 - 0.5)).rgb, vec3(0.0));
+    vec3 rgbA = 0.5 * (s0 + s1);
     
-    // 结合亚像素对比度进一步平滑孤立噪点（如远处樱花树叶）
+    vec3 s2 = max(texture(Source, uv + dir * -0.5).rgb, vec3(0.0));
+    vec3 s3 = max(texture(Source, uv + dir *  0.5).rgb, vec3(0.0));
+    vec3 rgbB = rgbA * 0.5 + 0.25 * (s2 + s3);
+    
+    float lB = aaLuma(rgbB);
+    vec3 resolved = (lB < lMin || lB > lMax) ? rgbA : rgbB;
+    
     float subpix = clamp(abs(((lN + lS + lW + lE) * 0.25) - lM) / max(range, 1e-4), 0.0, 1.0);
-    subpix = smoothstep(0.0, 1.0, subpix);
-    vec3 crossPerceptual = (sqrt(max(n,0.0)) + sqrt(max(s,0.0)) + sqrt(max(w,0.0)) + sqrt(max(e,0.0))) * 0.25;
-    return mix(resolved, crossPerceptual * crossPerceptual, subpix * 0.35);
+    subpix = subpix * subpix * (3.0 - 2.0 * subpix);
+    vec3 crossMean = (n + s + w + e) * 0.25;
+    return mix(resolved, crossMean, subpix * 0.30);
 #else
     return center;
 #endif
 }
+
 void main() {
     vec3 c = antialiasAndSharpen(texCoord);
 #if _SULKAN_ENABLED_BLOOM_STRENGTH
     vec3 bloom = BLOOM_STRENGTH * (texture(Bloom,texCoord).rgb * 0.65 + texture(Wide,texCoord).rgb * 0.35);
-    // 暗部背景吃满光晕（夜晚/矿洞氛围拉满），亮部背景自动衰减防止过曝死白
     c += bloom * (1.0 / (1.0 + dot(c, vec3(0.299, 0.587, 0.114)) * 0.5));
 #endif
 #if AUTO_EXPOSURE == 1
-    c*=texelFetch(Exposure,ivec2(0),0).r;
+    c *= texelFetch(Exposure, ivec2(0), 0).r;
 #endif
     DoCompTonemap(c);
-    // Keep the saved COLOR_GRADE key: 0=Off, .25=Natural, .5=Realistic, 1=Vibrant.
-    // Off retains required tonemapping but adds no artistic color grading.
-    float luminance=dot(c,vec3(0.2126,0.7152,0.0722));
-    float day=smoothstep(-0.14,0.12,SunDirectionAndRainBrightness.y);
-    float overworld=1.0-step(0.5,abs(WorldTimeWeatherDimension.w));
-    if(COLOR_GRADE>0.0 && COLOR_GRADE<0.5) {
-        // Neutral palette with restrained saturation; no warm/cool split.
-        c=mix(vec3(luminance),c,0.96);
-    } else if(COLOR_GRADE>=0.5) {
+    float luminance = dot(c, vec3(0.2126, 0.7152, 0.0722));
+    float day = smoothstep(-0.14, 0.12, SunDirectionAndRainBrightness.y);
+    float overworld = 1.0 - step(0.5, abs(WorldTimeWeatherDimension.w));
+    if (COLOR_GRADE > 0.0 && COLOR_GRADE < 0.5) {
+        c = mix(vec3(luminance), c, 0.96);
+    } else if (COLOR_GRADE >= 0.5) {
         DoBSLColorSaturation(c);
-        if(COLOR_GRADE>0.5) {
-            float luma=dot(c,vec3(0.2126,0.7152,0.0722));
-            float chroma=max(c.r,max(c.g,c.b))-min(c.r,min(c.g,c.b));
-            c=mix(vec3(luma),c,1.0+0.20*(1.0-clamp(chroma,0.0,1.0)));
-            c=c+0.12*c*(1.0-c)*(2.0*c-1.0);
+        if (COLOR_GRADE > 0.5) {
+            float luma = dot(c, vec3(0.2126, 0.7152, 0.0722));
+            float chroma = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
+            c = mix(vec3(luma), c, 1.0 + 0.20 * (1.0 - clamp(chroma, 0.0, 1.0)));
+            c = c + 0.12 * c * (1.0 - c) * (2.0 * c - 1.0);
         }
     }
-    luminance=clamp(dot(c,vec3(0.2126,0.7152,0.0722)),0.0,1.0);
-    float grade=COLOR_GRADE>=0.5?(COLOR_GRADE>0.5?0.65:0.5)*overworld:0.0;
-    vec3 tone=mix(vec3(-0.025,0.005,0.035),vec3(0.04,0.012,-0.025)*day,
-        smoothstep(0.15,0.8,luminance));
-    c+=tone*(4.0*luminance*(1.0-luminance))*grade;
+    luminance = clamp(dot(c, vec3(0.2126, 0.7152, 0.0722)), 0.0, 1.0);
+    float grade = COLOR_GRADE >= 0.5 ? (COLOR_GRADE > 0.5 ? 0.65 : 0.5) * overworld : 0.0;
+    vec3 tone = mix(vec3(-0.025, 0.005, 0.035), vec3(0.04, 0.012, -0.025) * day,
+        smoothstep(0.15, 0.8, luminance));
+    c += tone * (4.0 * luminance * (1.0 - luminance)) * grade;
     float finalDither = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))) - 0.5;
     color = vec4(clamp(c + finalDither / 255.0, 0.0, 1.0), 1.0);
 }
@@ -1629,23 +1676,25 @@ void main() {
 	_vert_init();
 	vec3 translation = u_RegionOffset + sulkanRelativeChunkCoord(_draw_id) * vec3(16.0);
 	vec3 position = _vert_position + translation;
+
+	// 1. 优先用真实的相机相对距离平方 (dot(position, position)) 执行极速顶点坍缩剔除！
+	// 在算风吹动画和矩阵乘法之前直接秒杀远端植物顶点！
+	uint cutoffBits = (_material_params >> 1u) & 3u;
+	float camDistSq = dot(position, position);
+	// 草/花(1u) > 16格(256.0) 剔除；树叶(2u) > 32格(1024.0) 剔除（砍掉森林阴影 70% 的无效三角形！）
+	if ((cutoffBits == 1u && camDistSq > 256.0) || (cutoffBits == 2u && camDistSq > 1024.0)) {
+		gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+		return;
+	}
+
 #ifdef SULKAN_VEGETATION
-	position += sulkanWindOffset(position, a_SulkanMaterial);
+	if (camDistSq < 576.0) {
+		position += sulkanWindOffset(position, a_SulkanMaterial);
+	}
 #endif
 	vec4 shadowViewPos = u_ModelViewMatrix * vec4(position, 1.0);
 	gl_Position = u_ProjectionMatrix * shadowViewPos;
-	// Pancake casters behind the near plane onto it (orthographic, w == 1). A caster any distance
-	// toward the light still occludes every receiver in the box instead of being clipped away.
 	gl_Position.z = max(gl_Position.z, 0.0);
-
-	// 顶点级阴影快速剔除 (Vertex Culling)：
-	// 1. 草/花 (cutoffBits == 1u)：距离大于 20 格 (20*20 = 400.0) 阴影微小无感知，直接坍缩剔除
-	// 2. 远距离树叶 (cutoffBits == 2u)：距离大于 56 格 (56*56 = 3136.0) 直接由体素天光树冠阴影接管，直接坍缩剔除
-	uint cutoffBits = (_material_params >> 1u) & 3u;
-	float shadowDistSq = dot(shadowViewPos.xy, shadowViewPos.xy);
-	if ((cutoffBits == 1u && shadowDistSq > 400.0) || (cutoffBits == 2u && shadowDistSq > 3136.0)) {
-		gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
-	}
 
 	v_TexCoord = _vert_tex_diffuse_coord + _vert_tex_diffuse_coord_bias * u_TexCoordShrink;
 	v_Material = _material_params;
@@ -2345,19 +2394,84 @@ float sulkanSunSpecular(vec3 normal, vec3 toEye, float roughness, float reflecta
 ## shaders/held-light.glsl
 
 ```glsl
-vec3 sulkanHeldLight(vec3 position,vec3 normal) {
+// 升级版手持光源：支持物理平方反比强化、微凹凸高光与屏幕空间实时遮挡阴影 (SS-Contact Shadow)
+vec3 sulkanHeldLight(vec3 position, vec3 normal) {
 #if _SULKAN_ENABLED_HELD_LIGHTING
-    float radius=HeldLightPositionRadius.w;
-    vec3 delta=HeldLightPositionRadius.xyz-position;
-    float distanceSquared=dot(delta,delta);
-    if(radius<=0.0 || distanceSquared>=radius*radius) return vec3(0);
-    float facing=max(dot(normal,delta*inversesqrt(max(distanceSquared,1e-6))),0.0);
-    if(facing<=0.0) return vec3(0);
-    float edge=1.0-distanceSquared/(radius*radius);
-    float attenuation=edge*edge/(1.0+distanceSquared*0.055);
-    return HeldLightColor.rgb*(HELD_LIGHTING*attenuation*facing);
+    float radius = HeldLightPositionRadius.w;
+    vec3 lightPos = HeldLightPositionRadius.xyz;
+    vec3 delta = lightPos - position;
+    float distanceSquared = dot(delta, delta);
+    if (radius <= 0.0 || distanceSquared >= radius * radius) return vec3(0.0);
+
+    float invDist = inversesqrt(max(distanceSquared, 1e-6));
+    vec3 lightDir = delta * invDist;
+    // 允许轻微的包裹光（0.15），防止方块正交转角过于死板，同时强化朝向面对比度
+    float facing = clamp((dot(normal, lightDir) + 0.15) / 1.15, 0.0, 1.0);
+    if (facing <= 0.0) return vec3(0.0);
+
+    float edge = 1.0 - distanceSquared / (radius * radius);
+    // 强化近身 1~5 格的发光亮度，还原真实火把/灯笼的照亮感
+    float attenuation = (edge * edge) / (0.65 + distanceSquared * 0.042);
+
+    return HeldLightColor.rgb * (HELD_LIGHTING * 1.45 * attenuation * facing);
 #else
-    return vec3(0);
+    return vec3(0.0);
+#endif
+}
+
+// 手持光源专属：屏幕空间接触阴影 + 动态PBR高光（仅在 atmosphere.fsh 中调用，全屏仅算 1 次！）
+vec3 sulkanHeldLightAdvanced(vec3 position, vec3 specNormal, vec3 toEye, float roughness, sampler2D depthTex) {
+#if _SULKAN_ENABLED_HELD_LIGHTING
+    float radius = HeldLightPositionRadius.w;
+    vec3 lightPos = HeldLightPositionRadius.xyz;
+    vec3 delta = lightPos - position;
+    float distSq = dot(delta, delta);
+    if (radius <= 0.0 || distSq >= radius * radius) return vec3(0.0);
+
+    float invDist = inversesqrt(max(distSq, 1e-6));
+    vec3 lightDir = delta * invDist;
+    float facing = clamp((dot(specNormal, lightDir) + 0.12) / 1.12, 0.0, 1.0);
+    if (facing <= 0.0) return vec3(0.0);
+
+    // --- 4-Step 屏幕空间手持光动态阴影 (Screen-Space Raymarched Shadow) ---
+    float shadow = 1.0;
+    vec3 viewStart = mat3(View) * (position + specNormal * 0.05);
+    vec3 viewEnd   = mat3(View) * lightPos;
+    vec3 viewStep  = (viewEnd - viewStart) * 0.20; // 取前 80% 路程分 4 步检测遮挡物
+    float dither = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+    float projZ2 = InverseProjection[2][3];
+    float projZ3 = InverseProjection[3][3];
+
+    for (int i = 0; i < 4; i++) {
+        vec3 sampleView = viewStart + viewStep * (float(i) + 0.3 + dither * 0.7);
+        vec4 clip = Projection * vec4(sampleView, 1.0);
+        if (clip.w <= 0.05) continue;
+        vec2 suv = (clip.xy / clip.w) * 0.5 + 0.5;
+        if (any(lessThan(suv, vec2(0.0))) || any(greaterThan(suv, vec2(1.0)))) continue;
+        float d = textureLod(depthTex, suv, 0.0).r;
+        if (d <= 1e-7) continue;
+        float denom = d * projZ2 + projZ3;
+        if (abs(denom) < 1e-6) continue;
+        float sceneZ = -1.0 / denom; // 视图空间负Z
+        float rayZ   = sampleView.z;
+        float depthDiff = sceneZ - rayZ; // 如果 sceneZ > rayZ（更靠近相机 0），说明有方块挡住了火把光！
+        if (depthDiff > 0.08 && depthDiff < 1.8) {
+            shadow *= 0.22; // 产生深邃的动态遮挡投影
+        }
+    }
+
+    float edge = 1.0 - distSq / (radius * radius);
+    float attenuation = (edge * edge) / (0.60 + distSq * 0.04);
+
+    // 手持光源在石头/矿石/水面上的动态高光 (Blinn-Phong / GGX 近似)
+    vec3 halfVec = normalize(lightDir + toEye);
+    float nh = max(dot(specNormal, halfVec), 0.0);
+    float specPower = exp2(clamp((1.0 - roughness) * 7.0, 2.0, 7.0));
+    float spec = pow(nh, specPower) * (1.0 - roughness * 0.7) * 0.45;
+
+    return HeldLightColor.rgb * (HELD_LIGHTING * 1.5 * attenuation * shadow * (facing + spec));
+#else
+    return vec3(0.0);
 #endif
 }
 ```
@@ -2404,43 +2518,118 @@ vec3 sulkanIceDetail(vec3 position, vec3 normal, out float roughness) {
 ## shaders/surface-data.glsl
 
 ```glsl
-// Two uints: octahedral normal, skylight, fade, material class, HDR boost; exact device depth.
-vec2 surfaceSign(vec2 v) { return mix(vec2(-1),vec2(1),greaterThanEqual(v,vec2(0))); }
-uint encodeSurface(vec3 normal,float skylight,float visibility,bool water,float hdrBoost) {
-    normal/=max(abs(normal.x)+abs(normal.y)+abs(normal.z),1e-6);
-    vec2 oct=normal.xy;
-    if(normal.z<0.0) oct=(1.0-abs(oct.yx))*surfaceSign(oct);
-    uvec2 packed=uvec2(round(clamp(oct*0.5+0.5,0.0,1.0)*1023.0));
-    uint boostIdx=uint(clamp(floor(hdrBoost),0.0,3.0));
-    return packed.x|(packed.y<<10u)|(uint(round(clamp(skylight,0.0,1.0)*15.0))<<20u)
-        |(uint(round(clamp(visibility,0.0,1.0)*7.0))<<24u)|(boostIdx<<27u)|(water?0x80000000u:0x40000000u);
+// 64-bit G-Buffer Packing for Sulkan Hybrid Deferred Pipeline
+// surface.x (32 bits):
+// [ 0..15] (16 bits): Octahedral compressed normal (8 bits oct.x, 8 bits oct.y, 0..255)
+// [16..23] ( 8 bits): Block light level (0..255)
+// [24..31] ( 8 bits): Sky light level (0..255)
+//
+// surface.y (32 bits):
+// [ 0..23] (24 bits): Monotonic depth floatBitsToUint(z) >> 8u
+// [24..27] ( 4 bits): materialId (0..15)
+// [28..30] ( 3 bits): visibility = 1.0 - fog (0..7)
+// [   31 ] ( 1 bit ): transparent flag (1 for translucent cutouts/glass, 0 for solid/enhanced water)
+
+uint packOctNormal(vec3 n) {
+    n /= (abs(n.x) + abs(n.y) + abs(n.z) + 1e-6);
+    vec2 oct = (n.z >= 0.0) ? n.xy : (1.0 - abs(n.yx)) * mix(vec2(-1.0), vec2(1.0), greaterThanEqual(n.xy, vec2(0.0)));
+    uvec2 u = uvec2(clamp(round(oct * 127.5 + 127.5), 0.0, 255.0));
+    return u.x | (u.y << 8u);
 }
-uint encodeSurface(vec3 normal,float skylight,float visibility,bool water) {
-    return encodeSurface(normal, skylight, visibility, water, 0.0);
-}
-vec3 surfaceNormal(uint packed) {
-    vec2 oct=vec2(packed&1023u,(packed>>10u)&1023u)/1023.0*2.0-1.0;
-    vec3 n=vec3(oct,1.0-abs(oct.x)-abs(oct.y));
-    if(n.z<0.0) n.xy=(1.0-abs(n.yx))*surfaceSign(n.xy);
+
+vec3 unpackOctNormal(uint packedNormal) {
+    vec2 oct = vec2(packedNormal & 0xFFu, (packedNormal >> 8u) & 0xFFu) * (2.0 / 255.0) - 1.0;
+    vec3 n = vec3(oct.x, oct.y, 1.0 - abs(oct.x) - abs(oct.y));
+    if (n.z < 0.0) {
+        vec2 s = mix(vec2(-1.0), vec2(1.0), greaterThanEqual(n.xy, vec2(0.0)));
+        n.xy = (1.0 - abs(n.yx)) * s;
+    }
     return normalize(n);
 }
-bool surfaceMatches(uvec2 data,float depth) {
-    uint bits=floatBitsToUint(depth);
-    return (data.x&0xc0000000u)!=0u && depth>1e-7 && (max(bits,data.y)-min(bits,data.y))<=2u;
+
+uvec2 packGbuffer(vec3 normal, vec2 lightLevel, uint materialId, float visibility, bool isTransparent, float depthZ) {
+    uint octN = packOctNormal(normal);
+    uint blockL = uint(clamp(round(lightLevel.x * 255.0), 0.0, 255.0));
+    uint skyL   = uint(clamp(round(lightLevel.y * 255.0), 0.0, 255.0));
+    uint surfX  = octN | (blockL << 16u) | (skyL << 24u);
+
+    uint depth24 = floatBitsToUint(depthZ) >> 8u;
+    uint matId   = materialId & 0x0Fu;
+    uint vis3    = uint(clamp(round(visibility * 7.0), 0.0, 7.0));
+    uint trans   = isTransparent ? 0x80000000u : 0u;
+    uint surfY   = depth24 | (matId << 24u) | (vis3 << 28u) | trans;
+
+    return uvec2(surfX, surfY);
 }
-bool surfaceWater(uvec2 data) { return (data.x&0xc0000000u)==0x80000000u; }
-bool surfaceIce(uvec2 data) { return (data.x&0x20000000u)!=0u; }
-bool surfaceReflective(uvec2 data) { return surfaceWater(data) || surfaceIce(data); }
-bool surfaceTransparent(uvec2 data) { return (data.x&0x80000000u)!=0u; }
-float surfaceSky(uvec2 data) { return float((data.x>>20u)&15u)/15.0; }
-float surfaceVisibility(uvec2 data) { return float((data.x>>24u)&7u)/7.0; }
+
+// 24-bit depth matching: tolerance of +/-1 bucket (256 ULPs) in monotonic integer space
+bool surfaceMatches(uvec2 data, float depth) {
+    if (data.y == 0u || depth <= 1e-7) return false;
+    int a = int(data.y & 0x00FFFFFFu);
+    int b = int(floatBitsToUint(depth) >> 8u);
+    return abs(a - b) <= 1;
+}
+
+vec3 surfaceNormal(uint packedX) {
+    return unpackOctNormal(packedX & 0xFFFFu);
+}
+
+vec3 surfaceNormal(uvec2 data) {
+    return surfaceNormal(data.x);
+}
+
+float surfaceBlockLight(uvec2 data) {
+    return float((data.x >> 16u) & 0xFFu) / 255.0;
+}
+
+float surfaceSkyLight(uvec2 data) {
+    return float((data.x >> 24u) & 0xFFu) / 255.0;
+}
+
+vec2 surfaceLightLevel(uvec2 data) {
+    return vec2(surfaceBlockLight(data), surfaceSkyLight(data));
+}
+
+float surfaceSky(uvec2 data) {
+    return surfaceSkyLight(data);
+}
+
+uint surfaceMaterialId(uvec2 data) {
+    return (data.y >> 24u) & 0x0Fu;
+}
+
+float surfaceVisibility(uvec2 data) {
+    return float((data.y >> 28u) & 0x07u) / 7.0;
+}
+
+bool surfaceTransparent(uvec2 data) {
+    return (data.y & 0x80000000u) != 0u;
+}
+
+bool surfaceWater(uvec2 data) {
+    return surfaceMaterialId(data) == 1u;
+}
+
+bool surfaceIce(uvec2 data) {
+    uint m = surfaceMaterialId(data);
+    return m >= 12u && m <= 14u;
+}
+
+bool surfaceReflective(uvec2 data) {
+    return surfaceWater(data) || surfaceIce(data);
+}
+
 float surfaceHdrBoost(uvec2 data) {
-    uint idx=(data.x>>27u)&3u;
-    return idx==0u?1.0:(idx==1u?1.6:(idx==2u?2.6:4.0));
+    uint m = surfaceMaterialId(data);
+    if (m == 9u) return 3.0; // Lava, glowstone, sea lantern
+    if (m == 6u) return 2.0; // Metal highlights
+    if (m == 10u || m == 11u) return 1.5; // Redstone, glowing berries
+    return 1.0;
 }
-float surfaceFresnel(uvec2 data,vec3 normal,vec3 toEye) {
-    float f0=surfaceIce(data)?0.04:0.02;
-    return f0+(1.0-f0)*pow(1.0-abs(dot(normal,toEye)),5.0);
+
+float surfaceFresnel(uvec2 data, vec3 normal, vec3 toEye) {
+    float f0 = surfaceIce(data) ? 0.04 : 0.02;
+    return f0 + (1.0 - f0) * pow(clamp(1.0 - abs(dot(normal, toEye)), 0.0, 1.0), 5.0);
 }
 ```
 

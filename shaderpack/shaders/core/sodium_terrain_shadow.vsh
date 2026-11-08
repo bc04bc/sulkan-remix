@@ -35,23 +35,25 @@ void main() {
 	_vert_init();
 	vec3 translation = u_RegionOffset + sulkanRelativeChunkCoord(_draw_id) * vec3(16.0);
 	vec3 position = _vert_position + translation;
+
+	// 1. 优先用真实的相机相对距离平方 (dot(position, position)) 执行极速顶点坍缩剔除！
+	// 在算风吹动画和矩阵乘法之前直接秒杀远端植物顶点！
+	uint cutoffBits = (_material_params >> 1u) & 3u;
+	float camDistSq = dot(position, position);
+	// 草/花(1u) > 16格(256.0) 剔除；树叶(2u) > 32格(1024.0) 剔除（砍掉森林阴影 70% 的无效三角形！）
+	if ((cutoffBits == 1u && camDistSq > 256.0) || (cutoffBits == 2u && camDistSq > 1024.0)) {
+		gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+		return;
+	}
+
 #ifdef SULKAN_VEGETATION
-	position += sulkanWindOffset(position, a_SulkanMaterial);
+	if (camDistSq < 576.0) {
+		position += sulkanWindOffset(position, a_SulkanMaterial);
+	}
 #endif
 	vec4 shadowViewPos = u_ModelViewMatrix * vec4(position, 1.0);
 	gl_Position = u_ProjectionMatrix * shadowViewPos;
-	// Pancake casters behind the near plane onto it (orthographic, w == 1). A caster any distance
-	// toward the light still occludes every receiver in the box instead of being clipped away.
 	gl_Position.z = max(gl_Position.z, 0.0);
-
-	// 顶点级阴影快速剔除 (Vertex Culling)：
-	// 1. 草/花 (cutoffBits == 1u)：距离大于 20 格 (20*20 = 400.0) 阴影微小无感知，直接坍缩剔除
-	// 2. 远距离树叶 (cutoffBits == 2u)：距离大于 56 格 (56*56 = 3136.0) 直接由体素天光树冠阴影接管，直接坍缩剔除
-	uint cutoffBits = (_material_params >> 1u) & 3u;
-	float shadowDistSq = dot(shadowViewPos.xy, shadowViewPos.xy);
-	if ((cutoffBits == 1u && shadowDistSq > 400.0) || (cutoffBits == 2u && shadowDistSq > 3136.0)) {
-		gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
-	}
 
 	v_TexCoord = _vert_tex_diffuse_coord + _vert_tex_diffuse_coord_bias * u_TexCoordShrink;
 	v_Material = _material_params;

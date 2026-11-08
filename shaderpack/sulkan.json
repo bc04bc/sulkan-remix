@@ -113,7 +113,9 @@
       "pipeline": "sodium:pipeline/cutout_terrain",
       "vertex": "shaders/terrain.vsh",
       "fragment": "shaders/terrain.fsh",
-      "writes": []
+      "writes": [
+        "surface.data"
+      ]
     },
     {
       "pipeline": "sodium:pipeline/translucent_terrain",
@@ -294,7 +296,7 @@
     },
     "SHADOW_QUALITY": {
       "label": "Shadow quality",
-      "default": 1,
+      "default": 2,
       "values": [
         0,
         1,
@@ -443,7 +445,7 @@
       "scale": 0.5
     },
     "lighting.half": {
-      "format": "RG16_FLOAT",
+      "format": "RGBA16_FLOAT",
       "scale": 0.5
     },
     "surface.data": {
@@ -451,7 +453,7 @@
     },
     "water.reflection": {
       "format": "RGBA16_FLOAT",
-      "scale": 1
+      "scale": 0.5
     },
     "exposure.meter": {
       "format": "RG32_FLOAT",
@@ -490,7 +492,8 @@
       "reads": {
         "Depth": "$depth",
         "VanillaClouds": "$texture/vanilla-clouds",
-        "Surface": "surface.data"
+        "Surface": "surface.data",
+        "Scene": "$scene"
       },
       "writes": [
         "lighting.half"
