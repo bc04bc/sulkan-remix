@@ -3,6 +3,12 @@
 > **Next-Generation Physical Lighting Pipeline for Minecraft on Vulkan**  
 > 一款基于 **Sulkan** 原生 Vulkan 渲染管线深度定制与性能优化的现代化光影包，视觉风格与照明范式深度参考 **RTX Remix**。
 
+> [!WARNING]
+> **开发状态与兼容性说明 (WIP & Compatibility Notice)**  
+> - **开发阶段**：本项目当前为**开发中版本 (Work In Progress)**，包含较多前沿实验性特性，尚存在一些亟待解决的视觉与渲染显示问题。  
+> - **构建基线**：当前基于 **Minecraft 26.3** + Fabric + Sodium + Sulkan 0.6.0 环境构建。由于测试环境限制，**无法保证其在不同软件（驱动、系统）与硬件平台上的完全兼容性**。  
+> - **实测性能参考**：在入门级独立显卡 **AMD Radeon RX 560** 测试平台上，实测可以 **1080p 分辨率以 60 FPS+** 稳定流畅运行。
+
 ---
 
 ## 📖 项目简介 (Overview)
